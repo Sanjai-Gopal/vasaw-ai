@@ -84,12 +84,12 @@ export function SidebarContent({
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9">
             <AvatarFallback className="bg-gradient-to-br from-violet-500 to-cyan-400 text-white">
-              GR
+              S
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 leading-tight">
-            <p className="truncate text-sm font-medium">Gogul Raj</p>
-            <p className="truncate text-xs text-sidebar-muted">Founder · Admin</p>
+            <p className="truncate text-sm font-medium">Sanjai</p>
+            <p className="truncate text-xs text-sidebar-muted">Founder — VASAW AI</p>
           </div>
         </div>
       </div>

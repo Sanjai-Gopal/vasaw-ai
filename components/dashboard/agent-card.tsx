@@ -12,18 +12,22 @@ import { cn } from "@/lib/utils";
 
 const statusIcon: Record<AgentStatus, typeof CheckCircle2> = {
   healthy: CheckCircle2,
+  online: CheckCircle2,
   running: Loader2,
   idle: Circle,
   error: AlertTriangle,
   paused: Pause,
+  offline: Circle,
 };
 
 const statusColor: Record<AgentStatus, string> = {
   healthy: "text-emerald-400",
+  online: "text-emerald-400",
   running: "text-primary",
   idle: "text-muted-foreground",
   error: "text-rose-400",
   paused: "text-amber-400",
+  offline: "text-zinc-500",
 };
 
 export function AgentCard({ agent, index = 0 }: { agent: Agent; index?: number }) {

@@ -5,6 +5,7 @@ import type {
   MessageStatus,
   WebsiteStatus,
   DeploymentStatus,
+  ReplyClassification,
 } from "@/lib/types";
 
 export const leadStatusMeta: Record<LeadStatus, { label: string; variant: "default" | "secondary" | "outline" | "success" | "warning" | "destructive" | "info" | "muted" }> = {
@@ -28,10 +29,12 @@ export const campaignStatusMeta: Record<CampaignStatus, { label: string; variant
 
 export const agentStatusMeta: Record<AgentStatus, { label: string; variant: "default" | "secondary" | "outline" | "success" | "warning" | "destructive" | "info" | "muted" }> = {
   healthy: { label: "Healthy", variant: "success" },
+  online: { label: "Online", variant: "success" },
   running: { label: "Running", variant: "info" },
   idle: { label: "Idle", variant: "muted" },
   error: { label: "Attention", variant: "destructive" },
   paused: { label: "Paused", variant: "warning" },
+  offline: { label: "Offline", variant: "muted" },
 };
 
 export const websiteStatusMeta: Record<WebsiteStatus, { label: string; variant: "default" | "secondary" | "outline" | "success" | "warning" | "destructive" | "info" | "muted" }> = {
@@ -57,9 +60,12 @@ export const messageStatusMeta: Record<MessageStatus, { label: string; variant: 
   failed: { label: "Failed", variant: "destructive" },
 };
 
-export const replyClassMeta = {
-  interested: { label: "Interested", variant: "success" as const },
-  not_interested: { label: "Not Interested", variant: "destructive" as const },
-  asking_questions: { label: "Asking Questions", variant: "info" as const },
-  no_reply: { label: "No Reply", variant: "muted" as const },
+export const replyClassMeta: Record<ReplyClassification, { label: string; variant: "default" | "secondary" | "outline" | "success" | "warning" | "destructive" | "info" | "muted" }> = {
+  interested: { label: "Interested", variant: "success" },
+  price_request: { label: "Price Request", variant: "info" },
+  call_request: { label: "Call Request", variant: "info" },
+  follow_up: { label: "Follow Up", variant: "warning" },
+  not_interested: { label: "Not Interested", variant: "destructive" },
+  stop: { label: "Stop", variant: "destructive" },
+  unknown: { label: "Unknown", variant: "muted" },
 };

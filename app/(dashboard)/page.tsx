@@ -31,20 +31,31 @@ import { agentStatusMeta } from "@/lib/status";
 import { cn } from "@/lib/utils";
 import type { AgentStatus } from "@/lib/types";
 
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning, Sanjai";
+  if (hour < 17) return "Good afternoon, Sanjai";
+  return "Good evening, Sanjai";
+}
+
 const agentIcon: Record<AgentStatus, typeof CheckCircle2> = {
   healthy: CheckCircle2,
+  online: CheckCircle2,
   running: Loader2,
   idle: Circle,
   error: AlertTriangle,
   paused: Pause,
+  offline: Circle,
 };
 
 const agentColor: Record<AgentStatus, string> = {
   healthy: "text-emerald-400",
+  online: "text-emerald-400",
   running: "text-primary",
   idle: "text-muted-foreground",
   error: "text-rose-400",
   paused: "text-amber-400",
+  offline: "text-zinc-500",
 };
 
 export default function DashboardPage() {
@@ -54,8 +65,8 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       <PageHeader
-        title="Good morning, Gogul"
-        description="Here's what VASAW AI did while you were away."
+        title={getGreeting()}
+        description="Here's what VASAW AI is working on today."
       >
         <Button variant="outline" asChild className="gap-1.5">
           <Link href="/agents">

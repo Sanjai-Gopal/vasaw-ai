@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Play, RefreshCw } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { AgentCard } from "@/components/dashboard/agent-card";
@@ -112,7 +113,9 @@ export default function AgentsPage() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {agents.map((agent, index) => (
           <div key={agent.id} className="flex flex-col gap-3">
-            <AgentCard agent={agent} index={index} />
+            <Link href={`/agents/${agent.id}`} className="block">
+              <AgentCard agent={agent} index={index} />
+            </Link>
             <Button
               variant="outline"
               size="sm"

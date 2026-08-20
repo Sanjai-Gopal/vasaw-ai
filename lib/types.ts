@@ -84,6 +84,8 @@ export interface Lead {
 
 export type CampaignStatus = "draft" | "active" | "paused" | "completed";
 
+export type AutomationMode = "manual" | "semi-automatic" | "automatic";
+
 export interface Campaign {
   id: string;
   name: string;
@@ -97,6 +99,11 @@ export interface Campaign {
   websitesBuilt: number;
   websitesDeployed: number;
   messagesSent: number;
+  minimumRating: number;
+  minimumReviews: number;
+  websiteOpportunityRequirement: boolean;
+  socialPresenceRequirement: boolean;
+  automationMode: AutomationMode;
   createdAt: string;
   updatedAt: string;
 }
@@ -109,7 +116,15 @@ export type AgentId =
   | "deployment"
   | "whatsapp";
 
-export type AgentStatus = "idle" | "running" | "healthy" | "error" | "paused";
+export type AgentStatus = "idle" | "running" | "healthy" | "error" | "paused" | "online" | "offline";
+
+export interface AgentRun {
+  id: string;
+  timestamp: string;
+  status: "success" | "failed" | "running";
+  durationMs: number;
+  detail: string;
+}
 
 export interface Agent {
   id: AgentId;
@@ -123,6 +138,7 @@ export interface Agent {
   failedRuns: number;
   avgDurationMs: number;
   recentActivity: ActivityItem[];
+  runs: AgentRun[];
 }
 
 export type WebsiteStatus = "queued" | "building" | "built" | "deployed" | "failed";
@@ -169,9 +185,12 @@ export type MessageStatus = "prepared" | "sent" | "delivered" | "read" | "failed
 
 export type ReplyClassification =
   | "interested"
+  | "price_request"
+  | "call_request"
+  | "follow_up"
   | "not_interested"
-  | "asking_questions"
-  | "no_reply";
+  | "stop"
+  | "unknown";
 
 export interface Message {
   id: string;
@@ -249,4 +268,13 @@ export interface DashboardStats {
   interestedLeads: number;
   weeklyLeads: Array<{ label: string; leads: number }>;
   categoryDistribution: Array<{ name: string; value: number }>;
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  description: string;
+  timestamp: string;
+  read: boolean;
+  type: ActivityType;
 }

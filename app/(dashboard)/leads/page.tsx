@@ -30,7 +30,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { leads as initialLeads } from "@/lib/data/leads";
-import { leadStatusMeta } from "@/lib/status";
+import { websites } from "@/lib/data/websites";
+import { messages } from "@/lib/data/messages";
+import { leadStatusMeta, websiteStatusMeta, messageStatusMeta } from "@/lib/status";
 import type { LeadPriority } from "@/lib/types";
 
 const PAGE_SIZE = 8;
@@ -240,11 +242,18 @@ export default function LeadsPage() {
               </TableHead>
               <TableHead>Priority</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Website</TableHead>
+              <TableHead>Outreach</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {pageItems.map((lead) => {
               const meta = leadStatusMeta[lead.status];
+              const leadWebsite = websites.find((w) => w.leadId === lead.id);
+              const leadMessages = messages.filter((m) => m.leadId === lead.id);
+              const latestMessage = leadMessages.length > 0
+                ? [...leadMessages].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+                : null;
               return (
                 <TableRow key={lead.id} className="cursor-pointer">
                   <TableCell>
@@ -295,12 +304,30 @@ export default function LeadsPage() {
                   <TableCell>
                     <Badge variant={meta.variant}>{meta.label}</Badge>
                   </TableCell>
+                  <TableCell>
+                    {leadWebsite ? (
+                      <Badge variant={websiteStatusMeta[leadWebsite.status].variant}>
+                        {websiteStatusMeta[leadWebsite.status].label}
+                      </Badge>
+                    ) : (
+                      <Badge variant="muted">None</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {latestMessage ? (
+                      <Badge variant={messageStatusMeta[latestMessage.status].variant}>
+                        {messageStatusMeta[latestMessage.status].label}
+                      </Badge>
+                    ) : (
+                      <Badge variant="muted">Not contacted</Badge>
+                    )}
+                  </TableCell>
                 </TableRow>
               );
             })}
             {pageItems.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
+                <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
                   No leads match the current filters.
                 </TableCell>
               </TableRow>

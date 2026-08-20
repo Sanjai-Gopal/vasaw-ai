@@ -1,8 +1,21 @@
-import type { DashboardStats, PipelineStage } from "@/lib/types";
+import type { DashboardStats, PipelineStage, Notification } from "@/lib/types";
 import { agents } from "@/lib/data/agents";
 import { leads } from "@/lib/data/leads";
 import { websites, deployments } from "@/lib/data/websites";
 import { messages } from "@/lib/data/messages";
+
+const daysAgo = (days: number, hour = 10, minute = 30) => {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  d.setHours(hour, minute, 0, 0);
+  return d.toISOString();
+};
+
+const minutesAgo = (minutes: number) => {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - minutes);
+  return d.toISOString();
+};
 
 export function getDashboardStats(): DashboardStats {
   const totalLeads = leads.length;
@@ -76,4 +89,49 @@ export function getPipeline(): PipelineStage[] {
       completed,
     };
   });
+}
+
+export function getNotifications(): Notification[] {
+  return [
+    {
+      id: "n1",
+      title: "Website deployed",
+      description: "annapurna-restaurant.vercel.app is now live.",
+      timestamp: minutesAgo(8),
+      read: false,
+      type: "deployment",
+    },
+    {
+      id: "n2",
+      title: "34 businesses qualified",
+      description: "Checking Agent qualified the latest batch from Saibaba Colony.",
+      timestamp: minutesAgo(12),
+      read: false,
+      type: "lead",
+    },
+    {
+      id: "n3",
+      title: "Website build in progress",
+      description: "Trendz Unisex Salon — 64% complete.",
+      timestamp: minutesAgo(35),
+      read: true,
+      type: "website",
+    },
+    {
+      id: "n4",
+      title: "Reply received",
+      description: "Kovai Iron Gym replied — interested in pricing.",
+      timestamp: minutesAgo(45),
+      read: true,
+      type: "message",
+    },
+    {
+      id: "n5",
+      title: "Agent health warning",
+      description: "WhatsApp Agent session expired — needs reconnection.",
+      timestamp: daysAgo(1, 16),
+      read: true,
+      type: "agent",
+    },
+  ];
 }

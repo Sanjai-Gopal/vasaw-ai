@@ -8,10 +8,12 @@ import { cn } from "@/lib/utils";
 
 const statusConfig = {
   healthy: { icon: CheckCircle2, className: "text-emerald-400", label: "Healthy" },
+  online: { icon: CheckCircle2, className: "text-emerald-400", label: "Online" },
   running: { icon: Loader2, className: "text-primary", label: "Running", spin: true },
   idle: { icon: Circle, className: "text-muted-foreground", label: "Idle" },
   error: { icon: AlertTriangle, className: "text-rose-400", label: "Attention" },
   paused: { icon: Circle, className: "text-amber-400", label: "Paused" },
+  offline: { icon: Circle, className: "text-zinc-500", label: "Offline" },
 } as const;
 
 export function PipelineVisual({

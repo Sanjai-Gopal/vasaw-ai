@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
@@ -43,6 +44,11 @@ function CreateCampaignDialog({
   const [category, setCategory] = React.useState(campaignCategories[0]);
   const [location, setLocation] = React.useState(campaignLocations[0]);
   const [target, setTarget] = React.useState("100");
+  const [minRating, setMinRating] = React.useState("4.0");
+  const [minReviews, setMinReviews] = React.useState("25");
+  const [websiteOpp, setWebsiteOpp] = React.useState(true);
+  const [socialPresence, setSocialPresence] = React.useState(false);
+  const [autoMode, setAutoMode] = React.useState<"manual" | "semi-automatic" | "automatic">("semi-automatic");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,11 +66,21 @@ function CreateCampaignDialog({
       websitesBuilt: 0,
       websitesDeployed: 0,
       messagesSent: 0,
+      minimumRating: Number(minRating) || 4.0,
+      minimumReviews: Number(minReviews) || 25,
+      websiteOpportunityRequirement: websiteOpp,
+      socialPresenceRequirement: socialPresence,
+      automationMode: autoMode,
       createdAt: now,
       updatedAt: now,
     });
     setName("");
     setTarget("100");
+    setMinRating("4.0");
+    setMinReviews("25");
+    setWebsiteOpp(true);
+    setSocialPresence(false);
+    setAutoMode("semi-automatic");
     setOpen(false);
   };
 
@@ -132,6 +148,55 @@ function CreateCampaignDialog({
               value={target}
               onChange={(e) => setTarget(e.target.value)}
             />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="campaign-min-rating">Minimum rating</Label>
+              <Input
+                id="campaign-min-rating"
+                type="number"
+                min={1}
+                max={5}
+                step={0.1}
+                value={minRating}
+                onChange={(e) => setMinRating(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="campaign-min-reviews">Minimum reviews</Label>
+              <Input
+                id="campaign-min-reviews"
+                type="number"
+                min={0}
+                value={minReviews}
+                onChange={(e) => setMinReviews(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Automation mode</Label>
+            <Select
+              value={autoMode}
+              onChange={(e) => setAutoMode(e.target.value as typeof autoMode)}
+            >
+              <option value="manual">Manual</option>
+              <option value="semi-automatic">Semi-automatic</option>
+              <option value="automatic">Automatic</option>
+            </Select>
+          </div>
+          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 p-3">
+            <div>
+              <p className="text-sm font-medium">Website opportunity required</p>
+              <p className="text-xs text-muted-foreground">Only qualify leads without a website</p>
+            </div>
+            <Switch checked={websiteOpp} onCheckedChange={setWebsiteOpp} />
+          </div>
+          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 p-3">
+            <div>
+              <p className="text-sm font-medium">Social presence required</p>
+              <p className="text-xs text-muted-foreground">Only qualify leads with social media</p>
+            </div>
+            <Switch checked={socialPresence} onCheckedChange={setSocialPresence} />
           </div>
           <DialogFooter>
             <Button

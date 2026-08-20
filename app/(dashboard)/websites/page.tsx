@@ -11,6 +11,8 @@ import {
   LayoutTemplate,
   Rocket,
   X,
+  RefreshCw,
+  Loader2,
 } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card } from "@/components/ui/card";
@@ -24,10 +26,10 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { websites } from "@/lib/data/websites";
+import { websites as initialWebsites } from "@/lib/data/websites";
 import { websiteStatusMeta } from "@/lib/status";
 import { formatDate } from "@/lib/utils";
-import type { Website } from "@/lib/types";
+import type { Website, WebsiteStatus } from "@/lib/types";
 
 function MockPreview({ website }: { website: Website }) {
   const gradient =
@@ -70,13 +72,48 @@ function MockPreview({ website }: { website: Website }) {
 }
 
 export default function WebsitesPage() {
+  const [websiteList, setWebsiteList] = React.useState<Website[]>(initialWebsites);
   const [preview, setPreview] = React.useState<Website | null>(null);
+  const [rebuildingId, setRebuildingId] = React.useState<string | null>(null);
+
+  const rebuildWebsite = (id: string) => {
+    if (rebuildingId) return;
+    setRebuildingId(id);
+    setWebsiteList((prev) =>
+      prev.map((w) =>
+        w.id === id ? { ...w, status: "building" as WebsiteStatus, buildProgress: 0 } : w
+      )
+    );
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 20 + 10;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        setWebsiteList((prev) =>
+          prev.map((w) =>
+            w.id === id
+              ? { ...w, status: "built" as WebsiteStatus, buildProgress: 100, builtAt: new Date().toISOString() }
+              : w
+          )
+        );
+        setRebuildingId(null);
+      } else {
+        setWebsiteList((prev) =>
+          prev.map((w) =>
+            w.id === id ? { ...w, buildProgress: Math.min(99, Math.round(progress)) } : w
+          )
+        );
+      }
+    }, 600);
+  };
 
   const counts = {
-    total: websites.length,
-    building: websites.filter((w) => w.status === "building").length,
-    deployed: websites.filter((w) => w.status === "deployed").length,
-    failed: websites.filter((w) => w.status === "failed").length,
+    total: websiteList.length,
+    building: websiteList.filter((w) => w.status === "building").length,
+    deployed: websiteList.filter((w) => w.status === "deployed").length,
+    failed: websiteList.filter((w) => w.status === "failed").length,
   };
 
   return (
@@ -106,7 +143,7 @@ export default function WebsitesPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {websites.map((website, index) => {
+        {websiteList.map((website, index) => {
           const meta = websiteStatusMeta[website.status];
           return (
             <motion.div
@@ -203,6 +240,22 @@ export default function WebsitesPage() {
                       <Button variant="outline" size="sm" className="gap-1" onClick={() => setPreview(website)}>
                         <Eye className="h-3.5 w-3.5" />
                         Preview
+                      </Button>
+                    )}
+                    {(website.status === "built" || website.status === "failed") && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1"
+                        disabled={rebuildingId === website.id}
+                        onClick={() => rebuildWebsite(website.id)}
+                      >
+                        {rebuildingId === website.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <RefreshCw className="h-3.5 w-3.5" />
+                        )}
+                        Rebuild
                       </Button>
                     )}
                     {website.status === "built" && (
