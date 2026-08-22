@@ -54,7 +54,7 @@ export default function ContactPage() {
   );
 }
 
-function ContactSection({ business }) {
+function ContactSection({ business }: { business: Business }) {
   return (
     <section id="contact" className="section bg-gray-50">
       <div className="container">
@@ -93,8 +93,7 @@ function ContactSection({ business }) {
               width="100%"
               height="100%"
               style={{ border: 0 }}
-              allowFullScreen=""
-              loading="lazy"
+              allowFullScreen loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
@@ -104,7 +103,7 @@ function ContactSection({ business }) {
   );
 }
 
-function FooterSection({ business }) {
+function FooterSection({ business }: { business: Business }) {
   return (
     <footer className="bg-gray-900 text-white py-12">
       <div className="container">

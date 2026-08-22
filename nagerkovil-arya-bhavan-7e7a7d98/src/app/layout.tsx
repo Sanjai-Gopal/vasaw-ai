@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "../globals.css";
 
-export const metadata = Metadata = {
+export const metadata: Metadata = {
   title: "Nagerkovil Arya Bhavan",
   description: "Welcome to Nagerkovil Arya Bhavan - South Indian restaurant in Coimbatore",
   openGraph: {
@@ -27,7 +27,7 @@ interface Business {
   hours: Array<{ day: string; hours: string }>;
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className="min-h-screen bg-white font-sans antialiased">
