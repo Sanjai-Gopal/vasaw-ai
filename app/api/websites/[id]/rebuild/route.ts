@@ -46,19 +46,34 @@ export async function POST(
       subCategory: lead.sub_category as string | undefined,
       scraped: {
         address: lead.address as string,
+        phone: lead.phone as string,
+        email: lead.email as string | undefined,
+        rating: website.rating ?? 0,
+        reviews: website.reviews ?? 0,
+        category: website.category,
+        subCategory: lead.sub_category as string | undefined,
         hours: lead.hours as string | undefined,
         services: (scrapedData.services as string[]) ?? [],
+        source: "Google Maps",
         scrapedAt: lead.scraped_at as string,
       },
       qualification: {
         hasWebsite: qualification.hasWebsite as boolean,
         websiteQuality: qualification.websiteQuality as number,
-        responseLikelihood: qualification.responseLikelihood as string,
+        hasWhatsApp: qualification.hasWhatsApp as boolean,
+        hasReviews: qualification.hasReviews as boolean,
+        responseLikelihood: (() => {
+          const v = qualification.responseLikelihood as string;
+          return v === "high" || v === "medium" || v === "low" ? v : "medium";
+        })(),
         notes: qualification.notes as string,
       },
       opportunity: {
         score: opportunity.score as number,
-        priority: opportunity.priority as string,
+        priority: (() => {
+          const v = opportunity.priority as string;
+          return v === "high" || v === "medium" || v === "low" ? v : "medium";
+        })(),
         reasons: (opportunity.factors as string[]) ?? [],
         estimatedValue: opportunity.estimatedValue as number,
       },

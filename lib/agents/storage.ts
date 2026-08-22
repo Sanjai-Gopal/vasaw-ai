@@ -8,9 +8,11 @@
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { createJob, updateJob, completeJob, failJob, getStepsForJobType, isDryRun } from "@/lib/queue/job-queue";
 import type { JobPayload } from "@/lib/queue/job-queue";
+import { randomUUID } from "crypto";
 
 export interface NormalizedLead {
   id: string;
+  campaign_id: string;
   business_name: string;
   category: string;
   location: string;
@@ -22,34 +24,18 @@ export interface NormalizedLead {
   ai_score: number;
   priority: string;
   status: string;
-  scraped: {
-    address: string;
-    phone: string;
-    email: string | null;
-    rating: number;
-    reviews: number;
-    category: string;
-    subCategory: string | null;
-    hours: string | null;
-    services: string[];
-    source: string;
-    scrapedAt: string;
-  };
-  qualification: {
-    hasWebsite: boolean;
-    websiteQuality: number;
-    hasWhatsApp: boolean;
-    hasReviews: boolean;
-    responseLikelihood: "high" | "medium" | "low";
-    notes: string;
-  };
-  opportunity: {
-    score: number;
-    priority: string;
-    reasons: string[];
-    estimatedValue: number;
-  };
-  leadId?: string;
+  source: string;
+  source_record_id: string | null;
+  apify_run_id: string | null;
+  apify_dataset_id: string | null;
+  ai_score_json: Record<string, unknown>;
+  qualification_json: Record<string, unknown>;
+  opportunity_json: Record<string, unknown>;
+  website_status: string;
+  quality_status: string;
+  deployment_status: string;
+  outreach_status: string;
+  updated_at: string;
 }
 
 export interface StorageResult {
@@ -124,7 +110,8 @@ export async function runStorageAgent(
         const normalizedPhone = normalizePhone(lead.phone);
         const normalizedWebsite = normalizeWebsite(lead.website);
         const normalizedBusinessName = normalizeName(lead.business_name);
-        const normalizedAddress = normalizeName(lead.scraped.address);
+        // Use location as address fallback since flat structure doesn't have nested scraped.address
+        const normalizedAddress = normalizeName(lead.location);
 
         // Check for existing lead using deduplication priority
         let existingLeadId: string | null = null;
@@ -154,8 +141,8 @@ export async function runStorageAgent(
         }
 
         // Priority 3: source record ID (from Apify place_id)
-        if (!existingLeadId && lead.scraped.source.includes("Google Maps")) {
-          const placeId = lead.scraped.address; // Would need actual place_id from raw data
+        if (!existingLeadId && lead.source.includes("Google Maps")) {
+          const placeId = lead.source_record_id; // Use the source_record_id from normalized data
           // This would need the actual place_id from raw Apify data
         }
 
@@ -186,34 +173,13 @@ export async function runStorageAgent(
           ai_score: lead.ai_score,
           priority: lead.priority,
           status: "scraped",
-          source: lead.scraped.source,
-          source_record_id: lead.scraped.source.includes("Google Maps") ? `gmaps-${Date.now()}-${Math.random().toString(36).slice(2, 8)}` : null,
+          source: lead.source,
+          source_record_id: lead.source_record_id,
           apify_run_id: options?.apifyRunId,
           apify_dataset_id: options?.apifyDatasetId,
-          ai_score_json: {
-            score: lead.opportunity.score,
-            priority: lead.opportunity.priority,
-            websiteOpportunity: !lead.website,
-            confidence: 0.8,
-            factors: lead.opportunity.reasons,
-            reason: lead.opportunity.reasons.join("; "),
-          },
-          qualification_json: {
-            hasWebsite: lead.qualification.hasWebsite,
-            websiteQuality: lead.qualification.websiteQuality,
-            hasWhatsApp: lead.qualification.hasWhatsApp,
-            hasReviews: lead.qualification.hasReviews,
-            responseLikelihood: lead.qualification.responseLikelihood,
-            notes: lead.qualification.notes,
-          },
-          opportunity_json: {
-            score: lead.opportunity.score,
-            priority: lead.opportunity.priority,
-            websiteOpportunity: !lead.website,
-            confidence: 0.8,
-            factors: lead.opportunity.reasons,
-            reason: lead.opportunity.reasons.join("; "),
-          },
+          ai_score_json: lead.ai_score_json,
+          qualification_json: lead.qualification_json,
+          opportunity_json: lead.opportunity_json,
           website_status: "not_started",
           quality_status: "not_started",
           deployment_status: "not_started",
@@ -267,7 +233,7 @@ export async function runStorageAgent(
           type: "lead",
           status: "info",
           title: existingLeadId ? "Lead updated" : "Lead created",
-          description: `${lead.business_name} ${existingLeadId ? "updated" : "created"} from ${lead.scraped.source}`,
+          description: `${lead.business_name} ${existingLeadId ? "updated" : "created"} from ${lead.source}`,
         });
 
       } catch (err) {

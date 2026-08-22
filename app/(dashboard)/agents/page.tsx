@@ -9,14 +9,28 @@ import { PipelineVisual } from "@/components/dashboard/pipeline-visual";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { agents as initialAgents } from "@/lib/data/agents";
-import { getPipeline } from "@/lib/data";
-import type { Agent, ActivityItem } from "@/lib/types";
+import type { Agent, ActivityItem, PipelineStage } from "@/lib/types";
 
 export default function AgentsPage() {
   const [agents, setAgents] = React.useState<Agent[]>(initialAgents);
   const [runningId, setRunningId] = React.useState<string | null>(null);
+  const [pipeline, setPipeline] = React.useState<PipelineStage[]>([]);
+  const [loadingPipeline, setLoadingPipeline] = React.useState(true);
 
-  const pipeline = getPipeline();
+  React.useEffect(() => {
+    async function fetchPipeline() {
+      try {
+        const { getPipeline } = await import("@/lib/data");
+        const stages = await getPipeline();
+        setPipeline(stages);
+      } catch (err) {
+        console.error("Failed to fetch pipeline:", err);
+      } finally {
+        setLoadingPipeline(false);
+      }
+    }
+    fetchPipeline();
+  }, []);
 
   const runNow = (id: string) => {
     if (runningId) return;
@@ -99,7 +113,11 @@ export default function AgentsPage() {
             The complete automation flow VASAW AI will run for every lead
           </CardDescription>
         </CardHeader>
-        <PipelineVisual stages={pipeline} />
+        {loadingPipeline ? (
+          <div className="h-32 animate-pulse bg-muted rounded-lg" />
+        ) : (
+          <PipelineVisual stages={pipeline} />
+        )}
       </Card>
 
       <div className="mb-4 flex items-center justify-between">

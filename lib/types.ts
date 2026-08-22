@@ -44,6 +44,7 @@ export interface ScrapedInfo {
   services: string[];
   source: string;
   scrapedAt: string;
+  placeId?: string;
 }
 
 export interface Qualification {

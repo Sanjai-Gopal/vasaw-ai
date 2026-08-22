@@ -1,23 +1,24 @@
 import type { DashboardStats, PipelineStage, Notification } from "@/lib/types";
 import { agents } from "@/lib/data/agents";
-import { leads } from "@/lib/data/leads";
-import { websites, deployments } from "@/lib/data/websites";
-import { messages } from "@/lib/data/messages";
+import { getLeads, getLeadsByStatus, getLeadById } from "@/lib/data/leads";
+import { getWebsites, getWebsitesByStatus, getDeployments, getDeploymentsByLead, getWebsiteById, getWebsitesByLead } from "@/lib/data/websites";
+import { getRecentActivity, getConnections } from "@/lib/data/activities";
+import { getMessages, getMessagesByLead } from "@/lib/data/messages";
+import { getSupabaseAdmin } from "@/lib/supabase/server";
 
-const daysAgo = (days: number, hour = 10, minute = 30) => {
-  const d = new Date();
-  d.setDate(d.getDate() - days);
-  d.setHours(hour, minute, 0, 0);
-  return d.toISOString();
-};
+export { getLeads, getLeadById, getLeadsByStatus };
+export { getWebsites, getWebsiteById, getWebsitesByStatus, getWebsitesByLead, getDeployments, getDeploymentsByLead };
+export { getMessages, getMessagesByLead };
+export { getRecentActivity, getConnections };
 
-const minutesAgo = (minutes: number) => {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - minutes);
-  return d.toISOString();
-};
+export async function getDashboardStats(): Promise<DashboardStats> {
+  const [leads, websites, deployments, messages] = await Promise.all([
+    getLeads(),
+    getWebsites(),
+    getDeployments(),
+    getMessages(),
+  ]);
 
-export function getDashboardStats(): DashboardStats {
   const totalLeads = leads.length;
   const qualifiedLeads = leads.filter(
     (l) => l.status !== "new" && l.status !== "rejected"
@@ -60,7 +61,14 @@ export function getDashboardStats(): DashboardStats {
   };
 }
 
-export function getPipeline(): PipelineStage[] {
+export async function getPipeline(): Promise<PipelineStage[]> {
+  const [leads, websites, deployments, messages] = await Promise.all([
+    getLeads(),
+    getWebsites(),
+    getDeployments(),
+    getMessages(),
+  ]);
+
   const order: Array<{ id: PipelineStage["id"]; label: string }> = [
     { id: "scraping", label: "Scraping" },
     { id: "checking", label: "Checking" },
@@ -91,47 +99,29 @@ export function getPipeline(): PipelineStage[] {
   });
 }
 
-export function getNotifications(): Notification[] {
-  return [
-    {
-      id: "n1",
-      title: "Website deployed",
-      description: "annapurna-restaurant.vercel.app is now live.",
-      timestamp: minutesAgo(8),
-      read: false,
-      type: "deployment",
-    },
-    {
-      id: "n2",
-      title: "34 businesses qualified",
-      description: "Checking Agent qualified the latest batch from Saibaba Colony.",
-      timestamp: minutesAgo(12),
-      read: false,
-      type: "lead",
-    },
-    {
-      id: "n3",
-      title: "Website build in progress",
-      description: "Trendz Unisex Salon — 64% complete.",
-      timestamp: minutesAgo(35),
-      read: true,
-      type: "website",
-    },
-    {
-      id: "n4",
-      title: "Reply received",
-      description: "Kovai Iron Gym replied — interested in pricing.",
-      timestamp: minutesAgo(45),
-      read: true,
-      type: "message",
-    },
-    {
-      id: "n5",
-      title: "Agent health warning",
-      description: "WhatsApp Agent session expired — needs reconnection.",
-      timestamp: daysAgo(1, 16),
-      read: true,
-      type: "agent",
-    },
-  ];
+export async function getNotifications(): Promise<Notification[]> {
+  const activities = await getRecentActivity(10);
+  return activities.map((a, i) => ({
+    id: a.id,
+    title: a.title,
+    description: a.description ?? "",
+    timestamp: a.timestamp,
+    read: i > 2,
+    type: a.type,
+  }));
+}
+
+async function getMessageStatuses(): Promise<Array<{ status: string }>> {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from("messages")
+    .select("status")
+    .order("created_at", { ascending: false })
+    .limit(1000);
+
+  if (error) {
+    return [];
+  }
+
+  return data ?? [];
 }

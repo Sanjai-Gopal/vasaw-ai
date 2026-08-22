@@ -10,9 +10,9 @@ export function getNvidiaProvider(apiKey: string): ProviderAdapter {
     "https://integrate.api.nvidia.com/v1",
     apiKey,
     {
-      general: process.env.NVIDIA_GENERAL_MODEL ?? "meta/llama-3.3-70b-instruct",
-      reasoning: process.env.NVIDIA_REASONING_MODEL ?? "deepseek/deepseek-r1",
-      coding: process.env.NVIDIA_CODING_MODEL ?? "qwen/qwen2.5-coder-32b-instruct",
+      general: process.env.NVIDIA_GENERAL_MODEL ?? "nvidia/nemotron-mini-4b-instruct",
+      reasoning: process.env.NVIDIA_REASONING_MODEL ?? "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+      coding: process.env.NVIDIA_CODING_MODEL ?? "nvidia/nemotron-mini-4b-instruct",
     }
   );
   return adapter;

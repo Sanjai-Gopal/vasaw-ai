@@ -10,12 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { getNotifications } from "@/lib/data";
-import { formatRelative } from "@/lib/utils";
-import { leads } from "@/lib/data/leads";
-import { campaigns } from "@/lib/data/campaigns";
-import { agents } from "@/lib/data/agents";
-import { websites } from "@/lib/data/websites";
 import type { Notification } from "@/lib/types";
 
 const routeTitles: Record<string, string> = {
@@ -29,6 +23,21 @@ const routeTitles: Record<string, string> = {
   "/settings": "Settings",
 };
 
+function formatRelative(timestamp: string): string {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
 function getPageTitle(pathname: string): string {
   if (pathname.startsWith("/leads/")) return "Lead Details";
   if (pathname.startsWith("/agents/")) return "Agent Details";
@@ -38,7 +47,7 @@ function getPageTitle(pathname: string): string {
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [notifOpen, setNotifOpen] = React.useState(false);
-  const [notifications, setNotifications] = React.useState<Notification[]>(getNotifications());
+  const [notifications, setNotifications] = React.useState<Notification[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchOpen, setSearchOpen] = React.useState(false);
   const pathname = usePathname();
@@ -50,41 +59,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   const markAllRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
-
-  const searchResults = React.useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (q.length < 2) return [];
-    const results: Array<{ label: string; href: string; icon: typeof Users; meta: string }> = [];
-
-    leads.forEach((l) => {
-      if (`${l.businessName} ${l.category} ${l.location}`.toLowerCase().includes(q)) {
-        results.push({ label: l.businessName, href: `/leads/${l.id}`, icon: Users, meta: `${l.category} · ${l.location}` });
-      }
-    });
-    campaigns.forEach((c) => {
-      if (`${c.name} ${c.category} ${c.location}`.toLowerCase().includes(q)) {
-        results.push({ label: c.name, href: "/campaigns", icon: Target, meta: `${c.category} · ${c.location}` });
-      }
-    });
-    agents.forEach((a) => {
-      if (`${a.name} ${a.description}`.toLowerCase().includes(q)) {
-        results.push({ label: a.name, href: `/agents/${a.id}`, icon: Bot, meta: a.status });
-      }
-    });
-    websites.forEach((w) => {
-      if (`${w.businessName} ${w.category}`.toLowerCase().includes(q)) {
-        results.push({ label: w.businessName, href: "/websites", icon: Globe, meta: w.status });
-      }
-    });
-
-    return results.slice(0, 8);
-  }, [searchQuery]);
-
-  const handleSearchSelect = (href: string) => {
-    setSearchQuery("");
-    setSearchOpen(false);
-    router.push(href);
   };
 
   React.useEffect(() => {
@@ -169,37 +143,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               }}
               onFocus={() => searchQuery.length >= 2 && setSearchOpen(true)}
             />
-            {searchOpen && searchResults.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-border bg-popover shadow-xl"
-              >
-                {searchResults.map((result) => {
-                  const Icon = result.icon;
-                  return (
-                    <button
-                      key={result.href + result.label}
-                      onClick={() => handleSearchSelect(result.href)}
-                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-muted/50"
-                    >
-                      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">{result.label}</p>
-                        <p className="truncate text-xs text-muted-foreground">{result.meta}</p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </motion.div>
-            )}
-            {searchOpen && searchQuery.length >= 2 && searchResults.length === 0 && (
+            {searchOpen && searchQuery.length >= 2 && (
               <motion.div
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-border bg-popover p-4 text-center shadow-xl"
               >
-                <p className="text-sm text-muted-foreground">No results found</p>
+                <p className="text-sm text-muted-foreground">Search requires backend API</p>
               </motion.div>
             )}
           </div>

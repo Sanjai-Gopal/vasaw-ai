@@ -67,9 +67,13 @@ function getAdapter(id: ProviderId): ProviderAdapter {
   }
 }
 
+let backoffCounter = 0;
+
 function backoff(attempt: number): number {
   const ms = Math.min(INITIAL_BACKOFF_MS * Math.pow(2, attempt), MAX_BACKOFF_MS);
-  return ms + Math.random() * 500;
+  backoffCounter = (backoffCounter * 1664525 + 1013904223) >>> 0;
+  const jitter = (backoffCounter % 500) + 1;
+  return ms + jitter;
 }
 
 function sleep(ms: number): Promise<void> {

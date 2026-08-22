@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   Users,
   Star,
@@ -25,11 +26,33 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { agents } from "@/lib/data/agents";
-import { recentActivity } from "@/lib/data/activities";
-import { getDashboardStats, getPipeline } from "@/lib/data";
 import { agentStatusMeta } from "@/lib/status";
 import { cn } from "@/lib/utils";
-import type { AgentStatus } from "@/lib/types";
+import type { PipelineStage, ActivityItem as ActivityItemType, AgentStatus } from "@/lib/types";
+
+interface DashboardStats {
+  totalLeads: number;
+  qualifiedLeads: number;
+  websitesGenerated: number;
+  websitesDeployed: number;
+  messagesSent: number;
+  interestedLeads: number;
+  weeklyLeads: Array<{ label: string; leads: number }>;
+  categoryDistribution: Array<{ name: string; value: number }>;
+  pipeline: PipelineStage[];
+  campaigns: number;
+  activeCampaigns: number;
+}
+
+interface ActivityItemLocal {
+  id: string;
+  timestamp: string;
+  actor: string;
+  type: string;
+  status: string;
+  title: string;
+  description: string | null;
+}
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -59,8 +82,64 @@ const agentColor: Record<AgentStatus, string> = {
 };
 
 export default function DashboardPage() {
-  const stats = getDashboardStats();
-  const pipeline = getPipeline();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [activities, setActivities] = useState<ActivityItemLocal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch("/api/dashboard/stats");
+        const data = await response.json();
+        if (data.ok) {
+          setStats(data.stats);
+          setActivities(data.recentActivity);
+        } else {
+          setError(data.error || "Failed to fetch dashboard data");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-24 animate-pulse bg-muted rounded-lg" />
+            ))}
+          </div>
+          <div className="h-64 animate-pulse bg-muted rounded-lg mt-6" />
+          <div className="grid gap-4 lg:grid-cols-3 mt-6">
+            <div className="h-64 animate-pulse bg-muted rounded-lg lg:col-span-2" />
+            <div className="h-64 animate-pulse bg-muted rounded-lg" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="text-center py-12">
+          <AlertTriangle className="h-12 w-12 text-rose-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold">Failed to load dashboard</h2>
+          <p className="text-muted-foreground mt-2">{error || "Unknown error"}</p>
+          <p className="text-xs text-muted-foreground mt-4">
+            Run the Supabase GRANT migration and ingestion pipeline first.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
@@ -84,7 +163,7 @@ export default function DashboardPage() {
           index={0}
           title="Total leads"
           value={String(stats.totalLeads)}
-          delta={18}
+          delta={stats.totalLeads > 0 ? 100 : 0}
           icon={Users}
           accent="primary"
         />
@@ -92,7 +171,7 @@ export default function DashboardPage() {
           index={1}
           title="Qualified leads"
           value={String(stats.qualifiedLeads)}
-          delta={12}
+          delta={stats.qualifiedLeads > 0 ? 100 : 0}
           icon={Star}
           accent="success"
         />
@@ -100,7 +179,7 @@ export default function DashboardPage() {
           index={2}
           title="Websites generated"
           value={String(stats.websitesGenerated)}
-          delta={8}
+          delta={stats.websitesGenerated > 0 ? 100 : 0}
           icon={Globe}
           accent="info"
         />
@@ -108,7 +187,7 @@ export default function DashboardPage() {
           index={3}
           title="Websites deployed"
           value={String(stats.websitesDeployed)}
-          delta={6}
+          delta={stats.websitesDeployed > 0 ? 100 : 0}
           icon={Rocket}
           accent="warning"
         />
@@ -116,7 +195,7 @@ export default function DashboardPage() {
           index={4}
           title="Messages sent"
           value={String(stats.messagesSent)}
-          delta={9}
+          delta={stats.messagesSent > 0 ? 100 : 0}
           icon={MessageSquare}
           accent="destructive"
         />
@@ -124,7 +203,7 @@ export default function DashboardPage() {
           index={5}
           title="Interested leads"
           value={String(stats.interestedLeads)}
-          delta={11}
+          delta={stats.interestedLeads > 0 ? 100 : 0}
           icon={Heart}
           accent="success"
         />
@@ -138,7 +217,7 @@ export default function DashboardPage() {
               Scraping → Checking → Storage → Website Building → Deployment → WhatsApp
             </CardDescription>
           </CardHeader>
-          <PipelineVisual stages={pipeline} />
+          <PipelineVisual stages={stats.pipeline} />
         </Card>
       </div>
 
@@ -188,7 +267,7 @@ export default function DashboardPage() {
             <CardDescription>Live feed from your agents</CardDescription>
           </CardHeader>
           <CardContent>
-            <ActivityFeed items={recentActivity} limit={8} />
+            <ActivityFeed items={activities as ActivityItemType[]} limit={8} />
           </CardContent>
         </Card>
 

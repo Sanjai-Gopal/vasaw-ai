@@ -29,9 +29,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { leads as initialLeads } from "@/lib/data/leads";
-import { websites } from "@/lib/data/websites";
-import { messages } from "@/lib/data/messages";
 import { leadStatusMeta, websiteStatusMeta, messageStatusMeta } from "@/lib/status";
 import type { LeadPriority } from "@/lib/types";
 
@@ -40,14 +37,87 @@ const PAGE_SIZE = 8;
 type SortKey = "aiScore" | "rating" | "reviews" | "businessName";
 type SortDir = "asc" | "desc";
 
+interface Lead {
+  id: string;
+  businessName: string;
+  category: string;
+  location: string;
+  rating: number;
+  reviews: number;
+  website: string | null;
+  phone: string;
+  email?: string;
+  aiScore: number;
+  priority: LeadPriority;
+  status: string;
+  scraped: {
+    address: string;
+    phone: string;
+    email?: string;
+    rating: number;
+    reviews: number;
+    category: string;
+    subCategory?: string;
+    hours?: string;
+    services: string[];
+    source: string;
+    scrapedAt: string;
+  };
+  qualification: {
+    hasWebsite: boolean;
+    websiteQuality: number;
+    hasWhatsApp: boolean;
+    hasReviews: boolean;
+    responseLikelihood: "high" | "medium" | "low";
+    notes: string;
+  };
+  opportunity: {
+    score: number;
+    priority: LeadPriority;
+    reasons: string[];
+    estimatedValue: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Website {
+  id: string;
+  leadId: string;
+  businessName: string;
+  category: string;
+  location: string;
+  status: string;
+  template: string;
+  pages: number;
+  sections: number;
+  buildProgress: number;
+  previewUrl?: string;
+  liveUrl?: string;
+  repoUrl?: string;
+  commitHash?: string;
+  createdAt: string;
+  builtAt?: string;
+}
+
+interface Message {
+  id: string;
+  leadId: string;
+  businessName: string;
+  direction: "outbound" | "inbound";
+  channel: "whatsapp";
+  content: string;
+  status: string;
+  replyClassification?: string;
+  sentAt?: string;
+  createdAt: string;
+}
+
 const priorityVariant: Record<LeadPriority, "destructive" | "warning" | "muted"> = {
   high: "destructive",
   medium: "warning",
   low: "muted",
 };
-
-const statusOptions = Object.entries(leadStatusMeta);
-const categories = Array.from(new Set(initialLeads.map((l) => l.category))).sort();
 
 function ScoreRing({ score }: { score: number }) {
   const color = score >= 80 ? "text-emerald-400" : score >= 60 ? "text-amber-400" : "text-rose-400";
@@ -66,10 +136,59 @@ export default function LeadsPage() {
   const [sortKey, setSortKey] = React.useState<SortKey>("aiScore");
   const [sortDir, setSortDir] = React.useState<SortDir>("desc");
   const [page, setPage] = React.useState(1);
+  const [leads, setLeads] = React.useState<Lead[]>([]);
+  const [websites, setWebsites] = React.useState<Website[]>([]);
+  const [messages, setMessages] = React.useState<Message[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [categories, setCategories] = React.useState<string[]>([]);
+  const [statusOptions, setStatusOptions] = React.useState<Array<[string, { label: string; variant: string }]>>([]);
+
+  React.useEffect(() => {
+    async function fetchData() {
+      try {
+        const [leadsRes, websitesRes, messagesRes] = await Promise.all([
+          fetch("/api/leads"),
+          fetch("/api/websites"),
+          fetch("/api/messages"),
+        ]);
+
+        const [leadsData, websitesData, messagesData] = await Promise.all([
+          leadsRes.json(),
+          websitesRes.json(),
+          messagesRes.json(),
+        ]);
+
+        if (leadsData.ok && Array.isArray(leadsData.leads)) {
+          const leadsArray = leadsData.leads as Lead[];
+          setLeads(leadsArray);
+          
+          // Extract unique categories
+          const cats = Array.from(new Set(leadsArray.map((l) => l.category))).sort();
+          setCategories(cats);
+
+          // Extract status options
+          const statuses = Array.from(new Set(leadsArray.map((l) => l.status)));
+          setStatusOptions(statuses.map(s => [s, leadStatusMeta[s as keyof typeof leadStatusMeta] || { label: s, variant: "default" }]));
+        }
+        if (websitesData.ok && Array.isArray(websitesData.websites)) {
+          setWebsites(websitesData.websites);
+        }
+        if (messagesData.ok && Array.isArray(messagesData.messages)) {
+          setMessages(messagesData.messages);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
 
   const filtered = React.useMemo(() => {
     const q = search.trim().toLowerCase();
-    let list = initialLeads.filter((lead) => {
+    let list = leads.filter((lead) => {
       if (status !== "all" && lead.status !== status) return false;
       if (priority !== "all" && lead.priority !== priority) return false;
       if (category !== "all" && lead.category !== category) return false;
@@ -86,7 +205,7 @@ export default function LeadsPage() {
       return (a[sortKey] - b[sortKey]) * dir;
     });
     return list;
-  }, [search, status, priority, category, sortKey, sortDir]);
+  }, [search, status, priority, category, sortKey, sortDir, leads]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
@@ -122,11 +241,36 @@ export default function LeadsPage() {
 
   const hasFilters = search || status !== "all" || priority !== "all" || category !== "all";
 
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-24 animate-pulse bg-muted rounded-lg" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="text-center py-12">
+          <p className="text-rose-400">Failed to load leads</p>
+          <p className="text-muted-foreground mt-2">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       <PageHeader
         title="Leads"
-        description={`${initialLeads.length} businesses discovered · ${filtered.length} matching current filters`}
+        description={`${leads.length} businesses discovered · ${filtered.length} matching current filters`}
       />
 
       <Card className="mb-4 p-4">
@@ -248,7 +392,7 @@ export default function LeadsPage() {
           </TableHeader>
           <TableBody>
             {pageItems.map((lead) => {
-              const meta = leadStatusMeta[lead.status];
+              const meta = leadStatusMeta[lead.status as keyof typeof leadStatusMeta] || { label: lead.status, variant: "default" };
               const leadWebsite = websites.find((w) => w.leadId === lead.id);
               const leadMessages = messages.filter((m) => m.leadId === lead.id);
               const latestMessage = leadMessages.length > 0
@@ -306,8 +450,8 @@ export default function LeadsPage() {
                   </TableCell>
                   <TableCell>
                     {leadWebsite ? (
-                      <Badge variant={websiteStatusMeta[leadWebsite.status].variant}>
-                        {websiteStatusMeta[leadWebsite.status].label}
+                      <Badge variant={websiteStatusMeta[leadWebsite.status as keyof typeof websiteStatusMeta]?.variant || "default"}>
+                        {websiteStatusMeta[leadWebsite.status as keyof typeof websiteStatusMeta]?.label || leadWebsite.status}
                       </Badge>
                     ) : (
                       <Badge variant="muted">None</Badge>
@@ -315,8 +459,8 @@ export default function LeadsPage() {
                   </TableCell>
                   <TableCell>
                     {latestMessage ? (
-                      <Badge variant={messageStatusMeta[latestMessage.status].variant}>
-                        {messageStatusMeta[latestMessage.status].label}
+                      <Badge variant={messageStatusMeta[latestMessage.status as keyof typeof messageStatusMeta]?.variant || "default"}>
+                        {messageStatusMeta[latestMessage.status as keyof typeof messageStatusMeta]?.label || latestMessage.status}
                       </Badge>
                     ) : (
                       <Badge variant="muted">Not contacted</Badge>

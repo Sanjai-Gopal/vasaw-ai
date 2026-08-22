@@ -323,22 +323,31 @@ export interface WebsiteBuildInput {
   reviews: number;
   phone: string;
   email?: string;
-  website?: string | null;
+  website: string | null;
   scraped: {
     address: string;
+    phone: string;
+    email?: string;
+    rating: number;
+    reviews: number;
+    category: string;
+    subCategory?: string;
     hours?: string;
     services: string[];
+    source: string;
     scrapedAt: string;
   };
   qualification: {
     hasWebsite: boolean;
     websiteQuality: number;
-    responseLikelihood: string;
+    hasWhatsApp: boolean;
+    hasReviews: boolean;
+    responseLikelihood: "high" | "medium" | "low";
     notes: string;
   };
   opportunity: {
     score: number;
-    priority: string;
+    priority: "high" | "medium" | "low";
     reasons: string[];
     estimatedValue: number;
   };
@@ -543,22 +552,19 @@ function generateMockContent(template: Template, businessData: WebsiteBuildInput
       case "menu":
         content[section.id] = {
           headline: "Menu",
-          categories: [{ name: "Popular Items", items: businessData.scraped.services.slice(0, 6).map((s) => ({ name: s, price: "₹" + Math.floor(Math.random() * 500 + 100) })) }],
+          categories: [{ name: "Popular Items", items: businessData.scraped.services.slice(0, 6).map((s) => ({ name: s, price: null })) }],
         };
         break;
       case "gallery":
         content[section.id] = {
           headline: "Gallery",
-          images: Array.from({ length: 6 }, (_, i) => ({ src: `/placeholder-${i + 1}.jpg`, alt: `${businessData.businessName} - Image ${i + 1}` })),
+          images: [],
         };
         break;
       case "testimonials":
         content[section.id] = {
           headline: "What Our Customers Say",
-          items: [
-            { quote: "Excellent service and quality!", author: "Happy Customer", rating: 5 },
-            { quote: "Highly recommended!", author: "Regular Visitor", rating: 5 },
-          ],
+          items: [],
         };
         break;
       case "hours":
@@ -611,17 +617,16 @@ async function buildWebsiteProject(params: {
     return { outputDir, previewUrl: `https://${projectName}.vercel.app` };
   }
 
-  // In a real implementation, this would:
-  // 1. Create Next.js project structure
-  // 2. Generate pages/components based on template
-  // 3. Inject generated content
-  // 4. Run npm install && npm run build
-  // 5. Return build output path
-
-  // For now, simulate the build
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  return { outputDir, previewUrl: `https://${projectName}.vercel.app` };
+  // Import the actual generator
+  const { generateWebsiteProject } = await import("@/lib/services/website-generator");
+  const template = getTemplate(params.templateId);
+  return generateWebsiteProject({
+    templateId: params.templateId,
+    template,
+    businessData: params.businessData,
+    generatedContent: params.generatedContent,
+    leadId: params.leadId,
+  });
 }
 
 export async function createWebsiteBuildJob(leadId: string, templateId?: TemplateType): Promise<string> {

@@ -5,11 +5,31 @@ import { ShieldCheck, Info } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ConnectionCard } from "@/components/dashboard/connection-card";
 import { Card, CardContent } from "@/components/ui/card";
-import { connections as initialConnections } from "@/lib/data/activities";
 import type { Connection } from "@/lib/types";
 
 export default function SettingsPage() {
-  const [connections, setConnections] = React.useState<Connection[]>(initialConnections);
+  const [connections, setConnections] = React.useState<Connection[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetch("/api/connections");
+        const data = await res.json();
+        if (data.ok) {
+          setConnections(data.connections);
+        } else {
+          setError(data.error || "Failed to fetch connections");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
 
   const connect = (id: Connection["id"]) => {
     setConnections((prev) =>
@@ -43,20 +63,37 @@ export default function SettingsPage() {
     }, 1800);
   };
 
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-24 animate-pulse bg-muted rounded-lg" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="text-center py-12">
+          <p className="text-rose-400">Failed to load settings</p>
+          <p className="text-muted-foreground mt-2">{error || "Unknown error"}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       <PageHeader
         title="Settings"
-        description="Connections and integrations — shown in mock state until APIs are wired up"
+        description="Connections and integrations"
       />
-
-      <div className="mb-6 flex items-start gap-2 rounded-xl border border-border bg-muted/30 p-4 text-sm">
-        <Info className="mt-0.5 h-4 w-4 shrink-0 text-info" />
-        <p className="text-muted-foreground">
-          These are demo connection states. Credentials, scopes and live sync will be
-          connected in the next phase of the build.
-        </p>
-      </div>
 
       <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-muted-foreground">
         Integrations
@@ -72,14 +109,13 @@ export default function SettingsPage() {
         ))}
       </div>
 
-      <Card className="mt-6">
-        <CardContent className="flex items-start gap-3 p-4 text-sm">
-          <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-success" />
-          <p className="text-muted-foreground">
-            No real credentials are stored. All API keys shown are masked placeholders.
-          </p>
-        </CardContent>
-      </Card>
+      {connections.length === 0 && (
+        <Card className="mt-6">
+          <CardContent className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+            No connections configured. Add integrations via the API.
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

@@ -26,7 +26,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { websites as initialWebsites } from "@/lib/data/websites";
 import { websiteStatusMeta } from "@/lib/status";
 import { formatDate } from "@/lib/utils";
 import type { Website, WebsiteStatus } from "@/lib/types";
@@ -71,10 +70,50 @@ function MockPreview({ website }: { website: Website }) {
   );
 }
 
+interface WebsiteApi {
+  id: string;
+  leadId: string;
+  businessName: string;
+  category: string;
+  location: string;
+  status: WebsiteStatus;
+  template: string;
+  pages: number;
+  sections: number;
+  buildProgress: number;
+  previewUrl?: string;
+  liveUrl?: string;
+  repoUrl?: string;
+  commitHash?: string;
+  createdAt: string;
+  builtAt?: string;
+}
+
 export default function WebsitesPage() {
-  const [websiteList, setWebsiteList] = React.useState<Website[]>(initialWebsites);
-  const [preview, setPreview] = React.useState<Website | null>(null);
+  const [websiteList, setWebsiteList] = React.useState<WebsiteApi[]>([]);
+  const [preview, setPreview] = React.useState<WebsiteApi | null>(null);
   const [rebuildingId, setRebuildingId] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetch("/api/websites");
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.websites)) {
+          setWebsiteList(data.websites);
+        } else {
+          setError(data.error || "Failed to fetch websites");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
 
   const rebuildWebsite = (id: string) => {
     if (rebuildingId) return;
@@ -87,7 +126,7 @@ export default function WebsitesPage() {
 
     let progress = 0;
     const interval = setInterval(() => {
-      progress += Math.random() * 20 + 10;
+      progress += 15;
       if (progress >= 100) {
         progress = 100;
         clearInterval(interval);
@@ -106,8 +145,33 @@ export default function WebsitesPage() {
           )
         );
       }
-    }, 600);
+    }, 500);
   };
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-24 animate-pulse bg-muted rounded-lg" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !websiteList) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="text-center py-12">
+          <p className="text-rose-400">Failed to load websites</p>
+          <p className="text-muted-foreground mt-2">{error || "Unknown error"}</p>
+        </div>
+      </div>
+    );
+  }
 
   const counts = {
     total: websiteList.length,
@@ -283,7 +347,7 @@ export default function WebsitesPage() {
               {preview?.template} template · {preview?.pages} pages · generated site preview
             </DialogDescription>
           </DialogHeader>
-          {preview && <MockPreview website={preview} />}
+          {preview && <MockPreview website={preview as Website} />}
           <div className="flex items-center justify-end gap-2">
             <Button variant="outline" onClick={() => setPreview(null)}>
               <X className="h-4 w-4" />

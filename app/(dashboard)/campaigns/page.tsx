@@ -50,30 +50,54 @@ function CreateCampaignDialog({
   const [socialPresence, setSocialPresence] = React.useState(false);
   const [autoMode, setAutoMode] = React.useState<"manual" | "semi-automatic" | "automatic">("semi-automatic");
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const now = new Date().toISOString();
-    onCreated({
-      id: `C-${Math.floor(200 + Math.random() * 900)}`,
-      name: name || `${category} — ${location}`,
-      category,
-      location,
-      leadTarget: Number(target) || 100,
-      status: "draft",
-      progress: 0,
-      leadsCollected: 0,
-      leadsQualified: 0,
-      websitesBuilt: 0,
-      websitesDeployed: 0,
-      messagesSent: 0,
-      minimumRating: Number(minRating) || 4.0,
-      minimumReviews: Number(minReviews) || 25,
-      websiteOpportunityRequirement: websiteOpp,
-      socialPresenceRequirement: socialPresence,
-      automationMode: autoMode,
-      createdAt: now,
-      updatedAt: now,
-    });
+    try {
+      const res = await fetch("/api/campaigns", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name || `${category} — ${location}`,
+          category,
+          location,
+          leadTarget: Number(target) || 100,
+          minimumRating: Number(minRating) || 4.0,
+          minimumReviews: Number(minReviews) || 25,
+          websiteOpportunityRequirement: websiteOpp,
+          socialPresenceRequirement: socialPresence,
+          automationMode: autoMode,
+        }),
+      });
+      const data = await res.json();
+      if (data.ok && data.campaign) {
+        onCreated(data.campaign);
+      }
+    } catch {
+      // Fallback: create locally with deterministic ID
+      const id = `campaign-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      onCreated({
+        id,
+        name: name || `${category} — ${location}`,
+        category,
+        location,
+        leadTarget: Number(target) || 100,
+        status: "draft",
+        progress: 0,
+        leadsCollected: 0,
+        leadsQualified: 0,
+        websitesBuilt: 0,
+        websitesDeployed: 0,
+        messagesSent: 0,
+        minimumRating: Number(minRating) || 4.0,
+        minimumReviews: Number(minReviews) || 25,
+        websiteOpportunityRequirement: websiteOpp,
+        socialPresenceRequirement: socialPresence,
+        automationMode: autoMode,
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
     setName("");
     setTarget("100");
     setMinRating("4.0");

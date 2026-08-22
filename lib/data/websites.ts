@@ -1,231 +1,143 @@
+import { getSupabaseAdmin } from "@/lib/supabase/server";
 import type { Website, Deployment } from "@/lib/types";
 
-const daysAgo = (days: number, hour = 12) => {
-  const d = new Date();
-  d.setDate(d.getDate() - days);
-  d.setHours(hour, 0, 0, 0);
-  return d.toISOString();
-};
+export async function getWebsites(): Promise<Website[]> {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from("websites")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-const minutesAgo = (minutes: number) => {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - minutes);
-  return d.toISOString();
-};
+  if (error) {
+    throw new Error(`Failed to fetch websites: ${error.message}`);
+  }
 
-export const websites: Website[] = [
-  {
-    id: "W-301",
-    leadId: "L-1001",
-    businessName: "Annapurna Veg Restaurant",
-    category: "Restaurant",
-    location: "RS Puram",
-    status: "deployed",
-    template: "Restaurant Pro",
-    pages: 5,
-    sections: 9,
-    buildProgress: 100,
-    previewUrl: "/preview/annapurna",
-    liveUrl: "https://annapurna-restaurant.vercel.app",
-    repoUrl: "https://github.com/vasaw-ai/annapurna-restaurant",
-    commitHash: "a3f8c21",
-    createdAt: daysAgo(6),
-    builtAt: daysAgo(5),
-  },
-  {
-    id: "W-302",
-    leadId: "L-1011",
-    businessName: "The Coffee Corner",
-    category: "Cafe",
-    location: "Brookefields",
-    status: "deployed",
-    template: "Cafe Modern",
-    pages: 4,
-    sections: 7,
-    buildProgress: 100,
-    previewUrl: "/preview/coffee-corner",
-    liveUrl: "https://coffee-corner-cbe.vercel.app",
-    repoUrl: "https://github.com/vasaw-ai/coffee-corner-cbe",
-    commitHash: "b91d0ee",
-    createdAt: daysAgo(5),
-    builtAt: daysAgo(4),
-  },
-  {
-    id: "W-303",
-    leadId: "L-1004",
-    businessName: "Trendz Unisex Salon",
-    category: "Salon",
-    location: "Saibaba Colony",
-    status: "building",
-    template: "Salon Studio",
-    pages: 3,
-    sections: 5,
-    buildProgress: 64,
-    createdAt: minutesAgo(35),
-  },
-  {
-    id: "W-304",
-    leadId: "L-1002",
-    businessName: "Kovai Iron Gym & Fitness",
-    category: "Fitness",
-    location: "Gandhipuram",
-    status: "queued",
-    template: "Fitness Edge",
-    pages: 4,
-    sections: 6,
-    buildProgress: 0,
-    createdAt: minutesAgo(10),
-  },
-  {
-    id: "W-305",
-    leadId: "L-1007",
-    businessName: "Little Angels Play School",
-    category: "Education",
-    location: "Ganapathy",
-    status: "built",
-    template: "Education Trust",
-    pages: 5,
-    sections: 8,
-    buildProgress: 100,
-    previewUrl: "/preview/little-angels",
-    createdAt: daysAgo(2),
-    builtAt: daysAgo(2),
-  },
-  {
-    id: "W-306",
-    leadId: "L-1003",
-    businessName: "DentaCare Dental Clinic",
-    category: "Healthcare",
-    location: "Peelamedu",
-    status: "built",
-    template: "Clinic Care",
-    pages: 4,
-    sections: 7,
-    buildProgress: 100,
-    previewUrl: "/preview/dentacare",
-    createdAt: daysAgo(3),
-    builtAt: daysAgo(2),
-  },
-  {
-    id: "W-307",
-    leadId: "L-1005",
-    businessName: "Sri Murugan Bakery & Sweets",
-    category: "Bakery",
-    location: "Race Course",
-    status: "queued",
-    template: "Bakery Sweet",
-    pages: 3,
-    sections: 5,
-    buildProgress: 0,
-    createdAt: daysAgo(1),
-  },
-  {
-    id: "W-308",
-    leadId: "L-1014",
-    businessName: "Ganga Garment Showroom",
-    category: "Retail",
-    location: "Cross Cut Road",
-    status: "failed",
-    template: "Retail Classic",
-    pages: 4,
-    sections: 6,
-    buildProgress: 42,
-    createdAt: daysAgo(2),
-  },
-  {
-    id: "W-309",
-    leadId: "L-1016",
-    businessName: "Nellai's Biryani House",
-    category: "Restaurant",
-    location: "Saibaba Colony",
-    status: "deployed",
-    template: "Restaurant Pro",
-    pages: 5,
-    sections: 8,
-    buildProgress: 100,
-    previewUrl: "/preview/nellais-biryani",
-    liveUrl: "https://nellais-biryani.vercel.app",
-    repoUrl: "https://github.com/vasaw-ai/nellais-biryani",
-    commitHash: "c44e1aa",
-    createdAt: daysAgo(4),
-    builtAt: daysAgo(3),
-  },
-];
+  return (data ?? []).map(mapWebsiteFromDb);
+}
 
-export const deployments: Deployment[] = [
-  {
-    id: "D-401",
-    websiteId: "W-301",
-    leadId: "L-1001",
-    businessName: "Annapurna Veg Restaurant",
-    status: "deployed",
-    provider: "vercel",
-    environment: "production",
-    liveUrl: "https://annapurna-restaurant.vercel.app",
-    commitHash: "a3f8c21",
-    durationSec: 46,
-    deployedAt: daysAgo(5),
-    createdAt: daysAgo(5),
-  },
-  {
-    id: "D-402",
-    websiteId: "W-302",
-    leadId: "L-1011",
-    businessName: "The Coffee Corner",
-    status: "deployed",
-    provider: "vercel",
-    environment: "production",
-    liveUrl: "https://coffee-corner-cbe.vercel.app",
-    commitHash: "b91d0ee",
-    durationSec: 39,
-    deployedAt: daysAgo(4),
-    createdAt: daysAgo(4),
-  },
-  {
-    id: "D-403",
-    websiteId: "W-309",
-    leadId: "L-1016",
-    businessName: "Nellai's Biryani House",
-    status: "deployed",
-    provider: "vercel",
-    environment: "production",
-    liveUrl: "https://nellais-biryani.vercel.app",
-    commitHash: "c44e1aa",
-    durationSec: 51,
-    deployedAt: daysAgo(3),
-    createdAt: daysAgo(3),
-  },
-  {
-    id: "D-404",
-    websiteId: "W-305",
-    leadId: "L-1007",
-    businessName: "Little Angels Play School",
-    status: "building",
-    provider: "vercel",
-    environment: "production",
-    durationSec: 0,
-    createdAt: minutesAgo(5),
-  },
-  {
-    id: "D-405",
-    websiteId: "W-306",
-    leadId: "L-1003",
-    businessName: "DentaCare Dental Clinic",
-    status: "queued",
-    provider: "vercel",
-    environment: "production",
-    durationSec: 0,
-    createdAt: minutesAgo(20),
-  },
-  {
-    id: "D-406",
-    websiteId: "W-308",
-    leadId: "L-1014",
-    businessName: "Ganga Garment Showroom",
-    status: "failed",
-    provider: "vercel",
-    environment: "production",
-    durationSec: 74,
-    createdAt: daysAgo(1),
-  },
-];
+export async function getWebsiteById(id: string): Promise<Website | null> {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from("websites")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return mapWebsiteFromDb(data);
+}
+
+export async function getWebsitesByLead(leadId: string): Promise<Website[]> {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from("websites")
+    .select("*")
+    .eq("lead_id", leadId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch websites by lead: ${error.message}`);
+  }
+
+  return (data ?? []).map(mapWebsiteFromDb);
+}
+
+export async function getWebsitesByStatus(status: string): Promise<Website[]> {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from("websites")
+    .select("*")
+    .eq("status", status)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch websites by status: ${error.message}`);
+  }
+
+  return (data ?? []).map(mapWebsiteFromDb);
+}
+
+export async function getDeployments(): Promise<Deployment[]> {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from("deployments")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch deployments: ${error.message}`);
+  }
+
+  return (data ?? []).map(mapDeploymentFromDb);
+}
+
+export async function getDeploymentsByLead(leadId: string): Promise<Deployment[]> {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from("deployments")
+    .select("*")
+    .eq("lead_id", leadId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch deployments by lead: ${error.message}`);
+  }
+
+  return (data ?? []).map(mapDeploymentFromDb);
+}
+
+export async function getDeploymentById(id: string): Promise<Deployment | null> {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from("deployments")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return mapDeploymentFromDb(data);
+}
+
+function mapWebsiteFromDb(row: Record<string, unknown>): Website {
+  return {
+    id: row.id as string,
+    leadId: row.lead_id as string,
+    businessName: row.business_name as string,
+    category: row.category as string,
+    location: row.location as string,
+    status: row.status as Website["status"],
+    template: row.template as string,
+    pages: row.pages as number,
+    sections: row.sections as number,
+    buildProgress: row.build_progress as number,
+    previewUrl: row.preview_url as string | undefined,
+    liveUrl: row.live_url as string | undefined,
+    repoUrl: row.repo_url as string | undefined,
+    commitHash: row.commit_hash as string | undefined,
+    createdAt: row.created_at as string,
+    builtAt: row.built_at as string | undefined,
+  };
+}
+
+function mapDeploymentFromDb(row: Record<string, unknown>): Deployment {
+  return {
+    id: row.id as string,
+    websiteId: row.website_id as string,
+    leadId: row.lead_id as string,
+    businessName: row.business_name as string,
+    status: row.status as Deployment["status"],
+    provider: row.provider as "vercel",
+    environment: row.environment as "production",
+    liveUrl: row.live_url as string | undefined,
+    commitHash: row.commit_hash as string | undefined,
+    durationSec: row.duration_sec as number,
+    deployedAt: row.deployed_at as string | undefined,
+    createdAt: row.created_at as string,
+  };
+}
