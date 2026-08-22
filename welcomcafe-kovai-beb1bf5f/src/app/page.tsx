@@ -57,7 +57,7 @@ export default function Home() {
   );
 }
 
-function HeroSection({ business }) {
+function HeroSection({ business }: { business: Business }) {
   const star = String.fromCharCode(0x2605);
   const location = String.fromCodePoint(0x1F4CD);
   return (
@@ -94,7 +94,7 @@ function HeroSection({ business }) {
   );
 }
 
-function AboutSection({ business }) {
+function AboutSection({ business }: { business: Business }) {
   return (
     <section id="about" className="section bg-gray-50">
       <div className="container">
@@ -123,7 +123,7 @@ function AboutSection({ business }) {
   );
 }
 
-function MenuSection({ business }) {
+function MenuSection({ business }: { business: Business }) {
   if (!business.services || business.services.length === 0) return null;
   
   return (
@@ -143,7 +143,7 @@ function MenuSection({ business }) {
   );
 }
 
-function ServicesSection({ business }) {
+function ServicesSection({ business }: { business: Business }) {
   if (!business.services || business.services.length === 0) return null;
   
   return (
@@ -163,7 +163,7 @@ function ServicesSection({ business }) {
   );
 }
 
-function GallerySection({ business }) {
+function GallerySection({ business }: { business: Business }) {
   return (
     <section id="gallery" className="section">
       <div className="container">
@@ -184,7 +184,7 @@ function GallerySection({ business }) {
   );
 }
 
-function TestimonialsSection({ business }) {
+function TestimonialsSection({ business }: { business: Business }) {
   const star = String.fromCharCode(0x2605);
   return (
     <section id="testimonials" className="section bg-gray-50">
@@ -204,7 +204,7 @@ function TestimonialsSection({ business }) {
   );
 }
 
-function HoursSection({ business }) {
+function HoursSection({ business }: { business: Business }) {
   if (!business.hours || business.hours.length === 0) return null;
   
   return (
@@ -226,7 +226,7 @@ function HoursSection({ business }) {
   );
 }
 
-function ContactSection({ business }) {
+function ContactSection({ business }: { business: Business }) {
   return (
     <section id="contact" className="section bg-gray-50">
       <div className="container">
@@ -265,8 +265,7 @@ function ContactSection({ business }) {
               width="100%"
               height="100%"
               style={{ border: 0 }}
-              allowFullScreen=""
-              loading="lazy"
+              allowFullScreen loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
@@ -276,7 +275,7 @@ function ContactSection({ business }) {
   );
 }
 
-function FooterSection({ business }) {
+function FooterSection({ business }: { business: Business }) {
   return (
     <footer className="bg-gray-900 text-white py-12">
       <div className="container">
