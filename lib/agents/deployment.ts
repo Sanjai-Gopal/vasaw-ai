@@ -8,9 +8,17 @@
 
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { createJob, updateJob, completeJob, failJob, getStepsForJobType, isDryRun } from "@/lib/queue/job-queue";
+import { createOrGetRepository, pushFiles, getAuthenticatedUser, scanForSecrets } from "@/lib/services/github-service";
+import { createProject, createDeployment, waitForDeployment } from "@/lib/services/vercel-service";
+import { generateWebsiteProject } from "@/lib/services/website-generator";
+import * as fs from "fs";
+import * as path from "path";
 
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
+if (!process.env.GITHUB_TOKEN) throw new Error("GITHUB_TOKEN not configured");
+if (!process.env.VERCEL_TOKEN) throw new Error("VERCEL_TOKEN not configured");
+
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN!;
+const VERCEL_TOKEN = process.env.VERCEL_TOKEN!;
 const VERCEL_TEAM_ID = process.env.VERCEL_TEAM_ID;
 const GITHUB_API = "https://api.github.com";
 const VERCEL_API = "https://api.vercel.com";
@@ -51,6 +59,247 @@ interface VercelDeploymentResponse {
   meta: {
     githubCommitSha: string;
   };
+}
+
+// Template types from website-generator
+interface TemplateSection {
+  id: string;
+  type: string;
+  required: boolean;
+  order: number;
+}
+
+interface TemplateType {
+  id: string;
+  name: string;
+  description: string;
+  pages: string[];
+  sections: TemplateSection[];
+}
+
+// Restaurant template
+const RESTAURANT_TEMPLATE: TemplateType = {
+  id: "restaurant",
+  name: "Restaurant",
+  description: "Full-service restaurant with menu, reservations, and online ordering",
+  pages: ["index", "contact"],
+  sections: [
+    { id: "hero", type: "hero", required: true, order: 1 },
+    { id: "about", type: "about", required: true, order: 2 },
+    { id: "menu", type: "menu", required: true, order: 3 },
+    { id: "gallery", type: "gallery", required: false, order: 4 },
+    { id: "testimonials", type: "testimonials", required: true, order: 5 },
+    { id: "hours", type: "hours", required: true, order: 6 },
+    { id: "contact", type: "contact", required: true, order: 7 },
+  ],
+};
+
+interface WebsiteBuildInput {
+  businessName: string;
+  category: string;
+  location: string;
+  phone: string;
+  email?: string;
+  website: string | null;
+  rating: number;
+  reviews: number;
+  scraped: {
+    address: string;
+    phone: string;
+    email?: string;
+    rating: number;
+    reviews: number;
+    category: string;
+    subCategory?: string;
+    hours?: string;
+    services: string[];
+    source: string;
+    scrapedAt: string;
+  };
+  qualification: {
+    hasWebsite: boolean;
+    websiteQuality: number;
+    hasWhatsApp: boolean;
+    hasReviews: boolean;
+    responseLikelihood: "high" | "medium" | "low";
+    notes: string;
+  };
+  opportunity: {
+    score: number;
+    priority: "high" | "medium" | "low";
+    reasons: string[];
+    estimatedValue: number;
+  };
+}
+
+interface GenerateWebsiteParams {
+  templateId: string;
+  template: TemplateType;
+  businessData: WebsiteBuildInput;
+  generatedContent: Record<string, unknown>;
+  leadId: string;
+}
+
+async function collectFilesForDeploy(outputDir: string): Promise<Array<{ path: string; content: string | Uint8Array }>> {
+  const files: Array<{ path: string; content: string | Uint8Array }> = [];
+  const excludeDirs = ["node_modules", ".next", ".git", ".vercel", "out"];
+  const excludeFiles = [".DS_Store", "tsconfig.tsbuildinfo"];
+
+  function walk(dir: string, prefix = "") {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (excludeDirs.includes(entry.name)) continue;
+      const fullPath = path.join(dir, entry.name);
+      const relPath = path.join(prefix, entry.name).replace(/\\/g, "/");
+      if (entry.isDirectory()) {
+        walk(fullPath, relPath);
+      } else if (!excludeFiles.includes(entry.name)) {
+        const content = fs.readFileSync(fullPath);
+        files.push({ path: relPath, content });
+      }
+    }
+  }
+
+  walk(outputDir);
+  return files;
+}
+
+function buildWebsiteBuildInput(website: any, lead: any): WebsiteBuildInput {
+  const qualification = lead.qualification_json || {};
+  const opportunity = lead.opportunity_json || {};
+  
+  return {
+    businessName: website.business_name,
+    category: website.category,
+    location: website.location,
+    phone: lead.phone,
+    email: lead.email || undefined,
+    website: lead.website || null,
+    rating: lead.rating,
+    reviews: lead.reviews,
+    scraped: {
+      address: lead.qualification_json?.address || website.location,
+      phone: lead.phone,
+      email: lead.email || undefined,
+      rating: lead.rating,
+      reviews: lead.reviews,
+      category: lead.category,
+      subCategory: lead.sub_category || undefined,
+      hours: lead.hours || undefined,
+      services: lead.services || [],
+      source: lead.source || "Google Maps",
+      scrapedAt: lead.scraped_at || new Date().toISOString(),
+    },
+    qualification: {
+      hasWebsite: qualification.hasWebsite ?? false,
+      websiteQuality: qualification.websiteQuality ?? 0,
+      hasWhatsApp: qualification.hasWhatsApp ?? false,
+      hasReviews: qualification.hasReviews ?? false,
+      responseLikelihood: qualification.responseLikelihood ?? "medium",
+      notes: qualification.notes ?? "",
+    },
+    opportunity: {
+      score: opportunity.score ?? 0,
+      priority: opportunity.priority ?? "medium",
+      reasons: opportunity.reasons ?? [],
+      estimatedValue: opportunity.estimatedValue ?? 0,
+    },
+  };
+}
+
+async function generateWebsiteProjectWrapper(
+  websiteId: string,
+  website: any,
+  lead: any
+): Promise<{ outputDir: string; previewUrl?: string }> {
+  const businessData = buildWebsiteBuildInput(website, lead);
+  const generatedContent = generateMockContent(RESTAURANT_TEMPLATE, businessData);
+  
+  return generateWebsiteProject({
+    templateId: "restaurant",
+    template: RESTAURANT_TEMPLATE,
+    businessData,
+    generatedContent,
+    leadId: website.lead_id,
+  });
+}
+
+function generateMockContent(template: TemplateType, businessData: WebsiteBuildInput): Record<string, unknown> {
+  const content: Record<string, unknown> = {};
+
+  for (const section of template.sections) {
+    switch (section.type) {
+      case "hero":
+        content[section.id] = {
+          headline: `${businessData.businessName} - ${businessData.category} in ${businessData.location}`,
+          subheadline: businessData.qualification.notes || `Premium ${businessData.category.toLowerCase()} experience`,
+          ctaText: "Contact Us",
+          ctaLink: "/contact",
+        };
+        break;
+      case "about":
+        content[section.id] = {
+          headline: `About ${businessData.businessName}`,
+          body: `Located in ${businessData.location}, ${businessData.businessName} has been serving the community with ${businessData.rating}/5 stars from ${businessData.reviews} reviews. ${businessData.opportunity.reasons.join(". ")}.`,
+        };
+        break;
+      case "services":
+        content[section.id] = {
+          headline: "Our Services",
+          items: businessData.scraped.services.slice(0, 8).map((s) => ({ title: s, description: "" })),
+        };
+        break;
+      case "menu":
+        content[section.id] = {
+          headline: "Menu",
+          categories: [{ name: "Popular Items", items: businessData.scraped.services.slice(0, 6).map((s) => ({ name: s, price: null })) }],
+        };
+        break;
+      case "gallery":
+        content[section.id] = {
+          headline: "Gallery",
+          images: [],
+        };
+        break;
+      case "testimonials":
+        content[section.id] = {
+          headline: "What Our Customers Say",
+          items: [],
+        };
+        break;
+      case "hours":
+        content[section.id] = {
+          headline: "Opening Hours",
+          schedule: businessData.scraped.hours ? [{ days: "Mon-Sun", hours: businessData.scraped.hours }] : [],
+        };
+        break;
+      case "team":
+        content[section.id] = {
+          headline: "Our Team",
+          members: [],
+        };
+        break;
+      case "contact":
+        content[section.id] = {
+          headline: "Contact Us",
+          address: businessData.scraped.address,
+          phone: businessData.phone,
+          email: businessData.email,
+          mapEmbedUrl: `https://maps.google.com/maps?q=${encodeURIComponent(businessData.scraped.address)}&output=embed`,
+        };
+        break;
+      case "cta":
+        content[section.id] = {
+          headline: "Ready to Visit?",
+          subheadline: "Get in touch or visit us today!",
+          buttonText: "Call Now",
+          buttonLink: `tel:${businessData.phone.replace(/\D/g, "")}`,
+        };
+        break;
+    }
+  }
+
+  return content;
 }
 
 async function githubRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -134,6 +383,7 @@ export async function runDeploymentAgent(
     const repoName = `vasaw-${website.business_name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${website.lead_id.slice(0, 8)}`;
     let githubRepo: GitHubRepoResponse;
     let commitHash = "";
+    let githubOwner = "";
 
     if (isDryRun()) {
       console.log("[Deployment] DRY_RUN: Simulating GitHub repo creation:", repoName);
@@ -146,19 +396,31 @@ export async function runDeploymentAgent(
         default_branch: "main",
       };
       commitHash = "dry-run-commit-hash";
+      githubOwner = "vasaw-ai";
     } else {
-      githubRepo = await githubRequest<GitHubRepoResponse>("/user/repos", {
-        method: "POST",
-        body: JSON.stringify({
-          name: repoName,
-          description: `VASAW AI generated website for ${website.business_name}`,
-          private: true,
-          auto_init: false,
-        }),
-      });
+      // Get authenticated GitHub user
+      const user = await getAuthenticatedUser(GITHUB_TOKEN);
+      githubOwner = user.login!;
 
-      // Push website code to the repo
-      commitHash = await pushWebsiteToGitHub(githubRepo.clone_url, websiteId);
+      // Create or get repository
+      githubRepo = await createOrGetRepository(GITHUB_TOKEN, repoName, `VASAW AI generated website for ${website.business_name}`);
+      
+      // Generate website files and push to GitHub
+      const { outputDir } = await generateWebsiteProjectWrapper(websiteId, website, lead);
+      
+      // Collect all files to push
+      const files = await collectFilesForDeploy(outputDir);
+      
+      // Scan for secrets
+      const secretScan = await scanForSecrets(files.map(f => ({ path: f.path, content: typeof f.content === 'string' ? f.content : new TextDecoder().decode(f.content) })));
+      if (secretScan.hasSecrets) {
+        throw new Error(`Secret scan failed: ${secretScan.secrets.map(s => `${s.file}:${s.line}`).join(", ")}`);
+      }
+
+      // Push files to GitHub
+      const commit = await pushFiles(GITHUB_TOKEN, githubOwner, repoName, files, "Initial commit: VASAW AI generated website");
+      commitHash = commit.sha;
+      githubRepo.html_url = `https://github.com/${githubOwner}/${repoName}`;
     }
 
     // Step 2: Create Vercel project
@@ -181,7 +443,7 @@ export async function runDeploymentAgent(
           framework: "nextjs",
           gitRepository: {
             type: "github",
-            repo: `vasaw-ai/${repoName}`,
+            repo: `${githubOwner}/${repoName}`,
           },
           teamId: VERCEL_TEAM_ID,
         }),
@@ -208,7 +470,7 @@ export async function runDeploymentAgent(
           project: vercelProject.id,
           gitSource: {
             type: "github",
-            repo: `vasaw-ai/${repoName}`,
+            repo: `${githubOwner}/${repoName}`,
             ref: "main",
             sha: commitHash,
           },

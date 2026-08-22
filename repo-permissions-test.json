@@ -1,0 +1,6 @@
+{
+  "name": "test-vasaw-repo-permissions",
+  "description": "Test repo for VASAW permissions",
+  "private": true,
+  "auto_init": false
+}
