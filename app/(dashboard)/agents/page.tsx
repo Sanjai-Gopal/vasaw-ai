@@ -32,7 +32,7 @@ export default function AgentsPage() {
     fetchPipeline();
   }, []);
 
-  const runNow = (id: string) => {
+  const runNow = async (id: string) => {
     if (runningId) return;
     setRunningId(id);
     setAgents((prev) =>
@@ -58,7 +58,88 @@ export default function AgentsPage() {
           : a
       )
     );
-    window.setTimeout(() => {
+
+    try {
+      if (id === "scraping") {
+        await fetch("/api/agents/scraping", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            campaignId: "dashboard-test",
+            category: "restaurant",
+            location: "Coimbatore",
+            limit: 3,
+            mode: "mock",
+          }),
+        });
+      } else if (id === "checking") {
+        await fetch("/api/agents/qualification", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            leads: [
+              {
+                id: "lead-dash-1",
+                businessName: "Saravana Bhavan",
+                category: "restaurant",
+                phone: "+919876543210",
+                address: "Coimbatore",
+                city: "Coimbatore",
+                rating: 4.5,
+                reviewCount: 120,
+                website: null,
+                scrapedAt: new Date().toISOString(),
+              },
+            ],
+            mode: "mock",
+          }),
+        });
+      } else if (id === "website-building") {
+        await fetch("/api/agents/website", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            lead: {
+              id: "lead-dash-1",
+              businessName: "Saravana Bhavan",
+              category: "restaurant",
+              phone: "+919876543210",
+              address: "Coimbatore",
+              city: "Coimbatore",
+              rating: 4.5,
+              reviewCount: 120,
+              website: null,
+              scrapedAt: new Date().toISOString(),
+            },
+            mode: "mock",
+          }),
+        });
+      } else if (id === "deployment") {
+        await fetch("/api/agents/deployment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            websiteId: "dash-web-01",
+            businessName: "Saravana Bhavan",
+            mode: "mock",
+          }),
+        });
+      } else if (id === "whatsapp") {
+        await fetch("/api/agents/whatsapp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            phone: "+919876543210",
+            businessName: "Saravana Bhavan",
+            message: {
+              type: "text",
+              body: "Hello Saravana Bhavan, your preview is ready!",
+            },
+            mode: "mock",
+          }),
+        });
+      }
+
       setAgents((prev) =>
         prev.map((a) =>
           a.id === id
@@ -75,7 +156,7 @@ export default function AgentsPage() {
                     type: "agent",
                     status: "success",
                     title: "Manual run completed",
-                    description: "Run finished successfully.",
+                    description: "Run finished successfully via Agent API.",
                   } satisfies ActivityItem,
                   ...a.recentActivity,
                 ].slice(0, 3),
@@ -83,11 +164,67 @@ export default function AgentsPage() {
             : a
         )
       );
+    } catch (err: unknown) {
+      setAgents((prev) =>
+        prev.map((a) =>
+          a.id === id
+            ? {
+                ...a,
+                status: "error",
+                failedRuns: a.failedRuns + 1,
+                recentActivity: [
+                  {
+                    id: `err-${Date.now()}`,
+                    timestamp: new Date().toISOString(),
+                    actor: a.name,
+                    type: "agent",
+                    status: "error",
+                    title: "Manual run failed",
+                    description: err instanceof Error ? err.message : "API execution error",
+                  } satisfies ActivityItem,
+                  ...a.recentActivity,
+                ].slice(0, 3),
+              }
+            : a
+        )
+      );
+    } finally {
       setRunningId(null);
-    }, 2500);
+    }
   };
 
-  const anyRunning = agents.some((a) => a.status === "running");
+  const runAllAgents = async () => {
+    if (runningId || anyRunning) return;
+    setRunningId("orchestrator");
+    try {
+      await fetch("/api/agents/orchestrator", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "start",
+          campaignId: "dashboard-full-run",
+          locations: ["Coimbatore"],
+          categories: ["restaurant"],
+          maxItems: 2,
+          mode: "mock",
+        }),
+      });
+      setAgents((prev) =>
+        prev.map((a) => ({
+          ...a,
+          status: "healthy",
+          totalRuns: a.totalRuns + 1,
+          successRuns: a.successRuns + 1,
+        }))
+      );
+    } catch {
+      // Non-blocking
+    } finally {
+      setRunningId(null);
+    }
+  };
+
+  const anyRunning = agents.some((a) => a.status === "running") || runningId !== null;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
@@ -98,7 +235,7 @@ export default function AgentsPage() {
         <Button
           variant="outline"
           className="gap-1.5"
-          onClick={() => agents.forEach((a) => a.id !== runningId && runNow(a.id))}
+          onClick={runAllAgents}
           disabled={anyRunning}
         >
           <RefreshCw className={`h-4 w-4 ${anyRunning ? "animate-spin" : ""}`} />

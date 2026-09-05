@@ -14,6 +14,7 @@ import type { Notification } from "@/lib/types";
 
 const routeTitles: Record<string, string> = {
   "/": "Dashboard",
+  "/onboarding": "Quick Start",
   "/campaigns": "Campaigns",
   "/leads": "Leads",
   "/websites": "Websites",

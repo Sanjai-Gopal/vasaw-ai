@@ -3,15 +3,23 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 let serverClient: SupabaseClient | null = null;
 let adminClient: SupabaseClient | null = null;
 
+function getSupabaseUrl(): string {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
+  if (!url) {
+    throw new Error("[Supabase] Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_URL");
+  }
+  return url;
+}
+
 function getServerClient(): SupabaseClient {
   if (serverClient) return serverClient;
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseUrl = getSupabaseUrl();
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.SUPABASE_ANON_KEY;
 
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!supabaseAnonKey) {
     throw new Error(
-      "[Supabase] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY"
+      "[Supabase] Missing NEXT_PUBLIC_SUPABASE_ANON_KEY or SUPABASE_ANON_KEY"
     );
   }
 
@@ -24,12 +32,12 @@ function getServerClient(): SupabaseClient {
 function getAdminClient(): SupabaseClient {
   if (adminClient) return adminClient;
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseUrl = getSupabaseUrl();
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!supabaseUrl || !serviceRoleKey) {
+  if (!serviceRoleKey) {
     throw new Error(
-      "[Supabase] Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY"
+      "[Supabase] Missing SUPABASE_SERVICE_ROLE_KEY"
     );
   }
 

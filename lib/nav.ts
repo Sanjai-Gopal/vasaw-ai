@@ -7,6 +7,7 @@ import {
   Bot,
   Timer,
   Settings,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -25,7 +26,10 @@ export interface NavGroup {
 export const navGroups: NavGroup[] = [
   {
     label: "Overview",
-    items: [{ title: "Dashboard", href: "/", icon: LayoutDashboard }],
+    items: [
+      { title: "Dashboard", href: "/", icon: LayoutDashboard },
+      { title: "Quick Start", href: "/onboarding", icon: Sparkles, badge: "demo" },
+    ],
   },
   {
     label: "Acquisition",

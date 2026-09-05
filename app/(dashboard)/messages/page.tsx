@@ -1,73 +1,55 @@
-import { getMessages, getLeads, getWebsites } from "@/lib/data";
+import { getMessages } from "@/lib/data";
+import type { Message } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-async function MessagesContent() {
-  const [messages, leads, websites] = await Promise.all([
-    getMessages(),
-    getLeads(),
-    getWebsites(),
-  ]);
+export default async function MessagesPage() {
+  let messages: Message[] = [];
+  try {
+    messages = await getMessages();
+  } catch {
+    messages = [];
+  }
 
-  const prepared = messages.filter((m) => m.status === "prepared");
-  const sent = messages.filter((m) => ["sent", "delivered", "read", "failed"].includes(m.status));
   const replies = messages.filter((m) => m.direction === "inbound");
 
   const replySummary = {
     interested: replies.filter((r) => r.replyClassification === "interested").length,
-    questions: replies.filter((r) => r.replyClassification === "follow_up" || r.replyClassification === "price_request" || r.replyClassification === "call_request").length,
+    questions: replies.filter(
+      (r) =>
+        r.replyClassification === "follow_up" ||
+        r.replyClassification === "price_request" ||
+        r.replyClassification === "call_request"
+    ).length,
     notInterested: replies.filter((r) => r.replyClassification === "not_interested").length,
   };
 
   return (
-    <html>
-      <head>
-        <title>Messages</title>
-      </head>
-      <body>
-        <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
-          <h1>Messages</h1>
-          <p>WhatsApp outreach, delivery tracking and reply intelligence</p>
-          
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem", marginBottom: "2rem" }}>
-            <div style={{ padding: "1rem", border: "1px solid #ddd", borderRadius: "8px" }}>
-              <p style={{ fontSize: "0.75rem", color: "#666" }}>Interested replies</p>
-              <p style={{ fontSize: "2rem", fontWeight: "bold", color: "#34d399" }}>{replySummary.interested}</p>
-              <p style={{ fontSize: "0.75rem", color: "#666" }}>Ready to push further</p>
-            </div>
-            <div style={{ padding: "1rem", border: "1px solid #ddd", borderRadius: "8px" }}>
-              <p style={{ fontSize: "0.75rem", color: "#666" }}>Need follow-up</p>
-              <p style={{ fontSize: "2rem", fontWeight: "bold", color: "#0ea5e9" }}>{replySummary.questions}</p>
-              <p style={{ fontSize: "0.75rem", color: "#666" }}>Questions, pricing, or call requests</p>
-            </div>
-            <div style={{ padding: "1rem", border: "1px solid #ddd", borderRadius: "8px" }}>
-              <p style={{ fontSize: "0.75rem", color: "#666" }}>Not interested</p>
-              <p style={{ fontSize: "2rem", fontWeight: "bold", color: "#f87171" }}>{replySummary.notInterested}</p>
-              <p style={{ fontSize: "0.75rem", color: "#666" }}>Closed or deprioritized</p>
-            </div>
-          </div>
-        </div>
-      </body>
-      </html>
-  );
-}
+    <div className="p-8 max-w-7xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-white">Messages</h1>
+        <p className="text-sm text-zinc-400 mt-1">
+          WhatsApp outreach, delivery tracking and reply intelligence
+        </p>
+      </div>
 
-export default async function MessagesPage() {
-  try {
-    return <MessagesContent />;
-  } catch (err) {
-    return (
-      <html>
-        <head>
-          <title>Messages</title>
-        </head>
-        <body>
-          <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
-            <h1>Messages</h1>
-            <p>Unable to load messages - database not configured</p>
-          </div>
-        </body>
-      </html>
-    );
-  }
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="p-5 border border-zinc-800 bg-zinc-950/60 rounded-xl">
+          <p className="text-xs font-medium text-zinc-400">Interested replies</p>
+          <p className="text-3xl font-bold text-emerald-400 mt-2">{replySummary.interested}</p>
+          <p className="text-xs text-zinc-500 mt-1">Ready to push further</p>
+        </div>
+        <div className="p-5 border border-zinc-800 bg-zinc-950/60 rounded-xl">
+          <p className="text-xs font-medium text-zinc-400">Need follow-up</p>
+          <p className="text-3xl font-bold text-sky-400 mt-2">{replySummary.questions}</p>
+          <p className="text-xs text-zinc-500 mt-1">Questions, pricing, or call requests</p>
+        </div>
+        <div className="p-5 border border-zinc-800 bg-zinc-950/60 rounded-xl">
+          <p className="text-xs font-medium text-zinc-400">Not interested</p>
+          <p className="text-3xl font-bold text-rose-400 mt-2">{replySummary.notInterested}</p>
+          <p className="text-xs text-zinc-500 mt-1">Closed or deprioritized</p>
+        </div>
+      </div>
+    </div>
+  );
 }

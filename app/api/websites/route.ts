@@ -1,19 +1,12 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { getWebsites } from "@/lib/data/websites";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const admin = getSupabaseAdmin();
-    const { data, error } = await admin
-      .from("websites")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) throw error;
-
-    return NextResponse.json({ ok: true, websites: data ?? [] });
+    const websites = await getWebsites();
+    return NextResponse.json({ ok: true, websites });
   } catch (err) {
     console.error("[API] Websites error:", err);
     return NextResponse.json(

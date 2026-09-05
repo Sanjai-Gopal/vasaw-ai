@@ -159,6 +159,9 @@ export interface Website {
   liveUrl?: string;
   repoUrl?: string;
   commitHash?: string;
+  deploymentId?: string;
+  theme?: { primaryColor?: string; secondaryColor?: string; accentColor?: string };
+  generatedAt?: string;
   createdAt: string;
   builtAt?: string;
 }
@@ -239,7 +242,7 @@ export interface ScheduledJob {
 
 export type ConnectionStatus = "connected" | "not_connected" | "connecting" | "error";
 
-export type ConnectionId = "apify" | "supabase" | "openai" | "github" | "vercel" | "whatsapp";
+export type ConnectionId = "apify" | "supabase" | "openai" | "github" | "vercel" | "whatsapp" | "google_sheets";
 
 export interface Connection {
   id: ConnectionId;

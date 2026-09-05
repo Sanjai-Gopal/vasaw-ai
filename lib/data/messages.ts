@@ -46,17 +46,17 @@ export async function getMessagesByStatus(status: string): Promise<Message[]> {
   return (data ?? []).map(mapMessageFromDb);
 }
 
-function mapMessageFromDb(row: Record<string, unknown>): Message {
+export function mapMessageFromDb(row: Record<string, unknown>): Message {
   return {
-    id: row.id as string,
-    leadId: row.lead_id as string,
-    businessName: row.business_name as string,
-    direction: row.direction as "outbound" | "inbound",
-    channel: row.channel as "whatsapp",
-    content: row.content as string,
-    status: row.status as Message["status"],
-    replyClassification: row.reply_classification as Message["replyClassification"] | undefined,
-    sentAt: row.sent_at as string | undefined,
-    createdAt: row.created_at as string,
+    id: (row.id as string) || "",
+    leadId: (row.lead_id as string) || (row.leadId as string) || "",
+    businessName: (row.business_name as string) || (row.businessName as string) || "WhatsApp Lead",
+    direction: (row.direction as "outbound" | "inbound") || "outbound",
+    channel: (row.channel as "whatsapp") || "whatsapp",
+    content: (row.content as string) || "",
+    status: (row.status as Message["status"]) || "sent",
+    replyClassification: (row.reply_classification as Message["replyClassification"] | undefined) || (row.replyClassification as Message["replyClassification"] | undefined),
+    sentAt: (row.sent_at as string | undefined) || (row.sentAt as string | undefined),
+    createdAt: (row.created_at as string) || (row.createdAt as string) || new Date().toISOString(),
   };
 }

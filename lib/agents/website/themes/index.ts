@@ -1,0 +1,88 @@
+import { TemplateType, WebsiteTheme } from "../types";
+
+export const THEMES: Record<TemplateType, WebsiteTheme> = {
+  restaurant: {
+    primaryColor: "#f59e0b",
+    secondaryColor: "#eab308",
+    accentColor: "#fbbf24",
+    backgroundColor: "#0f1115",
+    textColor: "#f3f4f6",
+    fontPairing: '"Playfair Display", Georgia, serif; --font-sans: "Plus Jakarta Sans", sans-serif',
+    heroPattern: "radial-gradient(ellipse 80% 80% at 50% -20%, rgba(245, 158, 11, 0.18), rgba(15, 17, 21, 0)), linear-gradient(180deg, #111317 0%, #0f1115 100%)",
+    borderRadius: "1rem",
+  },
+  cafe: {
+    primaryColor: "#f59e0b",
+    secondaryColor: "#d97706",
+    accentColor: "#fbbf24",
+    backgroundColor: "#141210",
+    textColor: "#f5f5f4",
+    fontPairing: '"DM Serif Display", Georgia, serif; --font-sans: "Plus Jakarta Sans", sans-serif',
+    heroPattern: "radial-gradient(ellipse 80% 80% at 50% -20%, rgba(217, 119, 6, 0.2), rgba(20, 18, 16, 0)), linear-gradient(180deg, #1c1917 0%, #141210 100%)",
+    borderRadius: "1rem",
+  },
+  salon: {
+    primaryColor: "#f43f5e",
+    secondaryColor: "#fb7185",
+    accentColor: "#fda4af",
+    backgroundColor: "#0f0e11",
+    textColor: "#f9fafb",
+    fontPairing: '"Playfair Display", serif; --font-sans: "Plus Jakarta Sans", sans-serif',
+    heroPattern: "radial-gradient(ellipse 80% 80% at 50% -20%, rgba(244, 63, 94, 0.2), rgba(15, 14, 17, 0)), linear-gradient(180deg, #18151f 0%, #0f0e11 100%)",
+    borderRadius: "1.25rem",
+  },
+  gym: {
+    primaryColor: "#00ff88",
+    secondaryColor: "#10b981",
+    accentColor: "#34d399",
+    backgroundColor: "#09090b",
+    textColor: "#f4f4f5",
+    fontPairing: '"Syne", sans-serif; --font-sans: "Inter", sans-serif',
+    heroPattern: "radial-gradient(ellipse 80% 80% at 50% -20%, rgba(0, 255, 136, 0.15), rgba(9, 9, 11, 0)), linear-gradient(180deg, #121216 0%, #09090b 100%)",
+    borderRadius: "0.75rem",
+  },
+  tattoo: {
+    primaryColor: "#eab308",
+    secondaryColor: "#ca8a04",
+    accentColor: "#fde047",
+    backgroundColor: "#0a0a0c",
+    textColor: "#f4f4f5",
+    fontPairing: '"Syne", sans-serif; --font-sans: "Inter", sans-serif',
+    heroPattern: "radial-gradient(ellipse 80% 80% at 50% -20%, rgba(234, 179, 8, 0.15), rgba(10, 10, 12, 0)), linear-gradient(180deg, #141418 0%, #0a0a0c 100%)",
+    borderRadius: "0.75rem",
+  },
+  clinic: {
+    primaryColor: "#0ea5e9",
+    secondaryColor: "#0284c7",
+    accentColor: "#38bdf8",
+    backgroundColor: "#0a101d",
+    textColor: "#f8fafc",
+    fontPairing: '"Plus Jakarta Sans", sans-serif; --font-sans: "Inter", sans-serif',
+    heroPattern: "radial-gradient(ellipse 80% 80% at 50% -20%, rgba(14, 165, 233, 0.18), rgba(10, 16, 29, 0)), linear-gradient(180deg, #0e1726 0%, #0a101d 100%)",
+    borderRadius: "1rem",
+  },
+  generic: {
+    primaryColor: "#00f0ff",
+    secondaryColor: "#0284c7",
+    accentColor: "#38bdf8",
+    backgroundColor: "#0b0f17",
+    textColor: "#f3f4f6",
+    fontPairing: '"Plus Jakarta Sans", sans-serif; --font-sans: "Inter", sans-serif',
+    heroPattern: "radial-gradient(ellipse 80% 80% at 50% -20%, rgba(0, 240, 255, 0.16), rgba(11, 15, 23, 0)), linear-gradient(180deg, #111827 0%, #0b0f17 100%)",
+    borderRadius: "1rem",
+  },
+  "local-service": {
+    primaryColor: "#00f0ff",
+    secondaryColor: "#0284c7",
+    accentColor: "#38bdf8",
+    backgroundColor: "#0b0f17",
+    textColor: "#f3f4f6",
+    fontPairing: '"Plus Jakarta Sans", sans-serif; --font-sans: "Inter", sans-serif',
+    heroPattern: "radial-gradient(ellipse 80% 80% at 50% -20%, rgba(0, 240, 255, 0.16), rgba(11, 15, 23, 0)), linear-gradient(180deg, #111827 0%, #0b0f17 100%)",
+    borderRadius: "1rem",
+  },
+};
+
+export function getTheme(templateId: TemplateType | string): WebsiteTheme {
+  return THEMES[templateId as TemplateType] ?? THEMES.generic;
+}

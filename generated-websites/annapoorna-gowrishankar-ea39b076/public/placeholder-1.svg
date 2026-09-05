@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <defs>
+    <linearGradient id="galGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#galGrad1)"/>
+  <rect x="20" y="20" width="760" height="560" rx="16" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+  <circle cx="400" cy="270" r="60" fill="#7f1d1d" fill-opacity="0.5"/>
+  <text x="400" y="285" font-family="system-ui, -apple-system, sans-serif" font-size="40" fill="#fbbf24" text-anchor="middle">
+    ✦
+  </text>
+  <text x="400" y="380" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="600" fill="#ffffff" text-anchor="middle">
+    Premium Quality
+  </text>
+</svg>

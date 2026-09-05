@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { Plus, Pause, Play, Target, MoreHorizontal, Globe, MessageSquare, Users } from "lucide-react";
+import { Plus, Pause, Play, Target, MoreHorizontal, Globe, MessageSquare, Users, Loader2, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,9 +27,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { campaigns as initialCampaigns, campaignCategories, campaignLocations } from "@/lib/data/campaigns";
+import { campaignCategories, campaignLocations, defaultMockCampaigns } from "@/lib/data/campaigns";
 import { campaignStatusMeta } from "@/lib/status";
 import { formatDate } from "@/lib/utils";
+import { fetchCampaigns, createCampaign, executeCampaign, updateCampaignStatus } from "@/lib/api/campaigns";
 import type { Campaign, CampaignStatus } from "@/lib/types";
 
 const statusVariant = (s: CampaignStatus) => campaignStatusMeta[s];
@@ -49,63 +50,28 @@ function CreateCampaignDialog({
   const [websiteOpp, setWebsiteOpp] = React.useState(true);
   const [socialPresence, setSocialPresence] = React.useState(false);
   const [autoMode, setAutoMode] = React.useState<"manual" | "semi-automatic" | "automatic">("semi-automatic");
+  const [submitting, setSubmitting] = React.useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const now = new Date().toISOString();
+    setSubmitting(true);
     try {
-      const res = await fetch("/api/campaigns", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name || `${category} — ${location}`,
-          category,
-          location,
-          leadTarget: Number(target) || 100,
-          minimumRating: Number(minRating) || 4.0,
-          minimumReviews: Number(minReviews) || 25,
-          websiteOpportunityRequirement: websiteOpp,
-          socialPresenceRequirement: socialPresence,
-          automationMode: autoMode,
-        }),
-      });
-      const data = await res.json();
-      if (data.ok && data.campaign) {
-        onCreated(data.campaign);
-      }
-    } catch {
-      // Fallback: create locally with deterministic ID
-      const id = `campaign-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      onCreated({
-        id,
+      const campaign = await createCampaign({
         name: name || `${category} — ${location}`,
         category,
         location,
         leadTarget: Number(target) || 100,
-        status: "draft",
-        progress: 0,
-        leadsCollected: 0,
-        leadsQualified: 0,
-        websitesBuilt: 0,
-        websitesDeployed: 0,
-        messagesSent: 0,
-        minimumRating: Number(minRating) || 4.0,
-        minimumReviews: Number(minReviews) || 25,
-        websiteOpportunityRequirement: websiteOpp,
-        socialPresenceRequirement: socialPresence,
         automationMode: autoMode,
-        createdAt: now,
-        updatedAt: now,
       });
+      onCreated(campaign);
+      setName("");
+      setTarget("100");
+      setOpen(false);
+    } catch (err) {
+      console.error("Failed to create campaign:", err);
+    } finally {
+      setSubmitting(false);
     }
-    setName("");
-    setTarget("100");
-    setMinRating("4.0");
-    setMinReviews("25");
-    setWebsiteOpp(true);
-    setSocialPresence(false);
-    setAutoMode("semi-automatic");
-    setOpen(false);
   };
 
   return (
@@ -230,7 +196,10 @@ function CreateCampaignDialog({
             >
               Cancel
             </Button>
-            <Button type="submit">Create campaign</Button>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : null}
+              Create campaign
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -239,24 +208,116 @@ function CreateCampaignDialog({
 }
 
 export default function CampaignsPage() {
-  const [campaigns, setCampaigns] = React.useState<Campaign[]>(initialCampaigns);
+  const [campaigns, setCampaigns] = React.useState<Campaign[]>(defaultMockCampaigns);
+  const [loading, setLoading] = React.useState(true);
+  const [executingId, setExecutingId] = React.useState<string | null>(null);
+  const [notification, setNotification] = React.useState<{ type: "success" | "error"; message: string } | null>(null);
 
-  const toggleStatus = (id: string) => {
-    setCampaigns((prev) =>
-      prev.map((c) =>
-        c.id === id
-          ? {
-              ...c,
-              status: c.status === "active" ? "paused" : "active",
-              updatedAt: new Date().toISOString(),
-            }
-          : c
-      )
-    );
+  const refreshCampaigns = React.useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await fetchCampaigns();
+      if (data && data.length > 0) {
+        setCampaigns(data);
+      }
+    } catch (err) {
+      console.warn("Failed to load campaigns from API, using fallback:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    let mounted = true;
+    fetchCampaigns()
+      .then((data) => {
+        if (mounted && data && data.length > 0) {
+          setCampaigns(data);
+        }
+      })
+      .catch((err) => {
+        console.warn("Failed to load campaigns from API, using fallback:", err);
+      })
+      .finally(() => {
+        if (mounted) {
+          setLoading(false);
+        }
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const handleStartCampaign = async (campaign: Campaign) => {
+    setExecutingId(campaign.id);
+    setNotification(null);
+    try {
+      const res = await executeCampaign(campaign.id, {
+        mode: "mock",
+        locations: [campaign.location || "RS Puram"],
+        categories: [campaign.category || "Restaurant"],
+      });
+
+      if (res.ok) {
+        setNotification({
+          type: "success",
+          message: res.message || `Campaign "${campaign.name}" batch executed successfully!`,
+        });
+        if (res.campaign) {
+          setCampaigns((prev) => prev.map((c) => (c.id === campaign.id ? res.campaign! : c)));
+        }
+        await refreshCampaigns();
+      } else {
+        setNotification({
+          type: "error",
+          message: "Campaign execution failed to complete.",
+        });
+      }
+    } catch (err) {
+      console.error("Execute campaign error:", err);
+      setNotification({
+        type: "error",
+        message: err instanceof Error ? err.message : "Campaign execution error",
+      });
+    } finally {
+      setExecutingId(null);
+    }
+  };
+
+  const handlePauseCampaign = async (campaign: Campaign) => {
+    try {
+      const updated = await updateCampaignStatus(campaign.id, "paused");
+      setCampaigns((prev) => prev.map((c) => (c.id === campaign.id ? updated : c)));
+      setNotification({
+        type: "success",
+        message: `Campaign "${campaign.name}" paused.`,
+      });
+    } catch (err) {
+      console.error("Pause campaign error:", err);
+      // Local optimistic fallback
+      setCampaigns((prev) =>
+        prev.map((c) => (c.id === campaign.id ? { ...c, status: "paused", updatedAt: new Date().toISOString() } : c))
+      );
+    }
+  };
+
+  const handleResumeCampaign = async (campaign: Campaign) => {
+    try {
+      const updated = await updateCampaignStatus(campaign.id, "active");
+      setCampaigns((prev) => prev.map((c) => (c.id === campaign.id ? updated : c)));
+      await handleStartCampaign(updated);
+    } catch (err) {
+      console.error("Resume campaign error:", err);
+      await handleStartCampaign(campaign);
+    }
   };
 
   const addCampaign = (campaign: Campaign) => {
     setCampaigns((prev) => [campaign, ...prev]);
+    setNotification({
+      type: "success",
+      message: `Campaign "${campaign.name}" created successfully.`,
+    });
   };
 
   const summary = campaigns.filter((c) => c.status === "active").length;
@@ -267,12 +328,48 @@ export default function CampaignsPage() {
         title="Campaigns"
         description={`${campaigns.length} campaigns · ${summary} active`}
       >
-        <CreateCampaignDialog onCreated={addCampaign} />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={refreshCampaigns} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+          <CreateCampaignDialog onCreated={addCampaign} />
+        </div>
       </PageHeader>
+
+      {/* Notification Toast */}
+      {notification && (
+        <div
+          className={`mb-6 flex items-center justify-between rounded-lg border p-4 text-sm ${
+            notification.type === "success"
+              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+              : "border-destructive/30 bg-destructive/10 text-destructive"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {notification.type === "success" ? (
+              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+            ) : (
+              <AlertCircle className="h-4 w-4 text-destructive" />
+            )}
+            <span>{notification.message}</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-xs"
+            onClick={() => setNotification(null)}
+          >
+            Dismiss
+          </Button>
+        </div>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         {campaigns.map((campaign, index) => {
           const meta = statusVariant(campaign.status);
+          const isExecuting = executingId === campaign.id;
+
           return (
             <motion.div
               key={campaign.id}
@@ -289,7 +386,14 @@ export default function CampaignsPage() {
                     <p className="mt-0.5 text-lg font-semibold">{campaign.name}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant={meta.variant}>{meta.label}</Badge>
+                    {isExecuting ? (
+                      <Badge variant="info" className="gap-1.5">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        Running Agents…
+                      </Badge>
+                    ) : (
+                      <Badge variant={meta.variant}>{meta.label}</Badge>
+                    )}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="iconSm">
@@ -297,12 +401,19 @@ export default function CampaignsPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => toggleStatus(campaign.id)}>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            if (campaign.status === "active") handlePauseCampaign(campaign);
+                            else handleStartCampaign(campaign);
+                          }}
+                          disabled={isExecuting}
+                        >
                           {campaign.status === "active" ? <Pause /> : <Play />}
-                          {campaign.status === "active" ? "Pause campaign" : "Start campaign"}
+                          {campaign.status === "active" ? "Pause campaign" : "Run campaign"}
                         </DropdownMenuItem>
-                        <DropdownMenuItem>Duplicate campaign</DropdownMenuItem>
-                        <DropdownMenuItem>Archive campaign</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleStartCampaign(campaign)} disabled={isExecuting}>
+                          <RefreshCw /> Force Re-run
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -368,26 +479,103 @@ export default function CampaignsPage() {
                   <span>Updated {formatDate(campaign.updatedAt)}</span>
                 </div>
 
-                {campaign.status === "active" && (
+                {/* Direct Action Controls */}
+                {campaign.status === "draft" && (
                   <Button
-                    variant="outline"
+                    variant="default"
                     size="sm"
                     className="mt-4 w-full gap-1.5"
-                    onClick={() => toggleStatus(campaign.id)}
+                    disabled={isExecuting}
+                    onClick={() => handleStartCampaign(campaign)}
                   >
-                    <Pause className="h-4 w-4" />
-                    Pause campaign
+                    {isExecuting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Executing Pipeline…
+                      </>
+                    ) : (
+                      <>
+                        <Play className="h-4 w-4" />
+                        Start campaign
+                      </>
+                    )}
                   </Button>
                 )}
+
+                {campaign.status === "active" && (
+                  <div className="mt-4 flex gap-2">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="flex-1 gap-1.5"
+                      disabled={isExecuting}
+                      onClick={() => handleStartCampaign(campaign)}
+                    >
+                      {isExecuting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Running…
+                        </>
+                      ) : (
+                        <>
+                          <Play className="h-4 w-4" />
+                          Run batch
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={isExecuting}
+                      onClick={() => handlePauseCampaign(campaign)}
+                    >
+                      <Pause className="h-4 w-4" />
+                      Pause
+                    </Button>
+                  </div>
+                )}
+
                 {campaign.status === "paused" && (
                   <Button
                     variant="default"
                     size="sm"
                     className="mt-4 w-full gap-1.5"
-                    onClick={() => toggleStatus(campaign.id)}
+                    disabled={isExecuting}
+                    onClick={() => handleResumeCampaign(campaign)}
                   >
-                    <Play className="h-4 w-4" />
-                    Resume campaign
+                    {isExecuting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Resuming Pipeline…
+                      </>
+                    ) : (
+                      <>
+                        <Play className="h-4 w-4" />
+                        Resume campaign
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                {campaign.status === "completed" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4 w-full gap-1.5"
+                    disabled={isExecuting}
+                    onClick={() => handleStartCampaign(campaign)}
+                  >
+                    {isExecuting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Re-running…
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="h-4 w-4" />
+                        Re-run campaign
+                      </>
+                    )}
                   </Button>
                 )}
               </Card>

@@ -1,4 +1,5 @@
 import type { Campaign } from "@/lib/types";
+import { getSupabaseAdmin } from "@/lib/supabase/server";
 
 const daysAgo = (days: number, hour = 10) => {
   const d = new Date();
@@ -7,7 +8,7 @@ const daysAgo = (days: number, hour = 10) => {
   return d.toISOString();
 };
 
-export const campaigns: Campaign[] = [
+export const defaultMockCampaigns: Campaign[] = [
   {
     id: "C-201",
     name: "Coimbatore Restaurants — Phase 1",
@@ -136,6 +137,8 @@ export const campaigns: Campaign[] = [
   },
 ];
 
+export const campaigns = defaultMockCampaigns;
+
 export const campaignCategories = [
   "Restaurant",
   "Salon & Fitness",
@@ -165,3 +168,122 @@ export const campaignLocations = [
   "Tidel Park",
   "Brookefields",
 ];
+
+export function mapCampaignFromDb(row: Record<string, unknown>): Campaign {
+  return {
+    id: String(row.id || `C-${Date.now()}`),
+    name: String(row.name || "Untitled Campaign"),
+    category: String(row.category || "General"),
+    location: String(row.location || "Coimbatore"),
+    leadTarget: typeof row.lead_target === "number" ? row.lead_target : typeof row.leadTarget === "number" ? row.leadTarget : 50,
+    status: (row.status as Campaign["status"]) || "draft",
+    progress: typeof row.progress === "number" ? row.progress : 0,
+    leadsCollected: typeof row.leads_collected === "number" ? row.leads_collected : typeof row.leadsCollected === "number" ? row.leadsCollected : 0,
+    leadsQualified: typeof row.leads_qualified === "number" ? row.leads_qualified : typeof row.leadsQualified === "number" ? row.leadsQualified : 0,
+    websitesBuilt: typeof row.websites_built === "number" ? row.websites_built : typeof row.websitesBuilt === "number" ? row.websitesBuilt : 0,
+    websitesDeployed: typeof row.websites_deployed === "number" ? row.websites_deployed : typeof row.websitesDeployed === "number" ? row.websitesDeployed : 0,
+    messagesSent: typeof row.messages_sent === "number" ? row.messages_sent : typeof row.messagesSent === "number" ? row.messagesSent : 0,
+    minimumRating: typeof row.minimum_rating === "number" ? row.minimum_rating : typeof row.minimumRating === "number" ? row.minimumRating : 4.0,
+    minimumReviews: typeof row.minimum_reviews === "number" ? row.minimum_reviews : typeof row.minimumReviews === "number" ? row.minimumReviews : 20,
+    websiteOpportunityRequirement: typeof row.website_opportunity_requirement === "boolean" ? row.website_opportunity_requirement : true,
+    socialPresenceRequirement: typeof row.social_presence_requirement === "boolean" ? row.social_presence_requirement : false,
+    automationMode: (row.automation_mode as Campaign["automationMode"]) || "semi-automatic",
+    createdAt: String(row.created_at || row.createdAt || new Date().toISOString()),
+    updatedAt: String(row.updated_at || row.updatedAt || new Date().toISOString()),
+  };
+}
+
+export async function getCampaigns(): Promise<Campaign[]> {
+  try {
+    const admin = getSupabaseAdmin();
+    const { data, error } = await admin
+      .from("campaigns")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      return defaultMockCampaigns;
+    }
+
+    return data.map((row: Record<string, unknown>) => mapCampaignFromDb(row));
+  } catch {
+    return defaultMockCampaigns;
+  }
+}
+
+export async function getCampaignById(id: string): Promise<Campaign | null> {
+  try {
+    const admin = getSupabaseAdmin();
+    const { data, error } = await admin
+      .from("campaigns")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (!error && data) {
+      return mapCampaignFromDb(data);
+    }
+  } catch {
+    // Fallback to in-memory/mock list
+  }
+  const all = await getCampaigns();
+  return all.find((c) => c.id === id) || null;
+}
+
+/**
+ * Recomputes and persists campaign counters directly from actual database tables.
+ * Single source of truth: leads, websites, deployments, messages.
+ */
+export async function refreshCampaignCounters(campaignId: string): Promise<Campaign | null> {
+  try {
+    const admin = getSupabaseAdmin();
+
+    // Fetch leads for this campaign
+    const { data: campaignLeads } = await admin
+      .from("leads")
+      .select("id, status")
+      .eq("campaign_id", campaignId);
+
+    const leads = campaignLeads || [];
+    const collected = leads.length;
+    const qualified = leads.filter((l: { status?: string }) =>
+      ["qualified", "website_building", "website_ready", "deploying", "website_deployed", "contacted"].includes(l.status || "")
+    ).length;
+
+    // Current Campaign details for target
+    const { data: campaignData, error: campError } = await admin
+      .from("campaigns")
+      .select("*")
+      .eq("id", campaignId)
+      .single();
+
+    if (campError || !campaignData) {
+      return getCampaignById(campaignId);
+    }
+
+    const leadTarget = campaignData.lead_target || 50;
+    const progress = Math.min(100, Math.round((collected / leadTarget) * 100));
+    const status = collected >= leadTarget ? "completed" : campaignData.status === "draft" ? "active" : campaignData.status;
+
+    const { data: updated, error: updateError } = await admin
+      .from("campaigns")
+      .update({
+        leads_collected: collected,
+        leads_qualified: qualified,
+        progress,
+        status,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", campaignId)
+      .select()
+      .single();
+
+    if (!updateError && updated) {
+      return mapCampaignFromDb(updated);
+    }
+  } catch (err) {
+    console.warn("[Campaigns] Failed to refresh database counters:", err instanceof Error ? err.message : err);
+  }
+
+  return getCampaignById(campaignId);
+}

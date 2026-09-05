@@ -50,7 +50,7 @@ interface Lead {
   aiScore: number;
   priority: LeadPriority;
   status: string;
-  scraped: {
+  scraped?: {
     address: string;
     phone: string;
     email?: string;
@@ -63,7 +63,7 @@ interface Lead {
     source: string;
     scrapedAt: string;
   };
-  qualification: {
+  qualification?: {
     hasWebsite: boolean;
     websiteQuality: number;
     hasWhatsApp: boolean;
@@ -71,7 +71,7 @@ interface Lead {
     responseLikelihood: "high" | "medium" | "low";
     notes: string;
   };
-  opportunity: {
+  opportunity?: {
     score: number;
     priority: LeadPriority;
     reasons: string[];
@@ -164,11 +164,11 @@ export default function LeadsPage() {
           setLeads(leadsArray);
           
           // Extract unique categories
-          const cats = Array.from(new Set(leadsArray.map((l) => l.category))).sort();
+          const cats = Array.from(new Set(leadsArray.map((l) => l.category).filter(Boolean))).sort();
           setCategories(cats);
 
           // Extract status options
-          const statuses = Array.from(new Set(leadsArray.map((l) => l.status)));
+          const statuses = Array.from(new Set(leadsArray.map((l) => l.status).filter(Boolean)));
           setStatusOptions(statuses.map(s => [s, leadStatusMeta[s as keyof typeof leadStatusMeta] || { label: s, variant: "default" }]));
         }
         if (websitesData.ok && Array.isArray(websitesData.websites)) {
@@ -193,7 +193,11 @@ export default function LeadsPage() {
       if (priority !== "all" && lead.priority !== priority) return false;
       if (category !== "all" && lead.category !== category) return false;
       if (q) {
-        const haystack = `${lead.businessName} ${lead.category} ${lead.location} ${lead.scraped.address}`.toLowerCase();
+        const address = lead.scraped?.address || "";
+        const bName = lead.businessName || "";
+        const cat = lead.category || "";
+        const loc = lead.location || "";
+        const haystack = `${bName} ${cat} ${loc} ${address}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
@@ -201,8 +205,12 @@ export default function LeadsPage() {
 
     list = [...list].sort((a, b) => {
       const dir = sortDir === "asc" ? 1 : -1;
-      if (sortKey === "businessName") return a.businessName.localeCompare(b.businessName) * dir;
-      return (a[sortKey] - b[sortKey]) * dir;
+      if (sortKey === "businessName") {
+        return (a.businessName || "").localeCompare(b.businessName || "") * dir;
+      }
+      const valA = (a[sortKey] as number) ?? 0;
+      const valB = (b[sortKey] as number) ?? 0;
+      return (valA - valB) * dir;
     });
     return list;
   }, [search, status, priority, category, sortKey, sortDir, leads]);
@@ -392,37 +400,39 @@ export default function LeadsPage() {
           </TableHeader>
           <TableBody>
             {pageItems.map((lead) => {
-              const meta = leadStatusMeta[lead.status as keyof typeof leadStatusMeta] || { label: lead.status, variant: "default" };
+              const meta = leadStatusMeta[lead.status as keyof typeof leadStatusMeta] || { label: lead.status || "New", variant: "default" };
               const leadWebsite = websites.find((w) => w.leadId === lead.id);
               const leadMessages = messages.filter((m) => m.leadId === lead.id);
               const latestMessage = leadMessages.length > 0
-                ? [...leadMessages].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+                ? [...leadMessages].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())[0]
                 : null;
+              const name = lead.businessName || "Unknown Business";
+              const initials = (name.trim() || "UN").slice(0, 2);
               return (
                 <TableRow key={lead.id} className="cursor-pointer">
                   <TableCell>
                     <Link href={`/leads/${lead.id}`} className="group flex items-center gap-2">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-[10px] font-bold uppercase text-muted-foreground">
-                        {lead.businessName.slice(0, 2)}
+                        {initials}
                       </div>
                       <div className="min-w-0">
                         <p className="truncate font-medium group-hover:text-primary">
-                          {lead.businessName}
+                          {name}
                         </p>
                         <p className="truncate text-xs text-muted-foreground">
-                          {lead.location}
+                          {lead.location || "—"}
                         </p>
                       </div>
                     </Link>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{lead.category}</TableCell>
+                  <TableCell className="text-muted-foreground">{lead.category || "—"}</TableCell>
                   <TableCell>
                     <span className="flex items-center gap-1 font-medium">
                       <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                      {lead.rating.toFixed(1)}
+                      {(lead.rating ?? 0).toFixed(1)}
                     </span>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{lead.reviews}</TableCell>
+                  <TableCell className="text-muted-foreground">{lead.reviews ?? 0}</TableCell>
                   <TableCell>
                     {lead.website ? (
                       <a
@@ -438,11 +448,11 @@ export default function LeadsPage() {
                     )}
                   </TableCell>
                   <TableCell>
-                    <ScoreRing score={lead.aiScore} />
+                    <ScoreRing score={lead.aiScore ?? 0} />
                   </TableCell>
                   <TableCell>
-                    <Badge variant={priorityVariant[lead.priority]}>
-                      {lead.priority}
+                    <Badge variant={priorityVariant[lead.priority] || "muted"}>
+                      {lead.priority || "medium"}
                     </Badge>
                   </TableCell>
                   <TableCell>

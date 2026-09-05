@@ -9,9 +9,12 @@ export function formatNumber(value: number): string {
   return new Intl.NumberFormat("en-IN").format(value);
 }
 
-export function formatRelative(date: string | Date): string {
+export function formatRelative(date?: string | Date | null): string {
+  if (!date) return "—";
   const d = typeof date === "string" ? new Date(date) : date;
+  if (isNaN(d.getTime())) return "—";
   const seconds = Math.floor((Date.now() - d.getTime()) / 1000);
+  if (seconds < 5) return "just now";
   const intervals: Array<[number, string]> = [
     [31536000, "year"],
     [2592000, "month"],
@@ -26,8 +29,10 @@ export function formatRelative(date: string | Date): string {
   return "just now";
 }
 
-export function formatDateTime(date: string | Date): string {
+export function formatDateTime(date?: string | Date | null): string {
+  if (!date) return "—";
   const d = typeof date === "string" ? new Date(date) : date;
+  if (isNaN(d.getTime())) return "—";
   return d.toLocaleString("en-IN", {
     day: "numeric",
     month: "short",
@@ -36,12 +41,16 @@ export function formatDateTime(date: string | Date): string {
   });
 }
 
-export function formatDate(date: string | Date): string {
+export function formatDate(date?: string | Date | null): string {
+  if (!date) return "—";
   const d = typeof date === "string" ? new Date(date) : date;
+  if (isNaN(d.getTime())) return "—";
   return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
-export function formatTime(date: string | Date): string {
+export function formatTime(date?: string | Date | null): string {
+  if (!date) return "—";
   const d = typeof date === "string" ? new Date(date) : date;
+  if (isNaN(d.getTime())) return "—";
   return d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
 }

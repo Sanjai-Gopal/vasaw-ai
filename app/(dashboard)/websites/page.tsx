@@ -208,7 +208,7 @@ export default function WebsitesPage() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {websiteList.map((website, index) => {
-          const meta = websiteStatusMeta[website.status];
+          const meta = websiteStatusMeta[website.status] || { label: website.status || "Queued", variant: "default" as const };
           return (
             <motion.div
               key={website.id}
@@ -223,9 +223,9 @@ export default function WebsitesPage() {
                       <Globe className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div>
-                      <p className="font-semibold leading-tight">{website.businessName}</p>
+                      <p className="font-semibold leading-tight">{website.businessName || "Untitled Website"}</p>
                       <p className="text-xs text-muted-foreground">
-                        {website.category} · {website.location}
+                        {website.category || "General"} · {website.location || "—"}
                       </p>
                     </div>
                   </div>
@@ -235,21 +235,21 @@ export default function WebsitesPage() {
                 <div className="mt-4 flex flex-wrap gap-1.5">
                   <Badge variant="outline" className="gap-1">
                     <LayoutTemplate className="h-3 w-3" />
-                    {website.template}
+                    {website.template || "default"}
                   </Badge>
                   <Badge variant="outline" className="gap-1">
                     <Layers className="h-3 w-3" />
-                    {website.pages} pages · {website.sections} sections
+                    {website.pages ?? 1} pages · {website.sections ?? 0} sections
                   </Badge>
                 </div>
 
                 <div className="mt-4">
                   <div className="mb-1.5 flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">Build progress</span>
-                    <span className="font-medium">{website.buildProgress}%</span>
+                    <span className="font-medium">{website.buildProgress ?? 0}%</span>
                   </div>
                   <Progress
-                    value={website.buildProgress}
+                    value={website.buildProgress ?? 0}
                     indicatorClassName={
                       website.status === "failed"
                         ? "bg-rose-500"

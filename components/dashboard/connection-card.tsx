@@ -5,9 +5,10 @@ import {
   Bot,
   Database,
   Brain,
-GitBranch,
+  GitBranch,
   Triangle,
   MessageCircle,
+  FileSpreadsheet,
   Plug,
   PlugZap,
   Loader2,
@@ -27,6 +28,7 @@ const connectionIcon: Record<Connection["id"], LucideIcon> = {
   github: GitBranch,
   vercel: Triangle,
   whatsapp: MessageCircle,
+  google_sheets: FileSpreadsheet,
 };
 
 const statusMeta = {

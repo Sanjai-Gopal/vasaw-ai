@@ -63,10 +63,14 @@ export async function GET() {
 
     const byDate: Record<string, number> = {};
     for (const lead of leads ?? []) {
-      const date = new Date(lead.created_at).toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-      });
+      const createdAt = lead.created_at || lead.createdAt;
+      const d = createdAt ? new Date(createdAt) : new Date();
+      const date = isNaN(d.getTime())
+        ? "Recent"
+        : d.toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+          });
       byDate[date] = (byDate[date] ?? 0) + 1;
     }
     const weeklyLeads = Object.entries(byDate)
@@ -76,7 +80,8 @@ export async function GET() {
 
     const catCount: Record<string, number> = {};
     for (const lead of leads ?? []) {
-      catCount[lead.category] = (catCount[lead.category] ?? 0) + 1;
+      const cat = lead.category || "General";
+      catCount[cat] = (catCount[cat] ?? 0) + 1;
     }
     const categoryDistribution = Object.entries(catCount)
       .map(([name, value]) => ({ name, value }))

@@ -104,40 +104,40 @@ export async function getDeploymentById(id: string): Promise<Deployment | null> 
   return mapDeploymentFromDb(data);
 }
 
-function mapWebsiteFromDb(row: Record<string, unknown>): Website {
+export function mapWebsiteFromDb(row: Record<string, unknown>): Website {
   return {
-    id: row.id as string,
-    leadId: row.lead_id as string,
-    businessName: row.business_name as string,
-    category: row.category as string,
-    location: row.location as string,
-    status: row.status as Website["status"],
-    template: row.template as string,
-    pages: row.pages as number,
-    sections: row.sections as number,
-    buildProgress: row.build_progress as number,
-    previewUrl: row.preview_url as string | undefined,
-    liveUrl: row.live_url as string | undefined,
-    repoUrl: row.repo_url as string | undefined,
-    commitHash: row.commit_hash as string | undefined,
-    createdAt: row.created_at as string,
-    builtAt: row.built_at as string | undefined,
+    id: (row.id as string) || "",
+    leadId: (row.lead_id as string) || (row.leadId as string) || "",
+    businessName: (row.business_name as string) || (row.businessName as string) || "Untitled Website",
+    category: (row.category as string) || "General",
+    location: (row.location as string) || "",
+    status: (row.status as Website["status"]) || "queued",
+    template: (row.template as string) || "default",
+    pages: typeof row.pages === "number" ? row.pages : Number(row.pages) || 1,
+    sections: typeof row.sections === "number" ? row.sections : Number(row.sections) || 0,
+    buildProgress: typeof row.build_progress === "number" ? row.build_progress : typeof row.buildProgress === "number" ? row.buildProgress : Number(row.build_progress ?? row.buildProgress) || 0,
+    previewUrl: (row.preview_url as string | undefined) || (row.previewUrl as string | undefined),
+    liveUrl: (row.live_url as string | undefined) || (row.liveUrl as string | undefined),
+    repoUrl: (row.repo_url as string | undefined) || (row.repoUrl as string | undefined),
+    commitHash: (row.commit_hash as string | undefined) || (row.commitHash as string | undefined),
+    createdAt: (row.created_at as string) || (row.createdAt as string) || new Date().toISOString(),
+    builtAt: (row.built_at as string | undefined) || (row.builtAt as string | undefined),
   };
 }
 
-function mapDeploymentFromDb(row: Record<string, unknown>): Deployment {
+export function mapDeploymentFromDb(row: Record<string, unknown>): Deployment {
   return {
-    id: row.id as string,
-    websiteId: row.website_id as string,
-    leadId: row.lead_id as string,
-    businessName: row.business_name as string,
-    status: row.status as Deployment["status"],
-    provider: row.provider as "vercel",
-    environment: row.environment as "production",
-    liveUrl: row.live_url as string | undefined,
-    commitHash: row.commit_hash as string | undefined,
-    durationSec: row.duration_sec as number,
-    deployedAt: row.deployed_at as string | undefined,
-    createdAt: row.created_at as string,
+    id: (row.id as string) || "",
+    websiteId: (row.website_id as string) || (row.websiteId as string) || "",
+    leadId: (row.lead_id as string) || (row.leadId as string) || "",
+    businessName: (row.business_name as string) || (row.businessName as string) || "Untitled Website",
+    status: (row.status as Deployment["status"]) || "queued",
+    provider: (row.provider as "vercel") || "vercel",
+    environment: (row.environment as "production") || "production",
+    liveUrl: (row.live_url as string | undefined) || (row.liveUrl as string | undefined),
+    commitHash: (row.commit_hash as string | undefined) || (row.commitHash as string | undefined),
+    durationSec: typeof row.duration_sec === "number" ? row.duration_sec : Number(row.duration_sec) || 0,
+    deployedAt: (row.deployed_at as string | undefined) || (row.deployedAt as string | undefined),
+    createdAt: (row.created_at as string) || (row.createdAt as string) || new Date().toISOString(),
   };
 }
