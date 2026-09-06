@@ -1,4 +1,4 @@
-import { TemplateType, WebsiteBuildInput, WebsiteBuildResult, WebsiteProvider } from "./types";
+import { TemplateType, WebsiteBuildInput, WebsiteBuildResult, WebsiteProvider, createPublicBusinessProfile } from "./types";
 import { getTemplate, selectTemplate } from "./templates/registry";
 import { getTheme } from "./themes";
 import { generateDeterministicContent } from "./content/fallback";
@@ -13,13 +13,15 @@ export class MockWebsiteProvider implements WebsiteProvider {
     const template = getTemplate(templateId);
     const theme = getTheme(templateId);
 
-    // Deterministic content in mock mode
-    const content = generateDeterministicContent(lead, qualification, template);
+    // Explicit Public Data Boundary: strip internal lead/qualification metadata
+    const profile = createPublicBusinessProfile(lead);
 
-    // Render website project files
+    // Deterministic content in mock mode
+    const content = generateDeterministicContent(profile, qualification, template);
+
+    // Render website project files using strictly public profile
     const renderResult = renderWebsiteProject({
-      lead,
-      qualification,
+      profile,
       template,
       theme,
       content,
@@ -60,18 +62,20 @@ export class AIWebsiteProvider implements WebsiteProvider {
     const template = getTemplate(templateId);
     const theme = getTheme(templateId);
 
-    // AI content generation with automatic fallback
+    // Explicit Public Data Boundary: strip internal lead/qualification metadata
+    const profile = createPublicBusinessProfile(lead);
+
+    // AI content generation with automatic fallback using strictly public profile
     const content = await generateWebsiteContent({
-      lead,
+      profile,
       qualification,
       template,
       mode: "ai",
     });
 
-    // Render website project files
+    // Render website project files using strictly public profile
     const renderResult = renderWebsiteProject({
-      lead,
-      qualification,
+      profile,
       template,
       theme,
       content,

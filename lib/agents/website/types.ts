@@ -1,6 +1,45 @@
 import { Lead } from "@/lib/agents/scraping/types";
 import { QualificationResult } from "@/lib/agents/qualification/types";
 
+export interface PublicBusinessProfile {
+  id: string;
+  businessName: string;
+  category: string;
+  city: string;
+  address: string;
+  phone?: string;
+  email?: string;
+  website?: string | null;
+  rating: number;
+  reviewCount: number;
+  socialLinks: string[];
+  services: string[];
+  hours?: Array<{ days: string; hours: string }>;
+}
+
+export function createPublicBusinessProfile(lead: Lead): PublicBusinessProfile {
+  const rawRating = typeof lead.rating === "number" ? lead.rating : 4.5;
+  const rating = Number(rawRating.toFixed(1));
+  const reviewCount = typeof lead.reviewCount === "number" ? lead.reviewCount : 0;
+  const city = (lead.city || lead.address || "Coimbatore").trim();
+  const rawServices = (lead as unknown as { scraped?: { services?: string[] } }).scraped?.services ?? [];
+
+  return {
+    id: lead.id,
+    businessName: (lead.businessName || "Local Business").trim(),
+    category: (lead.category || "Local Business").trim(),
+    city: city || "Coimbatore",
+    address: lead.address ? lead.address.trim() : `${(lead.businessName || "Local Business").trim()}, ${city}`,
+    phone: lead.phone ? lead.phone.trim() : undefined,
+    email: (lead as unknown as { email?: string }).email?.trim() || undefined,
+    website: lead.website ? lead.website.trim() : null,
+    rating,
+    reviewCount,
+    socialLinks: Array.isArray(lead.socialLinks) ? lead.socialLinks : [],
+    services: Array.isArray(rawServices) ? rawServices : [],
+  };
+}
+
 export type TemplateType =
   | "restaurant"
   | "cafe"

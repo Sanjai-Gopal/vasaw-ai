@@ -1,6 +1,6 @@
 import { Lead } from "@/lib/agents/scraping/types";
 import { QualificationResult } from "@/lib/agents/qualification/types";
-import { TemplateDefinition, WebsiteContent } from "../types";
+import { TemplateDefinition, WebsiteContent, PublicBusinessProfile, createPublicBusinessProfile } from "../types";
 
 /**
  * Generates verified, customer-facing website copy strictly from factual business data.
@@ -9,18 +9,23 @@ import { TemplateDefinition, WebsiteContent } from "../types";
  * or "no website" opportunity reasoning onto customer-facing websites.
  */
 export function generateDeterministicContent(
-  lead: Lead,
+  profileOrLead: PublicBusinessProfile | Lead,
   _qualification?: QualificationResult | null,
   template?: TemplateDefinition
 ): WebsiteContent {
-  const businessName = (lead.businessName || "Local Business").trim();
-  const city = (lead.city || lead.address || "Coimbatore").trim();
-  const category = (lead.category || "Restaurant").trim();
-  const rating = typeof lead.rating === "number" ? Number(lead.rating.toFixed(1)) : 4.5;
-  const reviews = typeof lead.reviewCount === "number" ? lead.reviewCount : 0;
-  const phone = lead.phone ? lead.phone.trim() : "";
-  const address = lead.address ? lead.address.trim() : `${businessName}, ${city}`;
-  const rawServices = (lead as unknown as { scraped?: { services?: string[] } }).scraped?.services ?? [];
+  const profile: PublicBusinessProfile =
+    "city" in profileOrLead && !("source" in profileOrLead)
+      ? (profileOrLead as PublicBusinessProfile)
+      : createPublicBusinessProfile(profileOrLead as Lead);
+
+  const businessName = profile.businessName;
+  const city = profile.city;
+  const category = profile.category;
+  const rating = profile.rating;
+  const reviews = profile.reviewCount;
+  const phone = profile.phone || "";
+  const address = profile.address;
+  const rawServices = profile.services || [];
 
   const templateId = template?.id || "restaurant";
   const defaultServices = getDefaultServicesForCategory(templateId, category);
@@ -155,7 +160,7 @@ export function generateDeterministicContent(
       headline: "Location & Contact",
       address,
       phone,
-      email: (lead as unknown as { email?: string }).email,
+      email: profile.email,
       mapQuery: address,
     },
     cta: {

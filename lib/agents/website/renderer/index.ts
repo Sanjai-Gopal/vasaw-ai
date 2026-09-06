@@ -2,11 +2,12 @@ import * as fs from "fs";
 import * as path from "path";
 import { Lead } from "@/lib/agents/scraping/types";
 import { QualificationResult } from "@/lib/agents/qualification/types";
-import { TemplateDefinition, WebsiteContent, WebsiteTheme } from "../types";
+import { TemplateDefinition, WebsiteContent, WebsiteTheme, PublicBusinessProfile, createPublicBusinessProfile } from "../types";
 import { getVisualAssets, generateHeroPlaceholderSvg, generateGalleryPlaceholderSvg } from "./placeholders";
 
 export interface RenderProjectParams {
-  lead: Lead;
+  profile?: PublicBusinessProfile;
+  lead?: Lead;
   qualification?: QualificationResult;
   template: TemplateDefinition;
   theme: WebsiteTheme;
@@ -45,10 +46,21 @@ export function safeSerialize(obj: unknown): string {
 }
 
 export function renderWebsiteProject(params: RenderProjectParams): RenderProjectResult {
-  const { lead, template, theme, content } = params;
+  const profile = params.profile || (params.lead ? createPublicBusinessProfile(params.lead) : {
+    id: "site",
+    businessName: "Local Business",
+    category: "Local Business",
+    city: "Coimbatore",
+    address: "Coimbatore",
+    rating: 4.5,
+    reviewCount: 0,
+    socialLinks: [],
+    services: [],
+  });
+  const { template, theme, content } = params;
   const baseDir = params.outputBaseDir || path.join(/*turbopackIgnore: true*/ process.cwd(), "generated-websites");
 
-  const projectName = sanitizeProjectName(lead.businessName, lead.id);
+  const projectName = sanitizeProjectName(profile.businessName, profile.id);
   const projectDir = path.resolve(/*turbopackIgnore: true*/ baseDir, projectName);
 
   // Security: Check against path traversal
@@ -188,9 +200,9 @@ module.exports = {
   // 8. README.md
   writeFile(
     path.join(projectDir, "README.md"),
-    `# ${lead.businessName}
+    `# ${profile.businessName}
 
-Generated website project for **${lead.businessName}** (${lead.category}).
+Generated website project for **${profile.businessName}** (${profile.category}).
 Template: \`${template.name}\` (${template.id})
 
 ## Quick Start
@@ -305,17 +317,17 @@ export default function RootLayout({
 
   // 11. src/app/page.tsx
   const visualAssets = getVisualAssets(template.id);
-  const pageTsx = generatePageTsx({ lead, template, theme, content, visuals: visualAssets });
+  const pageTsx = generatePageTsx({ profile, template, theme, content, visuals: visualAssets });
   writeFile(path.join(appDir, "page.tsx"), pageTsx);
 
   // 12. src/app/contact/page.tsx
-  const contactPageTsx = generateContactPageTsx({ lead, template, content });
+  const contactPageTsx = generateContactPageTsx({ profile, template, content });
   writeFile(path.join(contactDir, "page.tsx"), contactPageTsx);
 
   // 13. Public Assets / Placeholders
   writeFile(
     path.join(publicDir, "placeholder-hero.svg"),
-    generateHeroPlaceholderSvg(lead.businessName, lead.category, theme)
+    generateHeroPlaceholderSvg(profile.businessName, profile.category, theme)
   );
   writeFile(
     path.join(publicDir, "placeholder-1.svg"),
@@ -350,18 +362,18 @@ export default function RootLayout({
 }
 
 function generatePageTsx(params: {
-  lead: Lead;
+  profile: PublicBusinessProfile;
   template: TemplateDefinition;
   theme: WebsiteTheme;
   content: WebsiteContent;
   visuals: ReturnType<typeof getVisualAssets>;
 }): string {
-  const { content, theme, template, visuals, lead } = params;
+  const { content, theme, template, visuals, profile } = params;
 
-  const rawRating = typeof lead.rating === "number" ? lead.rating : 4.5;
+  const rawRating = typeof profile.rating === "number" ? profile.rating : 4.5;
   const rating = Number(rawRating.toFixed(1));
-  const reviewCount = typeof lead.reviewCount === "number" ? lead.reviewCount : 0;
-  const city = lead.city || lead.address || "Coimbatore";
+  const reviewCount = typeof profile.reviewCount === "number" ? profile.reviewCount : 0;
+  const city = profile.city || profile.address || "Coimbatore";
 
   return `'use client';
 
@@ -1162,7 +1174,7 @@ export default function HomePage() {
 }
 
 function generateContactPageTsx(params: {
-  lead: Lead;
+  profile: PublicBusinessProfile;
   template: TemplateDefinition;
   content: WebsiteContent;
 }): string {

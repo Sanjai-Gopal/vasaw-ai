@@ -1,33 +1,45 @@
 import { Lead } from "@/lib/agents/scraping/types";
 import { QualificationResult } from "@/lib/agents/qualification/types";
 import { routeRequest } from "@/lib/ai/router";
-import { TemplateDefinition, WebsiteContent } from "../types";
+import { TemplateDefinition, WebsiteContent, PublicBusinessProfile, createPublicBusinessProfile } from "../types";
 import { generateDeterministicContent } from "./fallback";
 
 export async function generateWebsiteContent(params: {
-  lead: Lead;
-  qualification: QualificationResult;
+  lead?: Lead;
+  profile?: PublicBusinessProfile;
+  qualification?: QualificationResult | null;
   template: TemplateDefinition;
   mode?: "mock" | "ai";
 }): Promise<WebsiteContent> {
-  const { lead, qualification, template, mode = "mock" } = params;
+  const { lead, profile: rawProfile, qualification, template, mode = "mock" } = params;
+  const profile: PublicBusinessProfile = rawProfile || (lead ? createPublicBusinessProfile(lead) : {
+    id: "site",
+    businessName: "Local Business",
+    category: "Local Business",
+    city: "Coimbatore",
+    address: "Coimbatore",
+    rating: 4.5,
+    reviewCount: 0,
+    socialLinks: [],
+    services: [],
+  });
 
   if (mode === "mock") {
-    return generateDeterministicContent(lead, qualification, template);
+    return generateDeterministicContent(profile, qualification, template);
   }
 
   try {
     // Only pass factual, customer-facing business data.
     // NEVER pass internal qualification reasoning, sales opportunity scores, or "no website" notes.
     const businessFacts = {
-      businessName: lead.businessName,
-      category: lead.category,
-      city: lead.city || lead.address || "Coimbatore",
-      address: lead.address,
-      phone: lead.phone,
-      rating: lead.rating,
-      reviewCount: lead.reviewCount,
-      services: (lead as unknown as { scraped?: { services?: string[] } }).scraped?.services ?? [],
+      businessName: profile.businessName,
+      category: profile.category,
+      city: profile.city,
+      address: profile.address,
+      phone: profile.phone,
+      rating: profile.rating,
+      reviewCount: profile.reviewCount,
+      services: profile.services,
       template: template.id,
     };
 
@@ -90,7 +102,7 @@ ${JSON.stringify(businessFacts, null, 2)}`;
 
     if (!aiResult?.response?.success || !aiResult.response.content) {
       console.warn("[WebsiteContent] AI generation failed or empty, using fallback:", aiResult?.response?.errorMessage);
-      return generateDeterministicContent(lead, qualification, template);
+      return generateDeterministicContent(profile, qualification, template);
     }
 
     const rawContent = aiResult.response.content.trim();
@@ -105,11 +117,11 @@ ${JSON.stringify(businessFacts, null, 2)}`;
     // Validate essential sections
     if (!parsed.hero?.headline || !parsed.about?.body || !parsed.contact?.headline) {
       console.warn("[WebsiteContent] AI output missing mandatory sections, using fallback");
-      return generateDeterministicContent(lead, qualification, template);
+      return generateDeterministicContent(profile, qualification, template);
     }
 
     // Merge fallback with parsed AI content to guarantee complete structure
-    const fallback = generateDeterministicContent(lead, qualification, template);
+    const fallback = generateDeterministicContent(profile, qualification, template);
 
     return {
       metaTitle: parsed.metaTitle || fallback.metaTitle,
@@ -136,10 +148,10 @@ ${JSON.stringify(businessFacts, null, 2)}`;
       team: parsed.team || fallback.team,
       contact: {
         headline: parsed.contact.headline || fallback.contact.headline,
-        address: lead.address || parsed.contact.address || fallback.contact.address,
-        phone: lead.phone || parsed.contact.phone || fallback.contact.phone,
-        email: (lead as unknown as { email?: string }).email || parsed.contact.email,
-        mapQuery: lead.address || fallback.contact.mapQuery,
+        address: profile.address || parsed.contact.address || fallback.contact.address,
+        phone: profile.phone || parsed.contact.phone || fallback.contact.phone,
+        email: profile.email || parsed.contact.email,
+        mapQuery: profile.address || fallback.contact.mapQuery,
       },
       cta: {
         headline: parsed.cta?.headline || fallback.cta.headline,
@@ -154,6 +166,6 @@ ${JSON.stringify(businessFacts, null, 2)}`;
     };
   } catch (err) {
     console.warn("[WebsiteContent] Error during AI content generation, using fallback:", err);
-    return generateDeterministicContent(lead, qualification, template);
+    return generateDeterministicContent(profile, qualification, template);
   }
 }
