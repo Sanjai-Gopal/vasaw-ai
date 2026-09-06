@@ -442,15 +442,15 @@ export default function WebsitesPage() {
                 </div>
 
                 {/* Footer Actions */}
-                <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-3">
-                  <span className="font-mono text-[10px] text-slate-400">
+                <div className="mt-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-t border-slate-100 pt-3">
+                  <span className="font-mono text-[10px] text-slate-400 truncate">
                     Created {formatDate(website.createdAt)}
                   </span>
-                  <div className="flex gap-1.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-1 text-xs font-sans"
+                      className="gap-1 text-xs font-sans h-7 px-2.5"
                       onClick={() => setPreview(website)}
                     >
                       <Eye className="h-3.5 w-3.5 text-slate-500" />
@@ -459,7 +459,7 @@ export default function WebsitesPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-1 text-xs font-sans"
+                      className="gap-1 text-xs font-sans h-7 px-2.5"
                       disabled={isRebuilding}
                       onClick={() => rebuildWebsite(website.id)}
                     >
@@ -473,7 +473,7 @@ export default function WebsitesPage() {
                     {website.status !== "deployed" && (
                       <Button
                         size="sm"
-                        className="gap-1 text-xs font-sans bg-slate-900 text-white hover:bg-slate-800"
+                        className="gap-1 text-xs font-sans h-7 px-2.5 bg-slate-900 text-white hover:bg-slate-800"
                         onClick={() => rebuildWebsite(website.id)}
                       >
                         <Rocket className="h-3.5 w-3.5" />

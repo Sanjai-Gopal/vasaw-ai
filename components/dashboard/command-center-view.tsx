@@ -34,10 +34,11 @@ import {
   Sliders,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { DashboardStats, ActivityItem } from "@/lib/types";
 
 interface CommandCenterProps {
-  stats: any | null;
-  activities?: any[];
+  stats: DashboardStats | null;
+  activities?: ActivityItem[];
   onRefresh?: () => void;
 }
 

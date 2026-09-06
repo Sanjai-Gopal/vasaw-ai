@@ -12,14 +12,14 @@ export interface ValidationResult {
 export function validateWebsiteStatic(projectDir: string): ValidationResult {
   const errors: string[] = [];
 
-  if (!fs.existsSync(projectDir)) {
+  if (!fs.existsSync(/*turbopackIgnore: true*/ projectDir)) {
     return {
       valid: false,
       errors: [`Project directory does not exist: ${projectDir}`],
     };
   }
 
-  const stat = fs.statSync(projectDir);
+  const stat = fs.statSync(/*turbopackIgnore: true*/ projectDir);
   if (!stat.isDirectory()) {
     return {
       valid: false,
@@ -39,13 +39,13 @@ export function validateWebsiteStatic(projectDir: string): ValidationResult {
   ];
 
   for (const relPath of requiredFiles) {
-    const fullPath = path.join(projectDir, relPath);
-    if (!fs.existsSync(fullPath)) {
+    const fullPath = path.join(/*turbopackIgnore: true*/ projectDir, relPath);
+    if (!fs.existsSync(/*turbopackIgnore: true*/ fullPath)) {
       errors.push(`Missing required project file: ${relPath}`);
       continue;
     }
 
-    const fileStat = fs.statSync(fullPath);
+    const fileStat = fs.statSync(/*turbopackIgnore: true*/ fullPath);
     if (fileStat.size === 0) {
       errors.push(`File is empty: ${relPath}`);
     }
@@ -57,7 +57,7 @@ export function validateWebsiteStatic(projectDir: string): ValidationResult {
 
   // Validate package.json
   try {
-    const pkgContent = fs.readFileSync(path.join(projectDir, "package.json"), "utf8");
+    const pkgContent = fs.readFileSync(/*turbopackIgnore: true*/ path.join(/*turbopackIgnore: true*/ projectDir, "package.json"), "utf8");
     const pkg = JSON.parse(pkgContent);
     if (!pkg.name || typeof pkg.name !== "string") {
       errors.push("package.json must contain a valid 'name' field");
@@ -76,7 +76,7 @@ export function validateWebsiteStatic(projectDir: string): ValidationResult {
 
   // Validate tsconfig.json
   try {
-    const tsContent = fs.readFileSync(path.join(projectDir, "tsconfig.json"), "utf8");
+    const tsContent = fs.readFileSync(/*turbopackIgnore: true*/ path.join(/*turbopackIgnore: true*/ projectDir, "tsconfig.json"), "utf8");
     JSON.parse(tsContent);
   } catch (err) {
     errors.push(`Invalid tsconfig.json: ${err instanceof Error ? err.message : "JSON parse error"}`);
@@ -84,7 +84,7 @@ export function validateWebsiteStatic(projectDir: string): ValidationResult {
 
   // Validate layout.tsx
   try {
-    const layoutContent = fs.readFileSync(path.join(projectDir, "src/app/layout.tsx"), "utf8");
+    const layoutContent = fs.readFileSync(/*turbopackIgnore: true*/ path.join(/*turbopackIgnore: true*/ projectDir, "src/app/layout.tsx"), "utf8");
     if (!layoutContent.includes("export default")) {
       errors.push("src/app/layout.tsx must contain a default export");
     }
@@ -97,7 +97,7 @@ export function validateWebsiteStatic(projectDir: string): ValidationResult {
 
   // Validate page.tsx
   try {
-    const pageContent = fs.readFileSync(path.join(projectDir, "src/app/page.tsx"), "utf8");
+    const pageContent = fs.readFileSync(/*turbopackIgnore: true*/ path.join(/*turbopackIgnore: true*/ projectDir, "src/app/page.tsx"), "utf8");
     if (!pageContent.includes("export default")) {
       errors.push("src/app/page.tsx must contain a default export");
     }
@@ -131,7 +131,7 @@ export function executeWebsiteBuild(projectDir: string): {
           CI: "1",
           NEXT_TELEMETRY_DISABLED: "1",
         },
-        timeout: 60000,
+        timeout: 120000,
         encoding: "utf8",
       });
     } else {
@@ -145,7 +145,7 @@ export function executeWebsiteBuild(projectDir: string): {
           CI: "1",
           NEXT_TELEMETRY_DISABLED: "1",
         },
-        timeout: 60000,
+        timeout: 120000,
         encoding: "utf8",
       });
     }

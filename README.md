@@ -136,15 +136,99 @@ VASAW AI guarantees zero accidental real network actions during development and 
 
 ---
 
+## 🚀 Vercel Automatic Deployment (CI/CD)
+
+VASAW AI is configured for zero-friction continuous deployment via GitHub & Vercel:
+
+```text
+Developer changes code
+        ↓
+git commit
+        ↓
+git push origin main
+        ↓
+GitHub (Sanjai-Gopal/vasaw-ai)
+        ↓
+Vercel Webhook / Native Git Integration
+        ↓
+Install dependencies (npm install)
+        ↓
+Next.js Production Build (npm run build)
+        ↓
+Deploy & Promote to Production
+        ↓
+Live URL: https://vasaw-nagerkovil-arya-bhavan.vercel.app (or custom domain)
+```
+
+### 1. Vercel Project Settings
+
+| Setting | Recommended Value |
+| :--- | :--- |
+| **Framework Preset** | `Next.js` |
+| **Root Directory** | `./` |
+| **Build Command** | `npm run build` *(or default Next.js build)* |
+| **Output Directory** | `.next` *(default)* |
+| **Install Command** | `npm install` |
+| **Node.js Version** | `20.x` or `22.x` |
+
+### 2. Environment Variables Configuration
+
+Set these variables in the **Vercel Dashboard > Project Settings > Environment Variables**:
+
+#### 🌐 Client-Side Variables (Browser Accessible)
+| Variable Name | Required | Description |
+| :--- | :--- | :--- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes (Live mode) | Your Supabase project URL (`https://<project-ref>.supabase.co`). |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes (Live mode) | Supabase anonymous public client key. |
+
+#### 🔒 Server-Side Variables (Protected & Never Exposed to Browser)
+| Variable Name | Required | Description |
+| :--- | :--- | :--- |
+| `APP_INTEGRATION_MODE` | Optional (`mock` default) | Set to `live` for real Apify, Vercel, Supabase, and WhatsApp operations. |
+| `OUTREACH_MODE` | Optional (`disabled` default) | Safety gate: `disabled`, `mock`, or `live`. Must be `live` to send real WhatsApp messages. |
+| `CAMPAIGN_BATCH_SIZE` | Optional (`10` default) | Number of leads processed per pipeline batch. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes (Live mode) | Supabase admin service role key for backend DB operations. |
+| `APIFY_API_TOKEN` | Yes (Live mode) | Apify API token for Google Maps lead scraping actor. |
+| `APIFY_ACTOR_ID` | Optional | Apify Actor ID (defaults to `nwua9Gu5YrADL7ZDj`). |
+| `NVIDIA_API_KEY` | Optional | NVIDIA NIM API key for Nemotron AI models. |
+| `GROQ_API_KEY` | Optional | Groq API key for LLaMA 3.3 high-speed inference. |
+| `GEMINI_API_KEY` | Optional | Google Gemini API key for Flash 2.0 reasoning. |
+| `CLOUDFLARE_API_TOKEN` | Optional | Cloudflare AI Workers token. |
+| `CLOUDFLARE_ACCOUNT_ID` | Optional | Cloudflare account ID. |
+| `VERCEL_TOKEN` | Yes (Live deployments) | Vercel API token used by Agent 5 for deploying customer preview websites. |
+| `VERCEL_TEAM_ID` | Optional | Vercel Team ID if deploying customer sites under a team account. |
+| `VERCEL_PROJECT_ID` | Optional | Target Vercel Project ID if reusing a single project slot. |
+| `GITHUB_TOKEN` | Optional | GitHub personal access token for repository creation by Agent 5. |
+| `WHATSAPP_ACCESS_TOKEN` | Yes (Live outreach) | Meta WhatsApp Cloud API access token. |
+| `WHATSAPP_PHONE_NUMBER_ID` | Yes (Live outreach) | Meta WhatsApp Cloud API Sender Phone Number ID. |
+| `WHATSAPP_API_VERSION` | Optional | WhatsApp Graph API version (default: `v21.0`). |
+| `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | Optional | Secret string for WhatsApp webhook verification challenge. |
+| `WHATSAPP_APP_SECRET` | Optional | Meta App Secret for validating webhook HMAC SHA-256 signatures. |
+| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Optional | Google Cloud service account email for Google Sheets sync. |
+| `GOOGLE_PRIVATE_KEY` | Optional | Google Cloud service account RSA private key string. |
+| `GOOGLE_SHEETS_SPREADSHEET_ID` | Optional | Google Sheets document ID for live two-way sync. |
+
+### 3. Production Health Check
+
+Verify production deployment health by querying:
+```bash
+curl -i https://<your-vercel-domain>.vercel.app/api/health
+```
+
+Expected response status `200 OK` with JSON payload confirming agent states, service connectivity, and uptime.
+
+---
+
 ## 📊 Google Sheets Setup
 
 To enable live Google Sheets synchronization:
 1. Create a Google Cloud Service Account and enable the Google Sheets API.
 2. Share your target Google Sheet with your service account email.
-3. Configure the following in `.env.local`:
+3. Configure the following in `.env.local` / Vercel Environment Variables:
    ```env
    GOOGLE_SERVICE_ACCOUNT_EMAIL=your-sa@project.iam.gserviceaccount.com
    GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
    GOOGLE_SHEETS_SPREADSHEET_ID=your-sheet-id
    ```
 4. Navigate to **Settings > Google Sheets Export & Sync** to trigger 1-click exports.
+

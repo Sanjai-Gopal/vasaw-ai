@@ -46,13 +46,13 @@ export function safeSerialize(obj: unknown): string {
 
 export function renderWebsiteProject(params: RenderProjectParams): RenderProjectResult {
   const { lead, template, theme, content } = params;
-  const baseDir = params.outputBaseDir || path.join(process.cwd(), "generated-websites");
+  const baseDir = params.outputBaseDir || path.join(/*turbopackIgnore: true*/ process.cwd(), "generated-websites");
 
   const projectName = sanitizeProjectName(lead.businessName, lead.id);
-  const projectDir = path.resolve(baseDir, projectName);
+  const projectDir = path.resolve(/*turbopackIgnore: true*/ baseDir, projectName);
 
   // Security: Check against path traversal
-  const relative = path.relative(path.resolve(baseDir), projectDir);
+  const relative = path.relative(/*turbopackIgnore: true*/ path.resolve(/*turbopackIgnore: true*/ baseDir), projectDir);
   if (relative.startsWith("..") || path.isAbsolute(relative)) {
     throw new Error(`Invalid project path: path traversal detected for ${projectName}`);
   }

@@ -74,20 +74,20 @@ export function validateProjectDirectory(projectDir: string): { valid: boolean; 
     return { valid: false, errors };
   }
 
-  const resolved = path.resolve(projectDir);
+  const resolved = path.resolve(/*turbopackIgnore: true*/ projectDir);
 
   // Path traversal safety check
-  if (resolved.includes("..") && !fs.existsSync(resolved)) {
+  if (resolved.includes("..") && !fs.existsSync(/*turbopackIgnore: true*/ resolved)) {
     errors.push("Invalid project directory path");
     return { valid: false, errors };
   }
 
-  if (!fs.existsSync(resolved)) {
+  if (!fs.existsSync(/*turbopackIgnore: true*/ resolved)) {
     errors.push(`Project directory does not exist on disk: ${projectDir}`);
     return { valid: false, errors };
   }
 
-  const stat = fs.statSync(resolved);
+  const stat = fs.statSync(/*turbopackIgnore: true*/ resolved);
   if (!stat.isDirectory()) {
     errors.push(`Project path is not a directory: ${projectDir}`);
     return { valid: false, errors };
@@ -95,8 +95,8 @@ export function validateProjectDirectory(projectDir: string): { valid: boolean; 
 
   const requiredFiles = ["package.json", "src/app/page.tsx"];
   for (const file of requiredFiles) {
-    const filePath = path.join(resolved, file);
-    if (!fs.existsSync(filePath)) {
+    const filePath = path.join(/*turbopackIgnore: true*/ resolved, file);
+    if (!fs.existsSync(/*turbopackIgnore: true*/ filePath)) {
       errors.push(`Required project file missing from artifact: ${file}`);
     }
   }
@@ -116,14 +116,14 @@ export function collectAndScanProjectFiles(projectDir: string): ValidationResult
     return { valid: false, errors: dirValidation.errors, files: [] };
   }
 
-  const resolvedBase = path.resolve(projectDir);
+  const resolvedBase = path.resolve(/*turbopackIgnore: true*/ projectDir);
 
   function walk(currentDir: string): void {
-    const entries = fs.readdirSync(currentDir, { withFileTypes: true });
+    const entries = fs.readdirSync(/*turbopackIgnore: true*/ currentDir, { withFileTypes: true });
 
     for (const entry of entries) {
       const entryName = entry.name;
-      const fullPath = path.join(currentDir, entryName);
+      const fullPath = path.join(/*turbopackIgnore: true*/ currentDir, entryName);
 
       if (entry.isDirectory()) {
         if (EXCLUDED_DIRS.has(entryName) || entryName.startsWith(".")) {
@@ -140,7 +140,7 @@ export function collectAndScanProjectFiles(projectDir: string): ValidationResult
         let size = 0;
 
         try {
-          const stat = fs.statSync(fullPath);
+          const stat = fs.statSync(/*turbopackIgnore: true*/ fullPath);
           size = stat.size;
 
           // Limit file size to 10MB per file for safety
@@ -149,7 +149,7 @@ export function collectAndScanProjectFiles(projectDir: string): ValidationResult
             continue;
           }
 
-          content = fs.readFileSync(fullPath, "utf8");
+          content = fs.readFileSync(/*turbopackIgnore: true*/ fullPath, "utf8");
         } catch {
           // If binary or unreadable as utf-8, read empty
           content = "";

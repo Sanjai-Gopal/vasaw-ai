@@ -129,50 +129,39 @@ function WorkflowDiagram({ jobs }: { jobs: ScheduledJob[] }) {
         </span>
       </div>
 
-      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:gap-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5">
         {workflowSteps.map((step, index) => {
           const Icon = step.icon;
           const isCron = step.trigger === "cron";
           return (
-            <React.Fragment key={step.label}>
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.08 }}
-                className="flex-1"
-              >
-                <div className={cn("rounded-2xl border border-slate-200/80 p-4 transition-all duration-200 hover-lift bg-white shadow-xs", step.bg)}>
+            <motion.div
+              key={step.label}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.08 }}
+              className="min-w-0"
+            >
+              <div className={cn("h-full rounded-2xl border border-slate-200/80 p-4 transition-all duration-200 hover-lift bg-white shadow-xs flex flex-col justify-between", step.bg)}>
+                <div>
                   <div className="flex items-center gap-2.5">
                     <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-xs", step.color)}>
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-display text-xs font-bold text-slate-950 leading-tight">{step.label}</p>
+                      <p className="font-display text-xs font-bold text-slate-950 leading-tight truncate">{step.label}</p>
                       <p className="font-sans text-[11px] text-slate-500 truncate">{step.description}</p>
                     </div>
                   </div>
-                  <div className="mt-3 flex items-center gap-1.5 font-mono text-[10px]">
-                    <Badge variant={isCron ? "outline" : "info"} className="gap-1 py-0 px-2">
-                      {isCron ? <Calendar className="h-3 w-3" /> : <Zap className="h-3 w-3" />}
-                      {isCron ? "CRON" : "EVENT"}
-                    </Badge>
-                    <span className="text-slate-500 font-semibold">{step.triggerLabel}</span>
-                  </div>
                 </div>
-              </motion.div>
-              {index < workflowSteps.length - 1 && (
-                <div className="hidden shrink-0 px-2 xl:block">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white shadow-xs">
-                    <ArrowRight className="h-3 w-3 text-slate-400" />
-                  </div>
+                <div className="mt-3 flex items-center gap-1.5 font-mono text-[10px]">
+                  <Badge variant={isCron ? "outline" : "info"} className="gap-1 py-0 px-2">
+                    {isCron ? <Calendar className="h-3 w-3" /> : <Zap className="h-3 w-3" />}
+                    {isCron ? "CRON" : "EVENT"}
+                  </Badge>
+                  <span className="text-slate-500 font-semibold truncate">{step.triggerLabel}</span>
                 </div>
-              )}
-              {index < workflowSteps.length - 1 && (
-                <div className="flex justify-center py-1 xl:hidden">
-                  <ArrowRight className="h-4 w-4 -rotate-90 text-slate-400" />
-                </div>
-              )}
-            </React.Fragment>
+              </div>
+            </motion.div>
           );
         })}
       </div>
@@ -225,7 +214,7 @@ function JobRow({
         <TableCell>
           {job.lastRun ? (
             <div className="space-y-1">
-              <p className="font-mono text-xs text-slate-700">{formatDateTime(job.lastRun)}</p>
+              <p className="font-mono text-xs text-slate-700" suppressHydrationWarning>{formatDateTime(job.lastRun)}</p>
               {job.lastStatus && <RunBadge status={job.lastStatus} />}
             </div>
           ) : (
@@ -233,7 +222,7 @@ function JobRow({
           )}
         </TableCell>
         <TableCell>
-          <p className="font-mono text-xs text-slate-700">{formatDateTime(job.nextRun)}</p>
+          <p className="font-mono text-xs text-slate-700" suppressHydrationWarning>{formatDateTime(job.nextRun)}</p>
         </TableCell>
         <TableCell className="text-right">
           <div className="flex items-center justify-end gap-3">
@@ -276,7 +265,7 @@ function JobRow({
                   >
                     <div className="flex items-center gap-3">
                       <RunBadge status={run.status} />
-                      <span className="text-slate-600">{formatDateTime(run.timestamp)}</span>
+                      <span className="text-slate-600" suppressHydrationWarning>{formatDateTime(run.timestamp)}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="font-bold text-blue-600">

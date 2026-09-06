@@ -1,15 +1,17 @@
 import type { ScheduledJob } from "@/lib/types";
 
+const BASE_DATE = new Date("2026-09-06T10:00:00.000Z");
+
 const daysAgo = (days: number, hour = 6) => {
-  const d = new Date();
-  d.setDate(d.getDate() - days);
-  d.setHours(hour, 0, 0, 0);
+  const d = new Date(BASE_DATE);
+  d.setUTCDate(d.getUTCDate() - days);
+  d.setUTCHours(hour, 0, 0, 0);
   return d.toISOString();
 };
 
 const hoursFromNow = (hours: number) => {
-  const d = new Date();
-  d.setHours(d.getHours() + hours, 0, 0, 0);
+  const d = new Date(BASE_DATE);
+  d.setUTCHours(d.getUTCHours() + hours, 0, 0, 0);
   return d.toISOString();
 };
 

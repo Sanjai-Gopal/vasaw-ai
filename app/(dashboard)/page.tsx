@@ -31,7 +31,7 @@ import { Button } from "@/components/ui/button";
 import { agents } from "@/lib/data/agents";
 import { agentStatusMeta } from "@/lib/status";
 import { cn } from "@/lib/utils";
-import type { PipelineStage, ActivityItem as ActivityItemType, AgentStatus } from "@/lib/types";
+import type { PipelineStage, ActivityItem, AgentStatus } from "@/lib/types";
 
 interface DashboardStats {
   totalLeads: number;
@@ -45,16 +45,6 @@ interface DashboardStats {
   pipeline: PipelineStage[];
   campaigns: number;
   activeCampaigns: number;
-}
-
-interface ActivityItemLocal {
-  id: string;
-  timestamp: string;
-  actor: string;
-  type: string;
-  status: string;
-  title: string;
-  description: string | null;
 }
 
 function getGreeting() {
@@ -86,12 +76,12 @@ const agentColor: Record<AgentStatus, string> = {
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [activities, setActivities] = useState<ActivityItemLocal[]>([]);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"command" | "overview">("command");
 
-  const fetchData = useCallback(async () => {
+  const loadData = useCallback(async () => {
     try {
       const response = await fetch("/api/dashboard/stats");
       const data = await response.json();
@@ -109,8 +99,34 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    let ignore = false;
+    async function init() {
+      try {
+        const response = await fetch("/api/dashboard/stats");
+        const data = await response.json();
+        if (!ignore) {
+          if (data.ok) {
+            setStats(data.stats);
+            setActivities(data.recentActivity);
+          } else {
+            setError(data.error || "Failed to fetch dashboard data");
+          }
+        }
+      } catch (err) {
+        if (!ignore) {
+          setError(err instanceof Error ? err.message : "Unknown error");
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+    init();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -179,7 +195,7 @@ export default function DashboardPage() {
       </div>
 
       {viewMode === "command" ? (
-        <CommandCenterView stats={stats} activities={activities} onRefresh={fetchData} />
+        <CommandCenterView stats={stats} activities={activities} onRefresh={loadData} />
       ) : (
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
           <PageHeader
@@ -306,7 +322,7 @@ export default function DashboardPage() {
                 <CardDescription>Live feed from your agents</CardDescription>
               </CardHeader>
               <CardContent>
-                <ActivityFeed items={activities as ActivityItemType[]} limit={8} />
+                <ActivityFeed items={activities} limit={8} />
               </CardContent>
             </Card>
 

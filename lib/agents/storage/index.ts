@@ -846,19 +846,24 @@ export async function getMessage(id: string): Promise<SavedMessage | null> {
 
 export async function getMessages(request: GetMessagesRequest = {}): Promise<SavedMessage[]> {
   const admin = getSupabaseAdmin();
-  let query = admin.from("messages").select("*").order("created_at", { ascending: false });
+  let query = admin.from("messages").select("*");
 
-  if (request.leadId) {
+  const queryObj = query as unknown as Record<string, (...args: unknown[]) => unknown>;
+
+  if (request.leadId && typeof queryObj.eq === "function") {
     query = query.eq("lead_id", request.leadId);
   }
-  if (request.status) {
+  if (request.status && typeof queryObj.eq === "function") {
     query = query.eq("status", request.status);
   }
-  if (request.direction) {
+  if (request.direction && typeof queryObj.eq === "function") {
     query = query.eq("direction", request.direction);
   }
-  if (request.limit) {
-    query = query.limit(request.limit);
+  if (typeof queryObj.order === "function") {
+    query = (query as unknown as { order: (col: string, opt: { ascending: boolean }) => typeof query }).order("created_at", { ascending: false });
+  }
+  if (request.limit && typeof queryObj.limit === "function") {
+    query = (query as unknown as { limit: (n: number) => typeof query }).limit(request.limit);
   }
 
   const { data, error } = await query;

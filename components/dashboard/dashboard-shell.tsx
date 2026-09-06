@@ -46,25 +46,29 @@ function getPageTitle(pathname: string): string {
   return routeTitles[pathname] ?? "Command Center";
 }
 
+const INITIAL_NOTIFICATIONS: Notification[] = [
+  {
+    id: "n1",
+    title: "Synthesized Kovai Kitchen Website",
+    description: "6 Next.js components compiled in 1.8s with clean AST pass.",
+    timestamp: "2026-09-06T10:00:00.000Z",
+    read: false,
+    type: "website",
+  },
+  {
+    id: "n2",
+    title: "42 Fresh Dining Leads Ingested",
+    description: "Scrape batch completed for Coimbatore zone.",
+    timestamp: "2026-09-06T09:00:00.000Z",
+    read: false,
+    type: "lead",
+  },
+];
+
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [notifOpen, setNotifOpen] = React.useState(false);
-  const [notifications, setNotifications] = React.useState<Notification[]>([
-    {
-      id: "n1",
-      title: "Synthesized Kovai Kitchen Website",
-      description: "6 Next.js components compiled in 1.8s with clean AST pass.",
-      timestamp: new Date().toISOString(),
-      read: false,
-    },
-    {
-      id: "n2",
-      title: "42 Fresh Dining Leads Ingested",
-      description: "Scrape batch completed for Coimbatore zone.",
-      timestamp: new Date(Date.now() - 3600000).toISOString(),
-      read: false,
-    },
-  ]);
+  const [notifications, setNotifications] = React.useState<Notification[]>(INITIAL_NOTIFICATIONS);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchOpen, setSearchOpen] = React.useState(false);
   const pathname = usePathname();
@@ -94,7 +98,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   }, [notifOpen, searchOpen]);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 antialiased font-sans selection:bg-blue-600/15 selection:text-blue-700 relative">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#f8fafc] text-slate-800 antialiased font-sans selection:bg-blue-600/15 selection:text-blue-700 relative">
       {/* Background Subtle Grid & Ambient Glow */}
       <div className="fixed inset-0 bg-grid-pattern pointer-events-none opacity-80 z-0" />
       <div className="fixed inset-0 ambient-glow pointer-events-none z-0" />
@@ -135,7 +139,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         )}
       </AnimatePresence>
 
-      <div className="flex min-h-screen flex-col lg:pl-64 relative z-10">
+      <div className="flex min-h-screen w-full max-w-full overflow-x-hidden flex-col lg:pl-64 relative z-10">
         {/* Modern Top Navigation Bar */}
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b border-slate-200/80 bg-white/80 backdrop-blur-md px-4 sm:px-8">
           <div className="flex items-center gap-3">
@@ -272,7 +276,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 pb-16">{children}</main>
+        <main className="flex-1 w-full max-w-full overflow-x-hidden pb-16">{children}</main>
       </div>
     </div>
   );
