@@ -4,9 +4,9 @@ import { classifyError, isAbortError } from "../errors";
 const TIMEOUT_MS = 60_000;
 
 const models = {
-  general: "gemini-flash-latest",
-  reasoning: "gemini-pro-latest",
-  coding: "gemini-flash-latest",
+  general: "gemini-flash-lite-latest",
+  reasoning: "gemini-flash-lite-latest",
+  coding: "gemini-flash-lite-latest",
 };
 
 function mapRole(role: ChatMessage["role"]): "user" | "model" {

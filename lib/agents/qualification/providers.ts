@@ -78,7 +78,13 @@ Output structured JSON only for EACH lead:
     }
 
     try {
-      const results = JSON.parse(response.response.content) as QualificationResult[];
+      const rawContent = response.response.content.trim();
+      const cleanJson = rawContent
+        .replace(/^```json\s*/i, "")
+        .replace(/^```\s*/i, "")
+        .replace(/\s*```$/, "")
+        .trim();
+      const results = JSON.parse(cleanJson) as QualificationResult[];
       return results.map((r) => ({
         ...r,
         factors: {

@@ -34,9 +34,9 @@ export function getProviders(): ProviderConfig[] {
       apiKey: env("GEMINI_API_KEY") || env("GOOGLE_API_KEY") || "",
       baseUrl: "https://generativelanguage.googleapis.com/v1beta",
       models: {
-        general: env("GEMINI_GENERAL_MODEL") || "gemini-flash-latest",
-        reasoning: env("GEMINI_REASONING_MODEL") || "gemini-pro-latest",
-        coding: env("GEMINI_CODING_MODEL") || "gemini-flash-latest",
+        general: env("GEMINI_GENERAL_MODEL") || "gemini-flash-lite-latest",
+        reasoning: env("GEMINI_REASONING_MODEL") || "gemini-flash-lite-latest",
+        coding: env("GEMINI_CODING_MODEL") || "gemini-flash-lite-latest",
       },
       priority: 3,
     },
