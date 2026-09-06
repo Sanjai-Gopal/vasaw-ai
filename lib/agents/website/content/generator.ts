@@ -17,61 +17,61 @@ export async function generateWebsiteContent(params: {
   }
 
   try {
+    // Only pass factual, customer-facing business data.
+    // NEVER pass internal qualification reasoning, sales opportunity scores, or "no website" notes.
     const businessFacts = {
       businessName: lead.businessName,
       category: lead.category,
-      city: lead.city || lead.address,
+      city: lead.city || lead.address || "Coimbatore",
       address: lead.address,
       phone: lead.phone,
       rating: lead.rating,
       reviewCount: lead.reviewCount,
-      website: lead.website,
       services: (lead as unknown as { scraped?: { services?: string[] } }).scraped?.services ?? [],
-      qualificationNotes: qualification.reason,
-      evidence: qualification.evidence,
       template: template.id,
-      sections: template.sections.map((s) => s.id),
     };
 
-    const systemPrompt = `You are an expert website copywriter for local businesses.
-Generate structured website copy in JSON for a "${template.name}" website.
-CRITICAL RULES:
-1. Output valid JSON ONLY. No markdown code blocks, no backticks, no explanatory text.
-2. Use ONLY the provided business facts. Do NOT invent fake doctor names, fake reviews, fake statistics, or fake awards.
-3. Keep the tone professional, persuasive, and localized.
-4. The JSON must match the following structure:
+    const systemPrompt = `You are a world-class website copywriter crafting premium customer-facing copy for a real local business website.
+
+CRITICAL INTEGRITY & TONE RULES:
+1. Output valid JSON ONLY. No markdown code blocks, no backticks, no conversational text.
+2. The audience is END CUSTOMERS (diners, clients, patients). NEVER mention internal AI analysis, opportunity scores, qualification notes, lead scores, or "no website" reasons.
+3. Use ONLY provided business facts. Do NOT invent fake doctor names, fake reviews, fake statistics, or fake awards.
+4. Tone must be warm, inviting, human, localized, and specific to the business category. Avoid corporate consulting clichés like "solutions tailored to your needs".
+5. Structure:
 {
   "metaTitle": "Title for SEO",
-  "metaDescription": "Description for SEO (150-160 chars)",
+  "metaDescription": "Description for SEO (140-160 chars)",
   "hero": {
-    "headline": "Business Name or Catchy Hero Title",
-    "subheadline": "Compelling value proposition for this local business",
-    "ctaText": "Call to action text",
-    "ctaLink": "#contact",
-    "badge": "Badge text (e.g. ★ 4.8/5 Rating)"
+    "headline": "Exact Business Name",
+    "subheadline": "Appetizing / Compelling value proposition for end customers",
+    "ctaText": "Primary CTA text (e.g. View Menu / Book Table / Contact Us)",
+    "ctaLink": "#menu or #contact",
+    "badge": "★ 4.2 (445 Google Reviews) · City"
   },
   "about": {
-    "headline": "About Business Name",
-    "body": "2-3 paragraphs highlighting experience, commitment to quality, and local service.",
+    "headline": "Engaging Section Headline",
+    "body": "Warm, authentic narrative highlighting hospitality, fresh preparation, and local heritage.",
     "highlights": ["Highlight 1", "Highlight 2", "Highlight 3"]
   },
   "services": {
     "headline": "Our Services",
-    "items": [{"title": "Service Name", "description": "Short description"}]
+    "items": [{"title": "Service Title", "description": "Clear benefit description"}]
   },
   "contact": {
-    "headline": "Contact Us",
+    "headline": "Location & Contact",
     "address": "Actual business address",
     "phone": "Actual phone number"
   },
   "cta": {
-    "headline": "Action headline",
-    "subheadline": "Action subheadline",
+    "headline": "Inviting closing headline",
+    "subheadline": "Encouraging visit or order description",
     "buttonText": "Action button text",
     "buttonLink": "tel:..."
   },
   "footer": {
-    "copyrightText": "© 2026 Business Name. All rights reserved."
+    "copyrightText": "© 2026 Business Name. All rights reserved.",
+    "tagline": "Warm closing tagline"
   }
 }`;
 

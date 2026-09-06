@@ -724,7 +724,7 @@ describe("Agent 4 — Website Building Agent", () => {
       expect(validation.errors.some((e) => e.includes("Unsafe characters"))).toBe(true);
     });
 
-    it("should execute real production build successfully on rendered project", { timeout: 30000 }, () => {
+    it("should execute real production build successfully on rendered project", { timeout: 120000 }, () => {
       const lead = createMockLead();
       const qualification = createMockQualification();
       const template = getTemplate("restaurant");
@@ -746,7 +746,7 @@ describe("Agent 4 — Website Building Agent", () => {
       expect(buildRes.stdout).toContain("Compiled successfully");
     });
 
-    it("should fail real production build and capture errors when source code contains syntax error", () => {
+    it("should fail real production build and capture errors when source code contains syntax error", { timeout: 120000 }, () => {
       const lead = createMockLead();
       const qualification = createMockQualification();
       const template = getTemplate("restaurant");

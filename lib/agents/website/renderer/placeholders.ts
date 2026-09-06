@@ -1,5 +1,120 @@
 import { WebsiteTheme } from "../types";
 
+export interface CategoryVisualAssets {
+  heroImage: string;
+  aboutImage: string;
+  gallery: Array<{ url: string; alt: string; caption: string }>;
+  dishThumbnails?: Record<string, string>;
+}
+
+export const CATEGORY_VISUALS: Record<string, CategoryVisualAssets> = {
+  restaurant: {
+    heroImage: "https://images.unsplash.com/photo-1610057099443-fde8c4d50f91?auto=format&fit=crop&w=1600&q=85",
+    aboutImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1000&q=80",
+    gallery: [
+      {
+        url: "https://images.unsplash.com/photo-1668236543090-82eba5ee5976?auto=format&fit=crop&w=900&q=80",
+        alt: "Crispy Golden Dosa with Chutneys",
+        caption: "Signature Ghee Roast Dosa",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=900&q=80",
+        alt: "Aromatic Dum Biryani Platter",
+        caption: "Special Dum Biryani & Raita",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=900&q=80",
+        alt: "Traditional South Indian Curry & Spices",
+        caption: "Freshly Ground Spice Masala",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=900&q=80",
+        alt: "Traditional South Indian Filter Coffee",
+        caption: "Fresh Brewed Filter Coffee",
+      },
+    ],
+  },
+  cafe: {
+    heroImage: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1600&q=85",
+    aboutImage: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1000&q=80",
+    gallery: [
+      {
+        url: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=900&q=80",
+        alt: "Artisan Pour Over Coffee",
+        caption: "Specialty Roasted Espresso",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=900&q=80",
+        alt: "Freshly Baked Pastries",
+        caption: "Flaky Butter Croissants",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1509785307050-d4066910ec1e?auto=format&fit=crop&w=900&q=80",
+        alt: "Cozy Cafe Interior",
+        caption: "Relaxed Neighborhood Atmosphere",
+      },
+    ],
+  },
+  salon: {
+    heroImage: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1600&q=85",
+    aboutImage: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1000&q=80",
+    gallery: [
+      {
+        url: "https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=900&q=80",
+        alt: "Precision Hair Styling",
+        caption: "Custom Hair Styling & Treatment",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80",
+        alt: "Rejuvenating Skin Care",
+        caption: "Glow & Facial Therapies",
+      },
+    ],
+  },
+  gym: {
+    heroImage: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1600&q=85",
+    aboutImage: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=1000&q=80",
+    gallery: [
+      {
+        url: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=900&q=80",
+        alt: "Strength Training Area",
+        caption: "Free Weights & Power Racks",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=900&q=80",
+        alt: "Cardio & HIIT Zone",
+        caption: "High Performance Conditioning",
+      },
+    ],
+  },
+  clinic: {
+    heroImage: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1600&q=85",
+    aboutImage: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1000&q=80",
+    gallery: [
+      {
+        url: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=900&q=80",
+        alt: "Modern Clinical Consultation Desk",
+        caption: "Patient Care & Diagnostic Suite",
+      },
+    ],
+  },
+  generic: {
+    heroImage: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=85",
+    aboutImage: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80",
+    gallery: [
+      {
+        url: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=900&q=80",
+        alt: "Professional Team Consultation",
+        caption: "Dedicated Client Assistance",
+      },
+    ],
+  },
+};
+
+export function getVisualAssets(templateId: string): CategoryVisualAssets {
+  return CATEGORY_VISUALS[templateId] || CATEGORY_VISUALS.generic;
+}
+
 export function generateHeroPlaceholderSvg(businessName: string, category: string, theme: WebsiteTheme): string {
   const safeName = escapeXml(businessName);
   const safeCategory = escapeXml(category);
@@ -10,17 +125,13 @@ export function generateHeroPlaceholderSvg(businessName: string, category: strin
       <stop offset="0%" stop-color="${theme.primaryColor}" stop-opacity="1" />
       <stop offset="100%" stop-color="${theme.secondaryColor}" stop-opacity="1" />
     </linearGradient>
-    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
-    </pattern>
   </defs>
   <rect width="1200" height="600" fill="url(#heroGrad)"/>
-  <rect width="1200" height="600" fill="url(#grid)"/>
-  <circle cx="600" cy="300" r="180" fill="${theme.accentColor}" fill-opacity="0.15"/>
+  <rect width="1200" height="600" fill="rgba(0,0,0,0.4)"/>
   <text x="600" y="280" font-family="system-ui, -apple-system, sans-serif" font-size="44" font-weight="bold" fill="#ffffff" text-anchor="middle">
     ${safeName}
   </text>
-  <text x="600" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="rgba(255,255,255,0.8)" text-anchor="middle" letter-spacing="2">
+  <text x="600" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="rgba(255,255,255,0.85)" text-anchor="middle" letter-spacing="2">
     ${safeCategory.toUpperCase()}
   </text>
 </svg>`;
@@ -37,11 +148,11 @@ export function generateGalleryPlaceholderSvg(index: number, label: string, them
   </defs>
   <rect width="800" height="600" fill="url(#galGrad${index})"/>
   <rect x="20" y="20" width="760" height="560" rx="16" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
-  <circle cx="400" cy="270" r="60" fill="${theme.primaryColor}" fill-opacity="0.5"/>
-  <text x="400" y="285" font-family="system-ui, -apple-system, sans-serif" font-size="40" fill="${theme.accentColor}" text-anchor="middle">
+  <circle cx="400" cy="270" r="48" fill="${theme.primaryColor}" fill-opacity="0.5"/>
+  <text x="400" y="285" font-family="system-ui, -apple-system, sans-serif" font-size="32" fill="${theme.accentColor}" text-anchor="middle">
     ✦
   </text>
-  <text x="400" y="380" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="600" fill="#ffffff" text-anchor="middle">
+  <text x="400" y="370" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="600" fill="#ffffff" text-anchor="middle">
     ${safeLabel}
   </text>
 </svg>`;
