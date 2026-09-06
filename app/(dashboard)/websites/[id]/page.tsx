@@ -14,13 +14,15 @@ import {
   Eye,
   Loader2,
   MessageSquare,
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { fetchWebsites, deployWebsite, rebuildWebsite } from "@/lib/api/websites";
 import { formatDate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { Website } from "@/lib/types";
 
 export default function WebsiteDetailPage() {
@@ -59,7 +61,7 @@ export default function WebsiteDetailPage() {
       const res = await deployWebsite(website.id, "mock");
       if (res.ok) {
         setStatusMsg({ type: "success", text: `Website deployed successfully to ${res.url || "live URL"}` });
-        setWebsite((prev) => prev ? { ...prev, status: "deployed", liveUrl: res.url || prev.previewUrl } : null);
+        setWebsite((prev) => (prev ? { ...prev, status: "deployed", liveUrl: res.url || prev.previewUrl } : null));
       } else {
         setStatusMsg({ type: "error", text: "Deployment failed" });
       }
@@ -92,7 +94,7 @@ export default function WebsiteDetailPage() {
   if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
       </div>
     );
   }
@@ -100,12 +102,12 @@ export default function WebsiteDetailPage() {
   if (!website) {
     return (
       <div className="mx-auto max-w-5xl space-y-4 py-8">
-        <Link href="/websites" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-3.5 w-3.5" /> Back to Websites
+        <Link href="/websites" className="inline-flex items-center gap-1.5 text-xs font-sans text-slate-500 hover:text-slate-900">
+          <ArrowLeft className="h-3.5 w-3.5" /> Back to Websites Fleet
         </Link>
-        <div className="rounded-xl border p-12 text-center">
-          <h3 className="text-base font-semibold">Website Not Found</h3>
-          <p className="mt-1 text-sm text-muted-foreground">The requested website could not be found.</p>
+        <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center">
+          <h3 className="font-display text-lg font-bold text-slate-950">Website Not Found</h3>
+          <p className="mt-1 font-sans text-xs text-slate-500">The requested website could not be found.</p>
         </div>
       </div>
     );
@@ -114,18 +116,18 @@ export default function WebsiteDetailPage() {
   const liveLink = website.liveUrl || website.previewUrl;
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 py-4">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
       {/* Top Breadcrumb & Actions */}
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <Link href="/websites" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-2">
-            <ArrowLeft className="h-3.5 w-3.5" /> Back to Websites
+          <Link href="/websites" className="inline-flex items-center gap-1.5 text-xs font-sans font-semibold text-slate-500 hover:text-slate-900 mb-2">
+            <ArrowLeft className="h-3.5 w-3.5" /> Back to Websites Fleet
           </Link>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
-            <Globe className="h-6 w-6 text-primary" /> {website.businessName}
+          <h1 className="font-display text-2xl font-extrabold tracking-tight text-slate-950 flex items-center gap-2.5">
+            <Globe className="h-6 w-6 text-blue-600" /> {website.businessName}
           </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {website.category} • {website.location} • Template: <span className="capitalize font-medium text-foreground">{website.template}</span>
+          <p className="font-sans text-xs text-slate-500 mt-0.5">
+            {website.category} • {website.location} • Template: <span className="capitalize font-bold font-mono text-slate-800">{website.template}</span>
           </p>
         </div>
 
@@ -135,23 +137,23 @@ export default function WebsiteDetailPage() {
             size="sm"
             onClick={handleRebuild}
             disabled={!!actionLoading}
-            className="gap-1.5 text-xs"
+            className="gap-1.5 text-xs font-sans rounded-xl bg-white border-slate-200"
           >
-            {actionLoading === "rebuild" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-            Rebuild
+            {actionLoading === "rebuild" ? <Loader2 className="h-3.5 w-3.5 animate-spin text-blue-600" /> : <RefreshCw className="h-3.5 w-3.5 text-slate-500" />}
+            Rebuild AST
           </Button>
           <Button
             size="sm"
             onClick={handleDeploy}
             disabled={!!actionLoading || website.status === "deployed"}
-            className="gap-1.5 text-xs bg-gradient-to-r from-violet-600 to-cyan-600 text-white"
+            className="gap-1.5 text-xs font-sans rounded-xl bg-slate-900 text-white hover:bg-slate-800"
           >
             {actionLoading === "deploy" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UploadCloud className="h-3.5 w-3.5" />}
-            {website.status === "deployed" ? "Deployed" : "Deploy Live"}
+            {website.status === "deployed" ? "Deployed to Edge" : "Deploy Live"}
           </Button>
           {liveLink && (
             <a href={liveLink} target="_blank" rel="noopener noreferrer">
-              <Button variant="secondary" size="sm" className="gap-1.5 text-xs">
+              <Button size="sm" className="gap-1.5 text-xs font-sans rounded-xl bg-blue-600 text-white hover:bg-blue-700">
                 <ExternalLink className="h-3.5 w-3.5" /> View Live
               </Button>
             </a>
@@ -161,13 +163,14 @@ export default function WebsiteDetailPage() {
 
       {statusMsg && (
         <div
-          className={`flex items-center gap-2.5 rounded-lg border p-3 text-xs ${
+          className={cn(
+            "flex items-center gap-2.5 rounded-2xl border p-3.5 text-xs font-sans shadow-xs",
             statusMsg.type === "success"
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-              : "border-destructive/30 bg-destructive/10 text-destructive"
-          }`}
+              ? "border-emerald-200 bg-emerald-50/80 text-emerald-800"
+              : "border-rose-200 bg-rose-50/80 text-rose-800"
+          )}
         >
-          {statusMsg.type === "success" ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
+          {statusMsg.type === "success" ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <AlertCircle className="h-4 w-4 text-rose-600" />}
           <span>{statusMsg.text}</span>
         </div>
       )}
@@ -177,145 +180,135 @@ export default function WebsiteDetailPage() {
         {/* Left 2 Cols: Details & Pages Breakdown */}
         <div className="space-y-6 lg:col-span-2">
           {/* Status & Progress */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-semibold">Build & Deployment Status</CardTitle>
-                <Badge variant="outline" className="capitalize text-xs">
-                  {website.status}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm backdrop-blur-md">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+              <h3 className="font-display text-base font-bold text-slate-950">Build & Edge Deployment Status</h3>
+              <Badge variant="outline" className="capitalize font-mono text-[11px] text-emerald-700 border-emerald-200 bg-emerald-50">
+                {website.status}
+              </Badge>
+            </div>
+            <div className="space-y-4">
               <div>
-                <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
-                  <span>Build Progress</span>
-                  <span className="font-semibold text-foreground">{website.buildProgress ?? 100}%</span>
+                <div className="flex justify-between text-xs font-sans text-slate-500 mb-1.5">
+                  <span className="font-medium">AST Build Completion</span>
+                  <span className="font-mono font-bold text-slate-800">{website.buildProgress ?? 100}%</span>
                 </div>
                 <Progress value={website.buildProgress ?? 100} className="h-2" />
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
-                <div className="rounded-lg border bg-muted/40 p-3">
-                  <p className="text-muted-foreground">Generated Pages</p>
-                  <p className="mt-1 font-semibold text-foreground">{typeof website.pages === "number" ? website.pages : 3} Pages</p>
-                  <p className="text-[11px] text-muted-foreground/80 mt-0.5">
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3.5">
+                  <p className="font-mono text-[10px] font-bold text-slate-400 uppercase">Generated Pages</p>
+                  <p className="mt-1 font-mono text-base font-bold text-slate-900">{typeof website.pages === "number" ? website.pages : 3} Pages</p>
+                  <p className="font-sans text-[11px] text-slate-500 mt-0.5">
                     home, about, services, contact
                   </p>
                 </div>
-                <div className="rounded-lg border bg-muted/40 p-3">
-                  <p className="text-muted-foreground">UI Sections</p>
-                  <p className="mt-1 font-semibold text-foreground">{typeof website.sections === "number" ? website.sections : 5} Sections</p>
-                  <p className="text-[11px] text-muted-foreground/80 mt-0.5">
-                    hero, features, gallery, testimonials, contact
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3.5">
+                  <p className="font-mono text-[10px] font-bold text-slate-400 uppercase">UI Sections</p>
+                  <p className="mt-1 font-mono text-base font-bold text-slate-900">{typeof website.sections === "number" ? website.sections : 5} Sections</p>
+                  <p className="font-sans text-[11px] text-slate-500 mt-0.5">
+                    hero, features, gallery, reviews, booking
                   </p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Interactive Preview Sandbox Card */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <Eye className="h-4 w-4 text-cyan-400" /> Live Preview Sandbox
-                </CardTitle>
+          <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm backdrop-blur-md">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+              <h3 className="font-display text-base font-bold text-slate-950 flex items-center gap-2">
+                <Eye className="h-4 w-4 text-blue-600" /> Live Preview Sandbox
+              </h3>
+              {liveLink && (
+                <span className="font-mono text-[11px] text-slate-400 truncate max-w-xs">
+                  {liveLink}
+                </span>
+              )}
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm aspect-[16/10] flex flex-col">
+              {/* Browser bar */}
+              <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2.5 text-xs text-slate-400">
+                <div className="flex gap-1.5">
+                  <div className="h-2.5 w-2.5 rounded-full bg-rose-400" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                </div>
+                <div className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-1 text-center font-mono text-[11px] text-slate-600 truncate flex items-center justify-center gap-1.5">
+                  <ShieldCheck className="h-3 w-3 text-emerald-500" />
+                  {liveLink || "https://preview.vasaw.app/"}
+                </div>
+              </div>
+
+              {/* Preview Content */}
+              <div className="flex-1 p-8 flex flex-col justify-center items-center text-center bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 text-white">
+                <Globe className="h-12 w-12 text-white/40 mb-3" />
+                <h3 className="font-display text-2xl font-extrabold tracking-tight text-white">{website.businessName}</h3>
+                <p className="font-sans text-xs text-white/80 max-w-md mt-1">
+                  Custom {website.template} website synthesized with Next.js 16 App Router, responsive modern layouts, high-conversion CTA booking triggers, and edge cache optimization.
+                </p>
                 {liveLink && (
-                  <span className="text-[11px] text-muted-foreground font-mono truncate max-w-xs">
-                    {liveLink}
-                  </span>
+                  <a
+                    href={liveLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-5"
+                  >
+                    <Button size="sm" className="gap-1.5 text-xs font-sans rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-bold shadow-md">
+                      Open in Full Window <ExternalLink className="h-3.5 w-3.5" />
+                    </Button>
+                  </a>
                 )}
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-xl border border-border/80 bg-background/50 overflow-hidden shadow-inner aspect-[16/10] flex flex-col">
-                {/* Browser bar */}
-                <div className="flex items-center gap-2 border-b bg-muted/70 px-3 py-2 text-xs text-muted-foreground">
-                  <div className="flex gap-1.5">
-                    <div className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />
-                    <div className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
-                    <div className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
-                  </div>
-                  <div className="flex-1 rounded bg-background/80 px-2 py-0.5 text-center font-mono text-[10px] truncate">
-                    {liveLink || "https://preview.vasaw.app/"}
-                  </div>
-                </div>
-
-                {/* Preview Content */}
-                <div className="flex-1 p-6 flex flex-col justify-center items-center text-center bg-gradient-to-b from-background to-muted/20">
-                  <Globe className="h-12 w-12 text-primary/40 mb-3" />
-                  <h3 className="text-base font-bold text-foreground">{website.businessName}</h3>
-                  <p className="text-xs text-muted-foreground max-w-md mt-1">
-                    Custom {website.template} website rendered with responsive modern layouts, high-conversion CTA buttons, and optimized metadata.
-                  </p>
-                  {liveLink && (
-                    <a
-                      href={liveLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-4"
-                    >
-                      <Button size="sm" className="gap-1.5 text-xs">
-                        Open in New Window <ExternalLink className="h-3 w-3" />
-                      </Button>
-                    </a>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Right Col: Metadata & Quick Outreach */}
         <div className="space-y-6">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold">Website Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-xs">
-              <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Website ID</span>
-                <span className="font-mono text-foreground">{website.id}</span>
+          <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm backdrop-blur-md">
+            <h3 className="font-display text-base font-bold text-slate-950 mb-4">Website Telemetry Details</h3>
+            <div className="space-y-3 text-xs font-sans">
+              <div className="flex justify-between border-b border-slate-100 pb-2.5">
+                <span className="text-slate-500">Website ID</span>
+                <span className="font-mono font-bold text-slate-800">{website.id}</span>
               </div>
-              <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Lead ID</span>
-                <Link href={`/leads/${website.leadId}`} className="text-primary hover:underline font-mono">
+              <div className="flex justify-between border-b border-slate-100 pb-2.5">
+                <span className="text-slate-500">Lead Association</span>
+                <Link href={`/leads/${website.leadId}`} className="text-blue-600 hover:underline font-mono font-bold">
                   {website.leadId}
                 </Link>
               </div>
-              <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Template Type</span>
-                <span className="capitalize font-medium text-foreground">{website.template}</span>
+              <div className="flex justify-between border-b border-slate-100 pb-2.5">
+                <span className="text-slate-500">Template Type</span>
+                <span className="capitalize font-bold text-slate-900 font-mono">{website.template}</span>
               </div>
-              <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Created Date</span>
-                <span className="text-foreground">{formatDate(website.createdAt)}</span>
+              <div className="flex justify-between border-b border-slate-100 pb-2.5">
+                <span className="text-slate-500">Created Date</span>
+                <span className="font-mono text-slate-700">{formatDate(website.createdAt)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Hosting Status</span>
-                <span className="text-emerald-400 font-medium">Vercel Edge Ready</span>
+                <span className="text-slate-500">Edge Hosting Status</span>
+                <span className="text-emerald-600 font-bold font-mono">Vercel Edge Ready</span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="border-primary/20 bg-primary/5">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
-                <MessageSquare className="h-4 w-4 text-primary" /> WhatsApp Outreach
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Contact the business owner with this published preview link.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link href="/messages">
-                <Button variant="outline" size="sm" className="w-full text-xs">
-                  Go to Messages
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+          <div className="rounded-3xl border border-blue-200/70 bg-blue-50/50 p-6 shadow-sm backdrop-blur-md">
+            <h3 className="font-display text-base font-bold text-slate-950 flex items-center gap-2 mb-1">
+              <MessageSquare className="h-4 w-4 text-blue-600" /> WhatsApp Outreach
+            </h3>
+            <p className="font-sans text-xs text-slate-600 mb-4">
+              Dispatch a personalized WhatsApp preview message to the business owner.
+            </p>
+            <Link href="/messages">
+              <Button size="sm" className="w-full text-xs font-sans rounded-xl bg-slate-900 text-white hover:bg-slate-800">
+                Go to Outreach Console
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>

@@ -2,13 +2,23 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Play, RefreshCw } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  Play,
+  RefreshCw,
+  Cpu,
+  Zap,
+  Activity,
+  ShieldCheck,
+  ArrowRight,
+  Sparkles,
+} from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { AgentCard } from "@/components/dashboard/agent-card";
 import { PipelineVisual } from "@/components/dashboard/pipeline-visual";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { agents as initialAgents } from "@/lib/data/agents";
+import { cn } from "@/lib/utils";
 import type { Agent, ActivityItem, PipelineStage } from "@/lib/types";
 
 export default function AgentsPage() {
@@ -225,61 +235,105 @@ export default function AgentsPage() {
   };
 
   const anyRunning = agents.some((a) => a.status === "running") || runningId !== null;
+  const healthyCount = agents.filter((a) => a.status === "healthy" || a.status === "online").length;
+  const totalRunsAll = agents.reduce((acc, a) => acc + (a.totalRuns || 0), 0);
+  const totalSuccessAll = agents.reduce((acc, a) => acc + (a.successRuns || 0), 0);
+  const fleetSuccessRate = totalRunsAll > 0 ? Math.round((totalSuccessAll / totalRunsAll) * 100) : 99;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 space-y-6">
       <PageHeader
-        title="Agents"
-        description="Six specialized agents working together to grow your pipeline"
+        title="Autonomous Fleet"
+        description="Six specialized micro-agents orchestrated in real-time across scraping, AST synthesis, Edge deployment, and messaging."
       >
         <Button
           variant="outline"
-          className="gap-1.5"
+          className="gap-1.5 font-sans text-xs"
           onClick={runAllAgents}
           disabled={anyRunning}
         >
-          <RefreshCw className={`h-4 w-4 ${anyRunning ? "animate-spin" : ""}`} />
-          Run all agents
+          <RefreshCw className={cn("h-3.5 w-3.5 text-slate-500", anyRunning && "animate-spin")} />
+          Run All Fleet Agents
         </Button>
       </PageHeader>
 
-      <Card className="mb-6 p-5">
-        <CardHeader className="p-0 pb-4">
-          <CardTitle>Future pipeline</CardTitle>
-          <CardDescription>
-            The complete automation flow VASAW AI will run for every lead
-          </CardDescription>
-        </CardHeader>
+      {/* Porcelain Summary Telemetry Cards */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { label: "Active Fleet Units", value: `${healthyCount}/6`, sub: "Operational nodes online", color: "text-emerald-600", accent: "from-emerald-400 to-teal-500" },
+          { label: "Total Executions", value: totalRunsAll.toLocaleString(), sub: "Cumulative task runs", color: "text-slate-950", accent: "from-slate-600 to-slate-800" },
+          { label: "Fleet Success SLA", value: `${fleetSuccessRate}%`, sub: "Error-free task completion", color: "text-blue-600", accent: "from-blue-500 to-indigo-500" },
+          { label: "Heartbeat Interval", value: "250ms", sub: "Distributed state sync", color: "text-purple-600", accent: "from-purple-400 to-indigo-500" },
+        ].map((s) => (
+          <div
+            key={s.label}
+            className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-sm backdrop-blur-md transition-all duration-200 hover-lift"
+          >
+            <div className={cn("absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r opacity-70", s.accent)} />
+            <p className="font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">{s.label}</p>
+            <p className={cn("mt-1.5 font-display text-3xl font-extrabold tracking-tight", s.color)}>{s.value}</p>
+            <p className="mt-1 font-sans text-xs text-slate-500">{s.sub}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Autonomous Pipeline Stage Diagram */}
+      <div className="rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm backdrop-blur-md">
+        <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="font-display text-lg font-bold text-slate-950 flex items-center gap-2">
+              <Cpu className="h-5 w-5 text-blue-600" />
+              Autonomous Orchestration Pipeline
+            </h3>
+            <p className="font-sans text-xs text-slate-500">
+              The continuous kinetic flow VASAW AI executes for every prospective business target
+            </p>
+          </div>
+          <span className="font-mono text-[11px] text-slate-400">
+            DAG GRAPH: 6 SYNCHRONIZED NODES
+          </span>
+        </div>
+
         {loadingPipeline ? (
-          <div className="h-32 animate-pulse bg-muted rounded-lg" />
+          <div className="h-36 animate-pulse rounded-2xl bg-slate-100/70 border border-slate-200" />
         ) : (
           <PipelineVisual stages={pipeline} />
         )}
-      </Card>
-
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Agent fleet</h2>
-        <p className="text-xs text-muted-foreground">
-          {agents.filter((a) => a.status === "healthy").length} healthy ·{" "}
-          {agents.filter((a) => a.status === "running").length} running
-        </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {/* Agent Fleet Section Header */}
+      <div className="flex items-center justify-between pt-2">
+        <div>
+          <h2 className="font-display text-xl font-bold text-slate-950">Specialized Fleet Workers</h2>
+          <p className="font-sans text-xs text-slate-500">
+            Autonomous agent units equipped with specialized tools, AST parsers, and external APIs.
+          </p>
+        </div>
+        <span className="font-mono text-xs font-semibold text-slate-500">
+          {agents.filter((a) => a.status === "healthy").length} Ready · {agents.filter((a) => a.status === "running").length} Running
+        </span>
+      </div>
+
+      {/* Agent Fleet Cards */}
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {agents.map((agent, index) => (
           <div key={agent.id} className="flex flex-col gap-3">
-            <Link href={`/agents/${agent.id}`} className="block">
+            <Link href={`/agents/${agent.id}`} className="block group">
               <AgentCard agent={agent} index={index} />
             </Link>
             <Button
               variant="outline"
               size="sm"
-              className="gap-1.5"
+              className="gap-1.5 font-sans text-xs rounded-xl bg-white hover:bg-slate-50 border-slate-200"
               onClick={() => runNow(agent.id)}
               disabled={anyRunning && runningId !== agent.id}
             >
-              <Play className="h-3.5 w-3.5" />
-              Run now
+              {runningId === agent.id ? (
+                <RefreshCw className="h-3.5 w-3.5 animate-spin text-blue-600" />
+              ) : (
+                <Play className="h-3.5 w-3.5 text-slate-600" />
+              )}
+              Execute {agent.name.split(" ")[0]} Unit
             </Button>
           </div>
         ))}

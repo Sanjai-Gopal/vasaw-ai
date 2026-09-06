@@ -16,11 +16,14 @@ import {
   ExternalLink,
   Layers,
   FileSpreadsheet,
+  Zap,
+  Check,
+  Cpu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { runOrchestrator } from "@/lib/api/agents";
+import { cn } from "@/lib/utils";
 
 interface StepInfo {
   id: number;
@@ -89,7 +92,6 @@ export default function OnboardingPage() {
     setWorkflowResult(null);
 
     try {
-      // Step through visual progress
       const stepInterval = setInterval(() => {
         setActiveStep((prev) => {
           if (prev < 5) return prev + 1;
@@ -120,187 +122,198 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 py-4">
+    <div className="mx-auto max-w-6xl space-y-8 px-4 py-6 sm:px-6 sm:py-8">
       {/* Header */}
       <div className="flex flex-col gap-2">
-        <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
-          <Sparkles className="h-4 w-4" /> Quick Start Guide
+        <div className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-blue-600">
+          <Sparkles className="h-4 w-4" /> Quick Start & Architecture Guide
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Welcome to VASAW AI
+        <h1 className="font-display text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
+          Welcome to VASAW AI OS
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Understand how VASAW AI turns local Google Maps business listings into deployed custom websites and automated WhatsApp outreach in seconds.
+        <p className="font-sans text-sm text-slate-500 max-w-2xl leading-relaxed">
+          Learn how VASAW AI transforms unstructured Google Maps business listings into edge-deployed Next.js 16 websites and automated WhatsApp conversion sequences in under 30 seconds.
         </p>
       </div>
 
       {/* Interactive Demo Card */}
-      <Card className="border-primary/20 bg-card/60 backdrop-blur-sm">
-        <CardHeader>
-          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-            <div>
-              <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-                <Play className="h-4 w-4 text-primary" /> Live 30-Second Workflow Demo
-              </CardTitle>
-              <CardDescription>
-                Execute an end-to-end 6-agent mock lifecycle right now without external API keys.
-              </CardDescription>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={startDemo}
-                disabled={isRunning}
-                className="gap-2 bg-gradient-to-r from-violet-600 to-cyan-600 text-white hover:from-violet-500 hover:to-cyan-500"
-              >
-                {isRunning ? (
-                  <>Running Agent Pipeline...</>
-                ) : completed ? (
-                  <>
-                    <RotateCcw className="h-4 w-4" /> Run Demo Again
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-4 w-4" /> Start Interactive Demo
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Progress Flow */}
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
-            {steps.map((s, idx) => {
-              const isCurrent = activeStep === s.id && isRunning;
-              const isPast = activeStep > s.id || completed;
-              const Icon = s.icon;
-              return (
-                <div
-                  key={s.id}
-                  className={`relative flex flex-col justify-between rounded-xl border p-4 transition-all ${
-                    isCurrent
-                      ? "border-primary bg-primary/10 shadow-sm"
-                      : isPast
-                      ? "border-emerald-500/40 bg-emerald-500/5"
-                      : "border-border bg-card/40 opacity-70"
-                  }`}
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div
-                        className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                          isPast
-                            ? "bg-emerald-500/20 text-emerald-400"
-                            : isCurrent
-                            ? "bg-primary text-white"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {isPast ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
-                      </div>
-                      <Badge variant="outline" className="text-[10px]">
-                        Stage {idx + 1}
-                      </Badge>
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-semibold text-foreground">{s.title}</h4>
-                      <p className="text-[11px] text-muted-foreground">{s.agent}</p>
-                    </div>
-                  </div>
-                  <p className="mt-2 text-[10px] text-muted-foreground/80">{s.desc}</p>
-                </div>
-              );
-            })}
-          </div>
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-6 sm:p-8 shadow-sm backdrop-blur-md">
+        {/* Top Accent */}
+        <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-400" />
 
-          {/* Results Summary if Completed */}
-          {completed && (
-            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5">
-              <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-                    <h4 className="text-sm font-semibold text-emerald-400">
-                      Workflow Completed Successfully!
-                    </h4>
+        <div className="flex flex-col items-start justify-between gap-4 border-b border-slate-100 pb-6 sm:flex-row sm:items-center">
+          <div>
+            <h3 className="font-display text-xl font-bold text-slate-950 flex items-center gap-2">
+              <Play className="h-5 w-5 text-blue-600" />
+              Live 30-Second Multi-Agent Lifecycle
+            </h3>
+            <p className="font-sans text-xs text-slate-500 mt-1">
+              Execute a full 6-agent mock pipeline right now without external API keys or infrastructure cost.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={startDemo}
+              disabled={isRunning}
+              className="gap-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white hover:opacity-95 shadow-sm rounded-xl font-sans text-xs px-5 h-10"
+            >
+              {isRunning ? (
+                <>Running Agent Pipeline…</>
+              ) : completed ? (
+                <>
+                  <RotateCcw className="h-4 w-4" /> Run Lifecycle Again
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4" /> Start Interactive Demo
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Progress Flow Steps */}
+        <div className="grid grid-cols-1 gap-4 pt-6 md:grid-cols-5">
+          {steps.map((s, idx) => {
+            const isCurrent = activeStep === s.id && isRunning;
+            const isPast = activeStep > s.id || completed;
+            const Icon = s.icon;
+
+            return (
+              <div
+                key={s.id}
+                className={cn(
+                  "relative flex flex-col justify-between rounded-2xl border p-4 transition-all duration-200 hover-lift",
+                  isCurrent
+                    ? "border-blue-500 bg-blue-50/50 shadow-md scale-[1.02]"
+                    : isPast
+                      ? "border-emerald-200 bg-emerald-50/30"
+                      : "border-slate-200/80 bg-slate-50/50 opacity-70"
+                )}
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div
+                      className={cn(
+                        "flex h-9 w-9 items-center justify-center rounded-xl shadow-xs transition-colors",
+                        isPast
+                          ? "bg-emerald-100 text-emerald-600"
+                          : isCurrent
+                            ? "bg-blue-600 text-white"
+                            : "bg-white border border-slate-200 text-slate-400"
+                      )}
+                    >
+                      {isPast ? <Check className="h-4 w-4 stroke-[3]" /> : <Icon className="h-4 w-4" />}
+                    </div>
+                    <span className="font-mono text-[10px] font-bold text-slate-400">
+                      0{idx + 1}
+                    </span>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    All 6 agents finished. {workflowResult?.stats?.scraped ?? 3} leads discovered, {workflowResult?.stats?.websitesBuilt ?? 1} site generated & deployed, and {workflowResult?.stats?.messagesSent ?? 1} outreach dispatched.
-                  </p>
+                  <div>
+                    <h4 className="font-display text-xs font-bold text-slate-950">{s.title}</h4>
+                    <p className="font-mono text-[10px] text-slate-500 font-semibold">{s.agent}</p>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Link href="/leads">
-                    <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-                      View Leads <ArrowRight className="h-3.5 w-3.5" />
-                    </Button>
-                  </Link>
-                  <Link href="/websites">
-                    <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-                      View Websites <ExternalLink className="h-3.5 w-3.5" />
-                    </Button>
-                  </Link>
+                <p className="mt-3 font-sans text-[11px] text-slate-600 leading-relaxed">{s.desc}</p>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Results Summary if Completed */}
+        {completed && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5 shadow-xs"
+          >
+            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                  <h4 className="font-display text-sm font-bold text-emerald-950">
+                    Lifecycle Completed Successfully!
+                  </h4>
                 </div>
+                <p className="font-sans text-xs text-emerald-800">
+                  All 6 specialized agents finished in sync. {workflowResult?.stats?.scraped ?? 3} leads discovered, {workflowResult?.stats?.websitesBuilt ?? 1} site generated & deployed, and {workflowResult?.stats?.messagesSent ?? 1} WhatsApp outreach dispatched.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Link href="/leads">
+                  <Button variant="outline" size="sm" className="gap-1.5 text-xs font-sans rounded-xl bg-white">
+                    View Leads <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+                <Link href="/websites">
+                  <Button size="sm" className="gap-1.5 text-xs font-sans rounded-xl bg-slate-900 text-white hover:bg-slate-800">
+                    View Websites <ExternalLink className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </motion.div>
+        )}
+      </div>
 
-      {/* Next Steps Navigation */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card className="flex flex-col justify-between">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-              <Layers className="h-4 w-4 text-violet-400" /> Manage Campaigns
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Create campaigns targeting specific business categories and locations.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+      {/* Next Steps Quick Launch Cards */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+        <div className="relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm backdrop-blur-md transition-all duration-200 hover-lift">
+          <div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 shadow-xs mb-4">
+              <Layers className="h-5 w-5" />
+            </div>
+            <h3 className="font-display text-base font-bold text-slate-950">Manage Campaigns</h3>
+            <p className="font-sans text-xs text-slate-500 mt-1 leading-relaxed">
+              Create and launch automated acquisition campaigns targeting specific business niches and locations.
+            </p>
+          </div>
+          <div className="pt-5">
             <Link href="/campaigns">
-              <Button variant="secondary" className="w-full justify-between text-xs">
+              <Button variant="outline" className="w-full justify-between text-xs font-sans rounded-xl">
                 Go to Campaigns <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="flex flex-col justify-between">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-              <Target className="h-4 w-4 text-cyan-400" /> Review Leads
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Inspect AI scoring, opportunity evidence, and phone contacts.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <div className="relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm backdrop-blur-md transition-all duration-200 hover-lift">
+          <div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-50 border border-cyan-200 text-cyan-600 shadow-xs mb-4">
+              <Target className="h-5 w-5" />
+            </div>
+            <h3 className="font-display text-base font-bold text-slate-950">Review Qualified Leads</h3>
+            <p className="font-sans text-xs text-slate-500 mt-1 leading-relaxed">
+              Inspect AI scoring breakdowns, opportunity gap evidence, phone numbers, and address details.
+            </p>
+          </div>
+          <div className="pt-5">
             <Link href="/leads">
-              <Button variant="secondary" className="w-full justify-between text-xs">
-                Explore Leads <ArrowRight className="h-3.5 w-3.5" />
+              <Button variant="outline" className="w-full justify-between text-xs font-sans rounded-xl">
+                Explore Leads CRM <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="flex flex-col justify-between">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-              <FileSpreadsheet className="h-4 w-4 text-emerald-400" /> Google Sheets Sync
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Export and sync leads, websites, and outreach logs directly to Google Sheets.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <div className="relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm backdrop-blur-md transition-all duration-200 hover-lift">
+          <div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 shadow-xs mb-4">
+              <FileSpreadsheet className="h-5 w-5" />
+            </div>
+            <h3 className="font-display text-base font-bold text-slate-950">Google Sheets Sync</h3>
+            <p className="font-sans text-xs text-slate-500 mt-1 leading-relaxed">
+              Export and sync leads, websites, and outreach logs directly to Google Sheets with deduplication.
+            </p>
+          </div>
+          <div className="pt-5">
             <Link href="/settings">
-              <Button variant="secondary" className="w-full justify-between text-xs">
-                Configure Sheets <ArrowRight className="h-3.5 w-3.5" />
+              <Button variant="outline" className="w-full justify-between text-xs font-sans rounded-xl">
+                Configure Sheets Sync <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

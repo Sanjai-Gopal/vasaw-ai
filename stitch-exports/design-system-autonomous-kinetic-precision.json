@@ -1,0 +1,175 @@
+{
+  "name": "assets/c6212e173710449d8befbaf9b406c678",
+  "designSystem": {
+    "displayName": "Autonomous Kinetic Precision",
+    "styleGuidelines": "## Brand & Style\n\nThe design system establishes an ultra-refined, high-velocity operational aesthetic tailored for autonomous AI command centers and enterprise orchestration platforms. It targets engineering leaders, systems architects, and intelligence analysts who demand absolute clarity under heavy cognitive load. \n\nThe aesthetic is precision-driven minimalism: pristine porcelain planes, razor-thin structural perimeters, and deliberate electric accents. It rejects decorative noise in favor of functional radiance, evoking calm authority, institutional trust, and surgical computational efficiency inspired by modern craft standards.\n\n## Layout & Spacing\n\nThe layout is governed by a fluid 12-column grid underpinned by a strict 4px base increment.\n\n- **Grid Dynamics**: Desktop operations run on a full-width adaptive canvas with a fixed 280px agent tree navigation rail, 1.5rem column gutters, and 2rem outer viewport margins.\n- **Breakpoints**:\n  - `Desktop (> 1280px)`: 12 columns, full multi-pane orchestration, side-by-side terminal inspection.\n  - `Tablet (768px - 1279px)`: 8 columns, collapsible sub-inspector drawer, stacked log telemetry.\n  - `Mobile (< 767px)`: 4 columns, single-stream operational feed, sticky bottom command dock.\n- **Information Density**: Component interiors employ `density-compact` (6px) vertical pads for tables and log clusters, scaling up to `density-spacious` (20px) for high-level model overview cards.\n\n## Elevation & Depth\n\nElevation rejects heavy drop shadows, relying on layered luminosity, tonal surface shifts, and whisper-thin outlines.\n\n- **Surface Tiers**:\n  - **Ground Floor (`#FAFAFA`)**: Main application background.\n  - **Card/Container (`#FFFFFF`)**: Foreground workspace layers bordered by `1px solid rgba(9, 9, 11, 0.06)`.\n  - **Elevated Hover (`#FFFFFF`)**: Active interactive modules shift up with an ambient diffusion: `0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 4px 16px 0 rgba(0, 0, 0, 0.03)`.\n  - **Overlay/Modal (`#FFFFFF`)**: Command palettes and floating inspector sheets use `0 12px 32px -4px rgba(0, 0, 0, 0.06), 0 4px 12px -2px rgba(0, 0, 0, 0.03)`, framed by a crisp `#E4E4E7` border.\n- **Backdrop Blur**: Floating glass control strips apply `backdrop-filter: blur(12px)` over a `rgba(255, 255, 255, 0.85)` fill.\n\n## Components\n\n### Buttons\n- **Primary**: Solid `#09090B` background with `#FFFFFF` text and a fine internal inset highlight (`inset 0 1px 0 rgba(255, 255, 255, 0.16)`). On hover, subtle transition to `#27272A`. Focused with a 2px offset ring in `#2563EB`.\n- **Secondary / Kinetic**: Pure `#FFFFFF` fill, bordered by `1px solid #E4E4E7`, `#09090B` text. On hover, background shifts to `#F4F4F6` with an airy elevation shadow.\n- **Ghost**: Transparent fill, `#71717A` text, changing to `#09090B` text with a `#F4F4F6` wash on hover.\n\n### Chips & Badges\n- **Autonomous Status Pill**: Translucent background (`rgba(5, 150, 105, 0.08)`), text in `#059669`, containing a pulsing 6px circular emerald beacon (`#059669`) with an ambient outer glow.\n- **Execution Metric Badge**: Grounded `#F4F4F6` background, `#52525B` text, Geist font, border `1px solid rgba(0, 0, 0, 0.04)`.\n\n### Lists & Data Streams\n- Compact grid rows alternating between `#FFFFFF` and `#FAFAFA` on hover.\n- Separators use hairline rules (`rgba(0, 0, 0, 0.05)`).\n- Critical columns feature monospace alignment with fixed tabular digits (`font-variant-numeric: tabular-nums`).\n\n### Checkboxes & Radio Buttons\n- 16x16px boxes with a 4px corner radius.\n- Unchecked: `1px solid #D4D4D8` on pure `#FFFFFF`.\n- Checked: `#2563EB` fill displaying a sharp `#FFFFFF` check icon, accompanied by a subtle outer bloom.\n\n### Input Fields & Command Prompts\n- Background `#FFFFFF`, 1px solid `#E4E4E7`, with an inset shadow `inset 0 1px 2px rgba(0, 0, 0, 0.02)`.\n- Active focus smoothly expands into `border-color: #2563EB` paired with an electric diffusion `box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12)`.\n- Integrated terminal shortcut hints (`⌘K`, `↵`) rendered in `#71717A` with a `#F4F4F6` key cap surface.\n\n### Cards & Module Frames\n- Pure white surfaces with `1px solid rgba(9, 9, 11, 0.06)`.\n- Segmented header bars featuring small uppercase section titles (`label-caps`) alongside live agent node counters.\n- Subdued light-gradient divider lines separating metric summaries from action zones.\n\n### Terminal & Agent Stream Console\n- Background `#F8FAFC`, hairline `#E2E8F0` border, with strict mono font styling.\n- Live autonomous runs highlight current instruction execution with a subtle blue left border strip (`#2563EB`, 2px width) and an ambient cyan fading background highlight.",
+    "theme": {
+      "colorMode": "LIGHT",
+      "font": "GEIST",
+      "roundness": "ROUND_FOUR",
+      "customColor": "#2563eb",
+      "headlineFont": "GEIST",
+      "bodyFont": "INTER",
+      "labelFont": "GEIST",
+      "namedColors": {
+        "outline": "#737686",
+        "secondary_fixed": "#85f8c4",
+        "on_tertiary_fixed": "#001d31",
+        "on_secondary_fixed": "#002114",
+        "inverse_surface": "#2f3038",
+        "outline_variant": "#c3c6d7",
+        "inverse_on_surface": "#f1effa",
+        "tertiary_fixed_dim": "#93ccff",
+        "tertiary_container": "#0073ae",
+        "on_background": "#1a1b22",
+        "on_tertiary_container": "#e7f2ff",
+        "surface_bright": "#fbf8ff",
+        "on_secondary_container": "#00714e",
+        "on_error_container": "#93000a",
+        "on_secondary": "#ffffff",
+        "on_primary": "#ffffff",
+        "tertiary_fixed": "#cce5ff",
+        "primary_fixed": "#dbe1ff",
+        "on_primary_fixed_variant": "#003ea8",
+        "on_primary_container": "#eeefff",
+        "background": "#fbf8ff",
+        "surface_container_low": "#f4f2fd",
+        "on_error": "#ffffff",
+        "secondary_fixed_dim": "#68dba9",
+        "secondary": "#006c4a",
+        "on_secondary_fixed_variant": "#005137",
+        "surface_tint": "#0053db",
+        "error": "#ba1a1a",
+        "error_container": "#ffdad6",
+        "on_tertiary": "#ffffff",
+        "tertiary": "#005a89",
+        "primary_fixed_dim": "#b4c5ff",
+        "primary_container": "#2563eb",
+        "on_surface": "#1a1b22",
+        "on_primary_fixed": "#00174b",
+        "surface": "#fbf8ff",
+        "on_tertiary_fixed_variant": "#004b73",
+        "surface_dim": "#dad9e3",
+        "primary": "#004ac6",
+        "surface_container_high": "#e8e7f1",
+        "secondary_container": "#82f5c1",
+        "surface_container": "#eeedf7",
+        "inverse_primary": "#b4c5ff",
+        "surface_container_lowest": "#ffffff",
+        "on_surface_variant": "#434655",
+        "surface_container_highest": "#e3e1ec",
+        "surface_variant": "#e3e1ec"
+      },
+      "designMd": "---\nname: Autonomous Kinetic Precision\ncolors:\n  surface: '#fbf8ff'\n  surface-dim: '#dad9e3'\n  surface-bright: '#fbf8ff'\n  surface-container-lowest: '#ffffff'\n  surface-container-low: '#f4f2fd'\n  surface-container: '#eeedf7'\n  surface-container-high: '#e8e7f1'\n  surface-container-highest: '#e3e1ec'\n  on-surface: '#1a1b22'\n  on-surface-variant: '#434655'\n  inverse-surface: '#2f3038'\n  inverse-on-surface: '#f1effa'\n  outline: '#737686'\n  outline-variant: '#c3c6d7'\n  surface-tint: '#0053db'\n  primary: '#004ac6'\n  on-primary: '#ffffff'\n  primary-container: '#2563eb'\n  on-primary-container: '#eeefff'\n  inverse-primary: '#b4c5ff'\n  secondary: '#006c4a'\n  on-secondary: '#ffffff'\n  secondary-container: '#82f5c1'\n  on-secondary-container: '#00714e'\n  tertiary: '#005a89'\n  on-tertiary: '#ffffff'\n  tertiary-container: '#0073ae'\n  on-tertiary-container: '#e7f2ff'\n  error: '#ba1a1a'\n  on-error: '#ffffff'\n  error-container: '#ffdad6'\n  on-error-container: '#93000a'\n  primary-fixed: '#dbe1ff'\n  primary-fixed-dim: '#b4c5ff'\n  on-primary-fixed: '#00174b'\n  on-primary-fixed-variant: '#003ea8'\n  secondary-fixed: '#85f8c4'\n  secondary-fixed-dim: '#68dba9'\n  on-secondary-fixed: '#002114'\n  on-secondary-fixed-variant: '#005137'\n  tertiary-fixed: '#cce5ff'\n  tertiary-fixed-dim: '#93ccff'\n  on-tertiary-fixed: '#001d31'\n  on-tertiary-fixed-variant: '#004b73'\n  background: '#fbf8ff'\n  on-background: '#1a1b22'\n  surface-variant: '#e3e1ec'\ntypography:\n  display-hero:\n    fontFamily: Geist\n    fontSize: 48px\n    fontWeight: '600'\n    lineHeight: 56px\n    letterSpacing: -0.03em\n  display-hero-mobile:\n    fontFamily: Geist\n    fontSize: 32px\n    fontWeight: '600'\n    lineHeight: 40px\n    letterSpacing: -0.025em\n  headline-xl:\n    fontFamily: Geist\n    fontSize: 36px\n    fontWeight: '600'\n    lineHeight: 44px\n    letterSpacing: -0.025em\n  headline-xl-mobile:\n    fontFamily: Geist\n    fontSize: 26px\n    fontWeight: '600'\n    lineHeight: 32px\n    letterSpacing: -0.02em\n  headline-lg:\n    fontFamily: Geist\n    fontSize: 28px\n    fontWeight: '500'\n    lineHeight: 36px\n    letterSpacing: -0.02em\n  headline-md:\n    fontFamily: Geist\n    fontSize: 20px\n    fontWeight: '500'\n    lineHeight: 28px\n    letterSpacing: -0.015em\n  headline-sm:\n    fontFamily: Geist\n    fontSize: 16px\n    fontWeight: '600'\n    lineHeight: 24px\n    letterSpacing: -0.01em\n  body-lg:\n    fontFamily: Inter\n    fontSize: 16px\n    fontWeight: '400'\n    lineHeight: 26px\n    letterSpacing: -0.011em\n  body-md:\n    fontFamily: Inter\n    fontSize: 14px\n    fontWeight: '400'\n    lineHeight: 22px\n    letterSpacing: -0.006em\n  body-sm:\n    fontFamily: Inter\n    fontSize: 12px\n    fontWeight: '400'\n    lineHeight: 18px\n    letterSpacing: 0em\n  label-caps:\n    fontFamily: Geist\n    fontSize: 11px\n    fontWeight: '600'\n    lineHeight: 16px\n    letterSpacing: 0.06em\n  label-mono:\n    fontFamily: Geist\n    fontSize: 12px\n    fontWeight: '500'\n    lineHeight: 16px\n    letterSpacing: -0.01em\nrounded:\n  sm: 0.125rem\n  DEFAULT: 0.25rem\n  md: 0.375rem\n  lg: 0.5rem\n  xl: 0.75rem\n  full: 9999px\nspacing:\n  gutter-xs: 0.25rem\n  gutter-sm: 0.5rem\n  gutter-md: 1rem\n  gutter-lg: 1.5rem\n  gutter-xl: 2rem\n  margin-mobile: 1rem\n  margin-tablet: 1.5rem\n  margin-desktop: 2rem\n  density-compact: 0.375rem\n  density-default: 0.75rem\n  density-spacious: 1.25rem\n---\n\n## Brand & Style\n\nThe design system establishes an ultra-refined, high-velocity operational aesthetic tailored for autonomous AI command centers and enterprise orchestration platforms. It targets engineering leaders, systems architects, and intelligence analysts who demand absolute clarity under heavy cognitive load. \n\nThe aesthetic is precision-driven minimalism: pristine porcelain planes, razor-thin structural perimeters, and deliberate electric accents. It rejects decorative noise in favor of functional radiance, evoking calm authority, institutional trust, and surgical computational efficiency inspired by modern craft standards.\n\n## Colors\n\nThe palette operates on a base of warm porcelain surfaces, anchored by neutral zinc and dynamic spectral accents.\n\n- **Base Surfaces**: The primary backdrop is Canvas Pure (`#FFFFFF`) layered across warm porcelain tiers (`#FAFAFA` and `#F4F4F6`), creating subtle structural layering without heavy darks.\n- **Accents**: \n  - **Electric Cobalt (`#2563EB`)**: Primary system interactions, active focus rings, critical telemetry markers, and primary commands.\n  - **Kinetic Cyan (`#0284C7`)**: Secondary telemetry, stream ingestion metrics, and algorithmic state indicators.\n  - **Live Emerald (`#059669`)**: Autonomous engine heartbeats, operational health, and successful parallel runs.\n- **Neutrals**: Monochromatic zinc scale (`#09090B` down to `#FAFAFA`). Borders default to `#E4E4E7` or translucent hairline strokes (`rgba(9, 9, 11, 0.06)`).\n\n## Typography\n\nTypography prioritizes high-density data parsing and structural contrast. \n\n- **Geist** serves as the display, headline, and mechanical label face, bringing mathematical precision, tight tracking, and crisp letterforms to metric readouts and hierarchical headings.\n- **Inter** handles continuous narrative and descriptive body copy, selected for optical neutrality and clear rendering at micro sizes.\n- **Micro-labels and Telemetry**: Rendered in `label-caps` (all-caps with `0.06em` letter spacing) or `label-mono` for run-time readouts, thread tokens, and node addresses.\n\n## Layout & Spacing\n\nThe layout is governed by a fluid 12-column grid underpinned by a strict 4px base increment.\n\n- **Grid Dynamics**: Desktop operations run on a full-width adaptive canvas with a fixed 280px agent tree navigation rail, 1.5rem column gutters, and 2rem outer viewport margins.\n- **Breakpoints**:\n  - `Desktop (> 1280px)`: 12 columns, full multi-pane orchestration, side-by-side terminal inspection.\n  - `Tablet (768px - 1279px)`: 8 columns, collapsible sub-inspector drawer, stacked log telemetry.\n  - `Mobile (< 767px)`: 4 columns, single-stream operational feed, sticky bottom command dock.\n- **Information Density**: Component interiors employ `density-compact` (6px) vertical pads for tables and log clusters, scaling up to `density-spacious` (20px) for high-level model overview cards.\n\n## Elevation & Depth\n\nElevation rejects heavy drop shadows, relying on layered luminosity, tonal surface shifts, and whisper-thin outlines.\n\n- **Surface Tiers**:\n  - **Ground Floor (`#FAFAFA`)**: Main application background.\n  - **Card/Container (`#FFFFFF`)**: Foreground workspace layers bordered by `1px solid rgba(9, 9, 11, 0.06)`.\n  - **Elevated Hover (`#FFFFFF`)**: Active interactive modules shift up with an ambient diffusion: `0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 4px 16px 0 rgba(0, 0, 0, 0.03)`.\n  - **Overlay/Modal (`#FFFFFF`)**: Command palettes and floating inspector sheets use `0 12px 32px -4px rgba(0, 0, 0, 0.06), 0 4px 12px -2px rgba(0, 0, 0, 0.03)`, framed by a crisp `#E4E4E7` border.\n- **Backdrop Blur**: Floating glass control strips apply `backdrop-filter: blur(12px)` over a `rgba(255, 255, 255, 0.85)` fill.\n\n## Shapes\n\nThe shape system adopts a refined, subtle curve structure (`roundedness: 1`), imparting an engineered, calibrated feel across all primitives.\n\n- **Base Radius (0.25rem / 4px)**: Data tags, status badges, inline code blocks, and micro toggles.\n- **Medium Radius (0.375rem / 6px)**: Input fields, command buttons, dropdown menus, and tabs.\n- **Large Radius (0.5rem / 8px)**: Process cards, interactive telemetry panels, and code execution blocks.\n- **X-Large Radius (0.75rem / 12px)**: Root modal windows and floating command pallets.\n- **Circular (9999px)**: Live status beacons, model avatar chips, and agent activity indicators.\n\n## Components\n\n### Buttons\n- **Primary**: Solid `#09090B` background with `#FFFFFF` text and a fine internal inset highlight (`inset 0 1px 0 rgba(255, 255, 255, 0.16)`). On hover, subtle transition to `#27272A`. Focused with a 2px offset ring in `#2563EB`.\n- **Secondary / Kinetic**: Pure `#FFFFFF` fill, bordered by `1px solid #E4E4E7`, `#09090B` text. On hover, background shifts to `#F4F4F6` with an airy elevation shadow.\n- **Ghost**: Transparent fill, `#71717A` text, changing to `#09090B` text with a `#F4F4F6` wash on hover.\n\n### Chips & Badges\n- **Autonomous Status Pill**: Translucent background (`rgba(5, 150, 105, 0.08)`), text in `#059669`, containing a pulsing 6px circular emerald beacon (`#059669`) with an ambient outer glow.\n- **Execution Metric Badge**: Grounded `#F4F4F6` background, `#52525B` text, Geist font, border `1px solid rgba(0, 0, 0, 0.04)`.\n\n### Lists & Data Streams\n- Compact grid rows alternating between `#FFFFFF` and `#FAFAFA` on hover.\n- Separators use hairline rules (`rgba(0, 0, 0, 0.05)`).\n- Critical columns feature monospace alignment with fixed tabular digits (`font-variant-numeric: tabular-nums`).\n\n### Checkboxes & Radio Buttons\n- 16x16px boxes with a 4px corner radius.\n- Unchecked: `1px solid #D4D4D8` on pure `#FFFFFF`.\n- Checked: `#2563EB` fill displaying a sharp `#FFFFFF` check icon, accompanied by a subtle outer bloom.\n\n### Input Fields & Command Prompts\n- Background `#FFFFFF`, 1px solid `#E4E4E7`, with an inset shadow `inset 0 1px 2px rgba(0, 0, 0, 0.02)`.\n- Active focus smoothly expands into `border-color: #2563EB` paired with an electric diffusion `box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12)`.\n- Integrated terminal shortcut hints (`⌘K`, `↵`) rendered in `#71717A` with a `#F4F4F6` key cap surface.\n\n### Cards & Module Frames\n- Pure white surfaces with `1px solid rgba(9, 9, 11, 0.06)`.\n- Segmented header bars featuring small uppercase section titles (`label-caps`) alongside live agent node counters.\n- Subdued light-gradient divider lines separating metric summaries from action zones.\n\n### Terminal & Agent Stream Console\n- Background `#F8FAFC`, hairline `#E2E8F0` border, with strict mono font styling.\n- Live autonomous runs highlight current instruction execution with a subtle blue left border strip (`#2563EB`, 2px width) and an ambient cyan fading background highlight.",
+      "colorVariant": "FIDELITY",
+      "overridePrimaryColor": "#2563eb",
+      "overrideSecondaryColor": "#059669",
+      "overrideTertiaryColor": "#0284c7",
+      "overrideNeutralColor": "#71717a",
+      "spacingScale": 2,
+      "typography": {
+        "headline-xl-mobile": {
+          "fontFamily": "Geist",
+          "fontSize": "26px",
+          "fontWeight": "600",
+          "lineHeight": "32px",
+          "letterSpacing": "-0.02em"
+        },
+        "headline-xl": {
+          "fontFamily": "Geist",
+          "fontSize": "36px",
+          "fontWeight": "600",
+          "lineHeight": "44px",
+          "letterSpacing": "-0.025em"
+        },
+        "label-mono": {
+          "fontFamily": "Geist",
+          "fontSize": "12px",
+          "fontWeight": "500",
+          "lineHeight": "16px",
+          "letterSpacing": "-0.01em"
+        },
+        "body-lg": {
+          "fontFamily": "Inter",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "-0.011em"
+        },
+        "display-hero-mobile": {
+          "fontFamily": "Geist",
+          "fontSize": "32px",
+          "fontWeight": "600",
+          "lineHeight": "40px",
+          "letterSpacing": "-0.025em"
+        },
+        "headline-sm": {
+          "fontFamily": "Geist",
+          "fontSize": "16px",
+          "fontWeight": "600",
+          "lineHeight": "24px",
+          "letterSpacing": "-0.01em"
+        },
+        "headline-lg": {
+          "fontFamily": "Geist",
+          "fontSize": "28px",
+          "fontWeight": "500",
+          "lineHeight": "36px",
+          "letterSpacing": "-0.02em"
+        },
+        "headline-md": {
+          "fontFamily": "Geist",
+          "fontSize": "20px",
+          "fontWeight": "500",
+          "lineHeight": "28px",
+          "letterSpacing": "-0.015em"
+        },
+        "label-caps": {
+          "fontFamily": "Geist",
+          "fontSize": "11px",
+          "fontWeight": "600",
+          "lineHeight": "16px",
+          "letterSpacing": "0.06em"
+        },
+        "body-md": {
+          "fontFamily": "Inter",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "lineHeight": "22px",
+          "letterSpacing": "-0.006em"
+        },
+        "display-hero": {
+          "fontFamily": "Geist",
+          "fontSize": "48px",
+          "fontWeight": "600",
+          "lineHeight": "56px",
+          "letterSpacing": "-0.03em"
+        },
+        "body-sm": {
+          "fontFamily": "Inter",
+          "fontSize": "12px",
+          "fontWeight": "400",
+          "lineHeight": "18px",
+          "letterSpacing": "0em"
+        }
+      },
+      "spacing": {
+        "density-default": "0.75rem",
+        "margin-tablet": "1.5rem",
+        "gutter-md": "1rem",
+        "gutter-lg": "1.5rem",
+        "gutter-sm": "0.5rem",
+        "margin-desktop": "2rem",
+        "gutter-xs": "0.25rem",
+        "density-spacious": "1.25rem",
+        "density-compact": "0.375rem",
+        "gutter-xl": "2rem",
+        "margin-mobile": "1rem"
+      },
+      "headlineFontFamily": "Geist",
+      "bodyFontFamily": "Inter",
+      "labelFontFamily": "Geist"
+    }
+  },
+  "version": "1"
+}

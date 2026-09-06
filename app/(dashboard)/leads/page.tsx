@@ -14,9 +14,16 @@ import {
   SlidersHorizontal,
   Star,
   X,
+  Building2,
+  Sparkles,
+  TrendingUp,
+  Globe,
+  MessageSquare,
+  CheckCircle2,
+  Clock,
+  ShieldCheck,
 } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,9 +37,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { leadStatusMeta, websiteStatusMeta, messageStatusMeta } from "@/lib/status";
+import { cn } from "@/lib/utils";
 import type { LeadPriority } from "@/lib/types";
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 10;
 
 type SortKey = "aiScore" | "rating" | "reviews" | "businessName";
 type SortDir = "asc" | "desc";
@@ -113,17 +121,27 @@ interface Message {
   createdAt: string;
 }
 
-const priorityVariant: Record<LeadPriority, "destructive" | "warning" | "muted"> = {
-  high: "destructive",
-  medium: "warning",
-  low: "muted",
-};
-
-function ScoreRing({ score }: { score: number }) {
-  const color = score >= 80 ? "text-emerald-400" : score >= 60 ? "text-amber-400" : "text-rose-400";
+function ScoreBadge({ score }: { score: number }) {
+  const isHigh = score >= 80;
+  const isMed = score >= 60;
   return (
-    <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-current text-xs font-bold ${color}`}>
-      {score}
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 font-mono text-[11px] font-bold px-2 py-0.5 rounded-full border",
+        isHigh
+          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+          : isMed
+          ? "bg-amber-50 text-amber-700 border-amber-200"
+          : "bg-slate-100 text-slate-600 border-slate-200"
+      )}
+    >
+      <span
+        className={cn(
+          "w-1.5 h-1.5 rounded-full",
+          isHigh ? "bg-emerald-500" : isMed ? "bg-amber-500" : "bg-slate-400"
+        )}
+      />
+      {score}%
     </span>
   );
 }
@@ -162,14 +180,12 @@ export default function LeadsPage() {
         if (leadsData.ok && Array.isArray(leadsData.leads)) {
           const leadsArray = leadsData.leads as Lead[];
           setLeads(leadsArray);
-          
-          // Extract unique categories
+
           const cats = Array.from(new Set(leadsArray.map((l) => l.category).filter(Boolean))).sort();
           setCategories(cats);
 
-          // Extract status options
           const statuses = Array.from(new Set(leadsArray.map((l) => l.status).filter(Boolean)));
-          setStatusOptions(statuses.map(s => [s, leadStatusMeta[s as keyof typeof leadStatusMeta] || { label: s, variant: "default" }]));
+          setStatusOptions(statuses.map((s) => [s, leadStatusMeta[s as keyof typeof leadStatusMeta] || { label: s, variant: "default" }]));
         }
         if (websitesData.ok && Array.isArray(websitesData.websites)) {
           setWebsites(websitesData.websites);
@@ -231,12 +247,12 @@ export default function LeadsPage() {
   const renderSortIcon = (column: SortKey) =>
     sortKey === column ? (
       sortDir === "asc" ? (
-        <ArrowUp className="h-3.5 w-3.5" />
+        <ArrowUp className="h-3.5 w-3.5 text-blue-600" />
       ) : (
-        <ArrowDown className="h-3.5 w-3.5" />
+        <ArrowDown className="h-3.5 w-3.5 text-blue-600" />
       )
     ) : (
-      <ArrowUpDown className="h-3.5 w-3.5 opacity-50" />
+      <ArrowUpDown className="h-3.5 w-3.5 opacity-40 group-hover:opacity-100" />
     );
 
   const resetFilters = () => {
@@ -249,15 +265,20 @@ export default function LeadsPage() {
 
   const hasFilters = search || status !== "all" || priority !== "all" || category !== "all";
 
+  // Summary Metrics
+  const hotLeadsCount = leads.filter((l) => (l.aiScore ?? 0) >= 80).length;
+  const noWebsiteCount = leads.filter((l) => !l.website).length;
+
   if (loading) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mx-auto max-w-[1520px] px-4 py-6 sm:px-8">
         <div className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-24 animate-pulse bg-muted rounded-lg" />
+          <div className="grid gap-4 sm:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-24 animate-pulse bg-slate-100 rounded-2xl border border-slate-200" />
             ))}
           </div>
+          <div className="h-96 animate-pulse bg-slate-100 rounded-2xl border border-slate-200 mt-6" />
         </div>
       </div>
     );
@@ -265,36 +286,81 @@ export default function LeadsPage() {
 
   if (error) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-        <div className="text-center py-12">
-          <p className="text-rose-400">Failed to load leads</p>
-          <p className="text-muted-foreground mt-2">{error}</p>
+      <div className="mx-auto max-w-[1520px] px-4 py-6 sm:px-8">
+        <div className="text-center py-12 rounded-2xl bg-white border border-slate-200">
+          <p className="text-rose-600 font-bold font-display text-lg">Failed to load leads</p>
+          <p className="text-slate-500 mt-2 text-sm">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto max-w-[1520px] px-4 py-6 sm:px-8">
       <PageHeader
-        title="Leads"
-        description={`${leads.length} businesses discovered · ${filtered.length} matching current filters`}
-      />
+        title="Leads Intelligence Engine"
+        description={`${leads.length} entities discovered • ${filtered.length} matching operational filters`}
+      >
+        <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs h-8 shadow-xs">
+          <Link href="/campaigns">Scrape New Zone</Link>
+        </Button>
+      </PageHeader>
 
-      <Card className="mb-4 p-4">
-        <div className="grid gap-3 md:grid-cols-[1fr_repeat(3,minmax(150px,auto))]">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      {/* Top 3 Metric Tiles */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/80 hover-lift shadow-[0_2px_8px_rgba(15,23,42,0.03)] flex items-center justify-between">
+          <div>
+            <p className="text-[12px] font-semibold text-slate-500">Discovered Cohort</p>
+            <p className="mt-1 text-[26px] font-bold font-mono text-slate-950 leading-none">
+              {leads.length}
+            </p>
+          </div>
+          <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 border border-blue-200">
+            <Building2 className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/80 hover-lift shadow-[0_2px_8px_rgba(15,23,42,0.03)] flex items-center justify-between">
+          <div>
+            <p className="text-[12px] font-semibold text-slate-500">High-Value ICP (Hot Tier)</p>
+            <p className="mt-1 text-[26px] font-bold font-mono text-emerald-700 leading-none">
+              {hotLeadsCount}
+            </p>
+          </div>
+          <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">
+            <Sparkles className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/80 hover-lift shadow-[0_2px_8px_rgba(15,23,42,0.03)] flex items-center justify-between">
+          <div>
+            <p className="text-[12px] font-semibold text-slate-500">Missing Digital Presence</p>
+            <p className="mt-1 text-[26px] font-bold font-mono text-amber-700 leading-none">
+              {noWebsiteCount}
+            </p>
+          </div>
+          <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-200">
+            <Globe className="w-5 h-5" />
+          </div>
+        </div>
+      </div>
+
+      {/* Filter Controls Card */}
+      <div className="mb-6 p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs">
+        <div className="grid gap-3 md:grid-cols-[1fr_repeat(3,minmax(160px,auto))]">
+          <div className="relative flex items-center">
+            <Search className="absolute left-3.5 h-4 w-4 text-slate-400" />
             <Input
-              placeholder="Search by business, category, location…"
+              placeholder="Search by business, category, address..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              className="pl-9"
+              className="pl-10 h-9.5 rounded-xl bg-slate-50/70 border-slate-200 focus:bg-white text-[13px] font-sans"
             />
           </div>
+
           <Select
             value={status}
             onChange={(e) => {
@@ -302,14 +368,16 @@ export default function LeadsPage() {
               setPage(1);
             }}
             aria-label="Filter by status"
+            className="h-9.5 rounded-xl bg-slate-50/70 border-slate-200 text-[12.5px] font-sans"
           >
-            <option value="all">All statuses</option>
+            <option value="all">All Lifecycle Statuses</option>
             {statusOptions.map(([key, meta]) => (
               <option key={key} value={key}>
                 {meta.label}
               </option>
             ))}
           </Select>
+
           <Select
             value={priority}
             onChange={(e) => {
@@ -317,12 +385,14 @@ export default function LeadsPage() {
               setPage(1);
             }}
             aria-label="Filter by priority"
+            className="h-9.5 rounded-xl bg-slate-50/70 border-slate-200 text-[12.5px] font-sans"
           >
-            <option value="all">All priorities</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
+            <option value="all">All Priorities</option>
+            <option value="high">High Priority</option>
+            <option value="medium">Medium Priority</option>
+            <option value="low">Low Priority</option>
           </Select>
+
           <Select
             value={category}
             onChange={(e) => {
@@ -330,8 +400,9 @@ export default function LeadsPage() {
               setPage(1);
             }}
             aria-label="Filter by category"
+            className="h-9.5 rounded-xl bg-slate-50/70 border-slate-200 text-[12.5px] font-sans"
           >
-            <option value="all">All categories</option>
+            <option value="all">All Categories</option>
             {categories.map((c) => (
               <option key={c} value={c}>
                 {c}
@@ -339,203 +410,193 @@ export default function LeadsPage() {
             ))}
           </Select>
         </div>
-        {hasFilters && (
-          <button
-            onClick={resetFilters}
-            className="mt-3 flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-          >
-            <X className="h-3.5 w-3.5" />
-            Clear all filters
-          </button>
-        )}
-      </Card>
 
-      <Card>
-        <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
-          <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            <SlidersHorizontal className="h-3.5 w-3.5" />
-            Lead table
+        {hasFilters && (
+          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-slate-500 font-mono">
+              Filtered: <strong className="text-slate-900">{filtered.length}</strong> of {leads.length}
+            </span>
+            <button
+              onClick={resetFilters}
+              className="flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              <X className="h-3.5 w-3.5" />
+              Reset All Filters
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Leads Table Container */}
+      <div className="rounded-2xl bg-white border border-slate-200/90 overflow-hidden shadow-xs">
+        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5 bg-slate-50/50">
+          <p className="flex items-center gap-2 text-[12px] font-mono font-bold uppercase tracking-wider text-slate-500">
+            <SlidersHorizontal className="h-3.5 w-3.5 text-blue-600" />
+            Active Records Stream
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-[11.5px] font-mono text-slate-500 font-medium">
             Showing {(current - 1) * PAGE_SIZE + 1}–{Math.min(current * PAGE_SIZE, filtered.length)} of{" "}
-            {filtered.length}
+            <span className="text-slate-900 font-bold">{filtered.length}</span>
           </p>
         </div>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Business</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>
-                <button
-                  onClick={() => toggleSort("rating")}
-                  className="flex items-center gap-1 uppercase tracking-wider hover:text-foreground"
-                >
-                  Rating {renderSortIcon("rating")}
-                </button>
-              </TableHead>
-              <TableHead>
-                <button
-                  onClick={() => toggleSort("reviews")}
-                  className="flex items-center gap-1 uppercase tracking-wider hover:text-foreground"
-                >
-                  Reviews {renderSortIcon("reviews")}
-                </button>
-              </TableHead>
-              <TableHead>Website</TableHead>
-              <TableHead>
-                <button
-                  onClick={() => toggleSort("aiScore")}
-                  className="flex items-center gap-1 uppercase tracking-wider hover:text-foreground"
-                >
-                  AI Score {renderSortIcon("aiScore")}
-                </button>
-              </TableHead>
-              <TableHead>Priority</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Website</TableHead>
-              <TableHead>Outreach</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {pageItems.map((lead) => {
-              const meta = leadStatusMeta[lead.status as keyof typeof leadStatusMeta] || { label: lead.status || "New", variant: "default" };
-              const leadWebsite = websites.find((w) => w.leadId === lead.id);
-              const leadMessages = messages.filter((m) => m.leadId === lead.id);
-              const latestMessage = leadMessages.length > 0
-                ? [...leadMessages].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())[0]
-                : null;
-              const name = lead.businessName || "Unknown Business";
-              const initials = (name.trim() || "UN").slice(0, 2);
-              return (
-                <TableRow key={lead.id} className="cursor-pointer">
-                  <TableCell>
-                    <Link href={`/leads/${lead.id}`} className="group flex items-center gap-2">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-[10px] font-bold uppercase text-muted-foreground">
-                        {initials}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate font-medium group-hover:text-primary">
-                          {name}
-                        </p>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {lead.location || "—"}
-                        </p>
-                      </div>
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{lead.category || "—"}</TableCell>
-                  <TableCell>
-                    <span className="flex items-center gap-1 font-medium">
-                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                      {(lead.rating ?? 0).toFixed(1)}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{lead.reviews ?? 0}</TableCell>
-                  <TableCell>
-                    {lead.website ? (
-                      <a
-                        href="#"
-                        onClick={(e) => e.preventDefault()}
-                        className="flex max-w-[150px] items-center gap-1 text-xs text-info hover:underline"
-                      >
-                        <ExternalLink className="h-3 w-3 shrink-0" />
-                        <span className="truncate">{lead.website}</span>
-                      </a>
-                    ) : (
-                      <Badge variant="outline">None</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <ScoreRing score={lead.aiScore ?? 0} />
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={priorityVariant[lead.priority] || "muted"}>
-                      {lead.priority || "medium"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={meta.variant}>{meta.label}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    {leadWebsite ? (
-                      <Badge variant={websiteStatusMeta[leadWebsite.status as keyof typeof websiteStatusMeta]?.variant || "default"}>
-                        {websiteStatusMeta[leadWebsite.status as keyof typeof websiteStatusMeta]?.label || leadWebsite.status}
-                      </Badge>
-                    ) : (
-                      <Badge variant="muted">None</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {latestMessage ? (
-                      <Badge variant={messageStatusMeta[latestMessage.status as keyof typeof messageStatusMeta]?.variant || "default"}>
-                        {messageStatusMeta[latestMessage.status as keyof typeof messageStatusMeta]?.label || latestMessage.status}
-                      </Badge>
-                    ) : (
-                      <Badge variant="muted">Not contacted</Badge>
-                    )}
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-slate-50/80 border-b border-slate-200/80">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="font-mono text-[11px] font-bold text-slate-500 uppercase tracking-wider">Business Entity</TableHead>
+                <TableHead className="font-mono text-[11px] font-bold text-slate-500 uppercase tracking-wider">Category</TableHead>
+                <TableHead className="font-mono text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <button
+                    onClick={() => toggleSort("rating")}
+                    className="flex items-center gap-1 group hover:text-slate-900"
+                  >
+                    Rating {renderSortIcon("rating")}
+                  </button>
+                </TableHead>
+                <TableHead className="font-mono text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <button
+                    onClick={() => toggleSort("reviews")}
+                    className="flex items-center gap-1 group hover:text-slate-900"
+                  >
+                    Reviews {renderSortIcon("reviews")}
+                  </button>
+                </TableHead>
+                <TableHead className="font-mono text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <button
+                    onClick={() => toggleSort("aiScore")}
+                    className="flex items-center gap-1 group hover:text-slate-900"
+                  >
+                    AI Score {renderSortIcon("aiScore")}
+                  </button>
+                </TableHead>
+                <TableHead className="font-mono text-[11px] font-bold text-slate-500 uppercase tracking-wider">Status</TableHead>
+                <TableHead className="font-mono text-[11px] font-bold text-slate-500 uppercase tracking-wider">Synthesized Site</TableHead>
+                <TableHead className="font-mono text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-slate-100 font-sans">
+              {pageItems.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-12 text-slate-400 font-mono text-xs">
+                    No leads matching current search parameters
                   </TableCell>
                 </TableRow>
-              );
-            })}
-            {pageItems.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
-                  No leads match the current filters.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                pageItems.map((lead) => {
+                  const leadWebsite = websites.find((w) => w.leadId === lead.id);
+                  const name = lead.businessName || "Unknown Business";
+                  const initials = (name.trim() || "UN").slice(0, 2).toUpperCase();
 
-        <div className="flex items-center justify-between border-t border-border px-4 py-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1"
-            disabled={current <= 1}
-            onClick={() => setPage(current - 1)}
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Previous
-          </Button>
-          <div className="flex items-center gap-1">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPage(p)}
-                className={`h-8 w-8 rounded-md text-xs font-medium transition-colors ${
-                  p === current
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent"
-                }`}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1"
-            disabled={current >= totalPages}
-            onClick={() => setPage(current + 1)}
-          >
-            Next
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+                  return (
+                    <TableRow
+                      key={lead.id}
+                      className="hover:bg-blue-50/30 transition-colors group cursor-pointer"
+                    >
+                      <TableCell className="py-3">
+                        <Link href={`/leads/${lead.id}`} className="flex items-center gap-3">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/70 text-[11px] font-mono font-bold text-blue-700 shadow-xs">
+                            {initials}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate font-semibold text-[13.5px] text-slate-900 group-hover:text-blue-600 transition-colors">
+                              {name}
+                            </p>
+                            <p className="truncate text-[11.5px] text-slate-500 font-mono">
+                              {lead.location || "Coimbatore"}
+                            </p>
+                          </div>
+                        </Link>
+                      </TableCell>
+
+                      <TableCell className="text-[12.5px] text-slate-600 font-medium">
+                        {lead.category || "General"}
+                      </TableCell>
+
+                      <TableCell>
+                        <span className="inline-flex items-center gap-1 font-mono text-[12px] font-bold text-slate-800">
+                          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                          {(lead.rating ?? 0).toFixed(1)}
+                        </span>
+                      </TableCell>
+
+                      <TableCell className="font-mono text-[12px] text-slate-600">
+                        {lead.reviews ?? 0}
+                      </TableCell>
+
+                      <TableCell>
+                        <ScoreBadge score={lead.aiScore ?? 0} />
+                      </TableCell>
+
+                      <TableCell>
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                          {lead.status}
+                        </span>
+                      </TableCell>
+
+                      <TableCell>
+                        {leadWebsite ? (
+                          <Link
+                            href={`/websites/${leadWebsite.id}`}
+                            className="inline-flex items-center gap-1 text-[11.5px] font-mono font-bold text-blue-600 hover:text-blue-800 hover:underline"
+                          >
+                            <Globe className="w-3.5 h-3.5" />
+                            <span>Preview Demo</span>
+                          </Link>
+                        ) : (
+                          <span className="text-[11px] font-mono text-slate-400">—</span>
+                        )}
+                      </TableCell>
+
+                      <TableCell className="text-right">
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2.5 text-[11.5px] font-bold text-blue-600 hover:bg-blue-50"
+                        >
+                          <Link href={`/leads/${lead.id}`}>
+                            Inspect →
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
         </div>
-      </Card>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="mt-4 text-center text-xs text-muted-foreground"
-      >
-        Click any business row to open the full lead profile.
-      </motion.div>
+        {/* Pagination Footer */}
+        <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3.5 bg-slate-50/50">
+          <p className="text-[11.5px] font-mono text-slate-500">
+            Page <strong className="text-slate-900">{current}</strong> of {totalPages}
+          </p>
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={current <= 1}
+              className="h-7.5 px-2.5 rounded-lg border-slate-200 text-xs font-semibold"
+            >
+              <ChevronLeft className="h-3.5 w-3.5 mr-0.5" />
+              Prev
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={current >= totalPages}
+              className="h-7.5 px-2.5 rounded-lg border-slate-200 text-xs font-semibold"
+            >
+              Next
+              <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

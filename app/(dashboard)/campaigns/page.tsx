@@ -2,9 +2,25 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { Plus, Pause, Play, Target, MoreHorizontal, Globe, MessageSquare, Users, Loader2, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Plus,
+  Pause,
+  Play,
+  Target,
+  MoreHorizontal,
+  Globe,
+  MessageSquare,
+  Users,
+  Loader2,
+  RefreshCw,
+  CheckCircle2,
+  AlertCircle,
+  Sparkles,
+  Zap,
+  TrendingUp,
+  SlidersHorizontal,
+} from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +46,7 @@ import {
 import { campaignCategories, campaignLocations, defaultMockCampaigns } from "@/lib/data/campaigns";
 import { campaignStatusMeta } from "@/lib/status";
 import { formatDate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { fetchCampaigns, createCampaign, executeCampaign, updateCampaignStatus } from "@/lib/api/campaigns";
 import type { Campaign, CampaignStatus } from "@/lib/types";
 
@@ -77,35 +94,40 @@ function CreateCampaignDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button id="create-campaign-trigger" className="gap-1.5">
+        <Button id="create-campaign-trigger" className="gap-1.5 bg-slate-900 text-white shadow-sm hover:bg-slate-800 font-sans">
           <Plus className="h-4 w-4" />
-          Create campaign
+          Create Campaign
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-lg rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-2xl backdrop-blur-xl">
         <DialogHeader>
-          <DialogTitle>Create campaign</DialogTitle>
-          <DialogDescription>
-            Set up a new acquisition campaign for a category and location.
+          <DialogTitle className="font-display text-xl font-bold text-slate-950 flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-blue-600" />
+            Launch Autonomous Campaign
+          </DialogTitle>
+          <DialogDescription className="font-sans text-xs text-slate-500">
+            Configure geo-targeted discovery criteria, qualification filters, and execution automation mode.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={submit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="campaign-name">Campaign name</Label>
+        <form onSubmit={submit} className="space-y-4 pt-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="campaign-name" className="text-xs font-semibold text-slate-700">Campaign Name</Label>
             <Input
               id="campaign-name"
               placeholder="e.g. Coimbatore Restaurants — Phase 2"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              className="bg-slate-50 border-slate-200 text-xs rounded-xl font-sans"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="campaign-category">Category</Label>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="campaign-category" className="text-xs font-semibold text-slate-700">Category</Label>
               <Select
                 id="campaign-category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
+                className="bg-slate-50 border-slate-200 text-xs rounded-xl font-sans"
               >
                 {campaignCategories.map((c) => (
                   <option key={c} value={c}>
@@ -114,12 +136,13 @@ function CreateCampaignDialog({
                 ))}
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="campaign-location">Location</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="campaign-location" className="text-xs font-semibold text-slate-700">Location</Label>
               <Select
                 id="campaign-location"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
+                className="bg-slate-50 border-slate-200 text-xs rounded-xl font-sans"
               >
                 {campaignLocations.map((l) => (
                   <option key={l} value={l}>
@@ -129,19 +152,20 @@ function CreateCampaignDialog({
               </Select>
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="campaign-target">Lead target</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="campaign-target" className="text-xs font-semibold text-slate-700">Lead Target Quota</Label>
             <Input
               id="campaign-target"
               type="number"
               min={10}
               value={target}
               onChange={(e) => setTarget(e.target.value)}
+              className="bg-slate-50 border-slate-200 text-xs rounded-xl font-sans"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="campaign-min-rating">Minimum rating</Label>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="campaign-min-rating" className="text-xs font-semibold text-slate-700">Min Rating</Label>
               <Input
                 id="campaign-min-rating"
                 type="number"
@@ -150,55 +174,59 @@ function CreateCampaignDialog({
                 step={0.1}
                 value={minRating}
                 onChange={(e) => setMinRating(e.target.value)}
+                className="bg-slate-50 border-slate-200 text-xs rounded-xl font-sans"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="campaign-min-reviews">Minimum reviews</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="campaign-min-reviews" className="text-xs font-semibold text-slate-700">Min Reviews</Label>
               <Input
                 id="campaign-min-reviews"
                 type="number"
                 min={0}
                 value={minReviews}
                 onChange={(e) => setMinReviews(e.target.value)}
+                className="bg-slate-50 border-slate-200 text-xs rounded-xl font-sans"
               />
             </div>
           </div>
-          <div className="space-y-2">
-            <Label>Automation mode</Label>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-700">Execution Mode</Label>
             <Select
               value={autoMode}
               onChange={(e) => setAutoMode(e.target.value as typeof autoMode)}
+              className="bg-slate-50 border-slate-200 text-xs rounded-xl font-sans"
             >
-              <option value="manual">Manual</option>
-              <option value="semi-automatic">Semi-automatic</option>
-              <option value="automatic">Automatic</option>
+              <option value="manual">Manual Approval Gates</option>
+              <option value="semi-automatic">Semi-Automatic (Scrape & Qualify Auto)</option>
+              <option value="automatic">Full Autonomous Auto-Pilot</option>
             </Select>
           </div>
-          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 p-3">
+          <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/80 p-3">
             <div>
-              <p className="text-sm font-medium">Website opportunity required</p>
-              <p className="text-xs text-muted-foreground">Only qualify leads without a website</p>
+              <p className="text-xs font-semibold text-slate-800">Website Opportunity Required</p>
+              <p className="text-[11px] text-slate-500">Only qualify leads currently missing a website</p>
             </div>
             <Switch checked={websiteOpp} onCheckedChange={setWebsiteOpp} />
           </div>
-          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 p-3">
+          <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/80 p-3">
             <div>
-              <p className="text-sm font-medium">Social presence required</p>
-              <p className="text-xs text-muted-foreground">Only qualify leads with social media</p>
+              <p className="text-xs font-semibold text-slate-800">Verified WhatsApp Phone Required</p>
+              <p className="text-[11px] text-slate-500">Filter out businesses without validated phone number</p>
             </div>
             <Switch checked={socialPresence} onCheckedChange={setSocialPresence} />
           </div>
-          <DialogFooter>
+          <DialogFooter className="pt-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
+              className="text-xs font-sans"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={submitting}>
+            <Button type="submit" disabled={submitting} className="bg-blue-600 text-white font-sans text-xs hover:bg-blue-700">
               {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : null}
-              Create campaign
+              Launch Campaign Pipeline
             </Button>
           </DialogFooter>
         </form>
@@ -294,7 +322,6 @@ export default function CampaignsPage() {
       });
     } catch (err) {
       console.error("Pause campaign error:", err);
-      // Local optimistic fallback
       setCampaigns((prev) =>
         prev.map((c) => (c.id === campaign.id ? { ...c, status: "paused", updatedAt: new Date().toISOString() } : c))
       );
@@ -320,52 +347,79 @@ export default function CampaignsPage() {
     });
   };
 
-  const summary = campaigns.filter((c) => c.status === "active").length;
+  const activeCount = campaigns.filter((c) => c.status === "active").length;
+  const totalLeadsTarget = campaigns.reduce((acc, c) => acc + (c.leadTarget || 100), 0);
+  const totalLeadsQualified = campaigns.reduce((acc, c) => acc + (c.leadsQualified || 0), 0);
+  const totalSitesBuilt = campaigns.reduce((acc, c) => acc + (c.websitesBuilt || 0), 0);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 space-y-6">
       <PageHeader
         title="Campaigns"
-        description={`${campaigns.length} campaigns · ${summary} active`}
+        description="Autonomous multi-channel acquisition pipelines orchestrating scrapers, AST builders, and WhatsApp dispatch."
       >
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={refreshCampaigns} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          <Button variant="outline" size="sm" onClick={refreshCampaigns} disabled={loading} className="gap-1.5 font-sans">
+            <RefreshCw className={cn("h-3.5 w-3.5 text-slate-500", loading && "animate-spin")} />
             Refresh
           </Button>
           <CreateCampaignDialog onCreated={addCampaign} />
         </div>
       </PageHeader>
 
-      {/* Notification Toast */}
+      {/* Porcelain Summary Telemetry Cards */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { label: "Active Pipelines", value: activeCount, sub: `${campaigns.length} total registered`, color: "text-blue-600", accent: "from-blue-500 to-indigo-500" },
+          { label: "Target Quota", value: totalLeadsTarget.toLocaleString(), sub: "Target leads across fleet", color: "text-slate-950", accent: "from-slate-600 to-slate-800" },
+          { label: "Qualified Leads", value: totalLeadsQualified.toLocaleString(), sub: "Scored by Agent 2", color: "text-emerald-600", accent: "from-emerald-400 to-teal-500" },
+          { label: "Synthesized Sites", value: totalSitesBuilt.toLocaleString(), sub: "Edge-deployed previews", color: "text-purple-600", accent: "from-purple-400 to-indigo-500" },
+        ].map((s) => (
+          <div
+            key={s.label}
+            className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-sm backdrop-blur-md transition-all duration-200 hover-lift"
+          >
+            <div className={cn("absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r opacity-70", s.accent)} />
+            <p className="font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">{s.label}</p>
+            <p className={cn("mt-1.5 font-display text-3xl font-extrabold tracking-tight", s.color)}>{s.value}</p>
+            <p className="mt-1 font-sans text-xs text-slate-500">{s.sub}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Notification Banner */}
       {notification && (
-        <div
-          className={`mb-6 flex items-center justify-between rounded-lg border p-4 text-sm ${
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={cn(
+            "flex items-center justify-between rounded-2xl border p-4 shadow-sm backdrop-blur-md",
             notification.type === "success"
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-              : "border-destructive/30 bg-destructive/10 text-destructive"
-          }`}
+              ? "border-emerald-200 bg-emerald-50/80 text-emerald-800"
+              : "border-rose-200 bg-rose-50/80 text-rose-800"
+          )}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             {notification.type === "success" ? (
-              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+              <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
             ) : (
-              <AlertCircle className="h-4 w-4 text-destructive" />
+              <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
             )}
-            <span>{notification.message}</span>
+            <span className="font-sans text-xs font-semibold">{notification.message}</span>
           </div>
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 px-2 text-xs"
+            className="h-7 px-2 text-xs font-sans"
             onClick={() => setNotification(null)}
           >
             Dismiss
           </Button>
-        </div>
+        </motion.div>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      {/* Campaigns Grid */}
+      <div className="grid gap-5 lg:grid-cols-2">
         {campaigns.map((campaign, index) => {
           const meta = statusVariant(campaign.status);
           const isExecuting = executingId === campaign.id;
@@ -377,230 +431,262 @@ export default function CampaignsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
             >
-              <Card className="p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                      {campaign.id}
-                    </p>
-                    <p className="mt-0.5 text-lg font-semibold">{campaign.name}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {isExecuting ? (
-                      <Badge variant="info" className="gap-1.5">
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                        Running Agents…
-                      </Badge>
-                    ) : (
-                      <Badge variant={meta.variant}>{meta.label}</Badge>
-                    )}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="iconSm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => {
-                            if (campaign.status === "active") handlePauseCampaign(campaign);
-                            else handleStartCampaign(campaign);
-                          }}
-                          disabled={isExecuting}
-                        >
-                          {campaign.status === "active" ? <Pause /> : <Play />}
-                          {campaign.status === "active" ? "Pause campaign" : "Run campaign"}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleStartCampaign(campaign)} disabled={isExecuting}>
-                          <RefreshCw /> Force Re-run
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
+              <div className="relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 p-6 shadow-sm backdrop-blur-md transition-all duration-200 hover-lift">
+                {/* Top Accent */}
+                <div
+                  className={cn(
+                    "absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r",
+                    campaign.status === "active"
+                      ? "from-blue-500 via-indigo-500 to-cyan-400"
+                      : campaign.status === "completed"
+                        ? "from-emerald-400 to-teal-500"
+                        : "from-slate-300 to-slate-400"
+                  )}
+                />
 
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Badge variant="outline" className="gap-1.5">
-                    <Target className="h-3 w-3" />
-                    {campaign.category}
-                  </Badge>
-                  <Badge variant="outline">📍 {campaign.location}</Badge>
-                  <Badge variant="outline" className="gap-1">
-                    <Users className="h-3 w-3" />
-                    Target {campaign.leadTarget}
-                  </Badge>
-                </div>
+                <div>
+                  {/* Title & Status */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <span className="font-mono text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                        {campaign.id}
+                      </span>
+                      <h3 className="mt-0.5 font-display text-lg font-bold text-slate-950">{campaign.name}</h3>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {isExecuting ? (
+                        <Badge variant="info" className="gap-1.5 bg-blue-50 text-blue-700 border-blue-200">
+                          <Loader2 className="h-3 w-3 animate-spin text-blue-600" />
+                          Running Agents…
+                        </Badge>
+                      ) : (
+                        <Badge variant={meta.variant}>{meta.label}</Badge>
+                      )}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="iconSm" className="text-slate-400 hover:text-slate-900">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="rounded-xl border-slate-200 font-sans text-xs">
+                          <DropdownMenuItem
+                            onClick={() => {
+                              if (campaign.status === "active") handlePauseCampaign(campaign);
+                              else handleStartCampaign(campaign);
+                            }}
+                            disabled={isExecuting}
+                          >
+                            {campaign.status === "active" ? <Pause className="h-3.5 w-3.5 mr-2" /> : <Play className="h-3.5 w-3.5 mr-2" />}
+                            {campaign.status === "active" ? "Pause campaign" : "Run campaign"}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleStartCampaign(campaign)} disabled={isExecuting}>
+                            <RefreshCw className="h-3.5 w-3.5 mr-2" /> Force Re-run
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
 
-                <div className="mt-5">
-                  <div className="mb-1.5 flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Progress</span>
-                    <span className="font-semibold">{campaign.progress}%</span>
+                  {/* Target tags */}
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    <Badge variant="outline" className="gap-1.5 font-mono text-[10px] text-slate-600 border-slate-200 bg-slate-50">
+                      <Target className="h-3 w-3 text-slate-400" />
+                      {campaign.category}
+                    </Badge>
+                    <Badge variant="outline" className="font-mono text-[10px] text-slate-600 border-slate-200 bg-slate-50">
+                      📍 {campaign.location}
+                    </Badge>
+                    <Badge variant="outline" className="gap-1 font-mono text-[10px] text-slate-600 border-slate-200 bg-slate-50">
+                      <Users className="h-3 w-3 text-slate-400" />
+                      Target {campaign.leadTarget}
+                    </Badge>
                   </div>
-                  <Progress
-                    value={campaign.progress}
-                    indicatorClassName={
-                      campaign.progress === 100 ? "bg-emerald-500" : "bg-violet-500"
-                    }
-                  />
-                </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  <div className="rounded-lg border border-border bg-muted/40 p-2.5 text-center">
-                    <p className="text-[11px] text-muted-foreground">Leads</p>
-                    <p className="mt-0.5 text-sm font-semibold">
-                      {campaign.leadsCollected}/{campaign.leadTarget}
-                    </p>
+                  {/* Progress Bar */}
+                  <div className="mt-5 rounded-xl border border-slate-100 bg-slate-50/80 p-3">
+                    <div className="mb-1.5 flex items-center justify-between font-sans text-xs">
+                      <span className="font-medium text-slate-500">Pipeline Completion</span>
+                      <span className="font-mono font-bold text-slate-800">{campaign.progress}%</span>
+                    </div>
+                    <Progress
+                      value={campaign.progress}
+                      indicatorClassName={
+                        campaign.progress === 100
+                          ? "bg-emerald-500"
+                          : "bg-gradient-to-r from-blue-600 to-indigo-600"
+                      }
+                    />
                   </div>
-                  <div className="rounded-lg border border-border bg-muted/40 p-2.5 text-center">
-                    <p className="text-[11px] text-muted-foreground">Qualified</p>
-                    <p className="mt-0.5 text-sm font-semibold">{campaign.leadsQualified}</p>
-                  </div>
-                  <div className="rounded-lg border border-border bg-muted/40 p-2.5 text-center">
-                    <p className="text-[11px] text-muted-foreground">Websites</p>
-                    <p className="mt-0.5 text-sm font-semibold">{campaign.websitesBuilt}</p>
-                  </div>
-                  <div className="rounded-lg border border-border bg-muted/40 p-2.5 text-center">
-                    <p className="text-[11px] text-muted-foreground">Messages</p>
-                    <p className="mt-0.5 text-sm font-semibold">{campaign.messagesSent}</p>
-                  </div>
-                </div>
 
-                <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-3">
-                    <span className="flex items-center gap-1">
-                      <Globe className="h-3.5 w-3.5" />
-                      {campaign.websitesDeployed} deployed
+                  {/* Metrics grid */}
+                  <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                    <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-2.5 text-center">
+                      <p className="font-mono text-[10px] font-bold text-slate-400 uppercase">Leads</p>
+                      <p className="mt-0.5 font-mono text-sm font-bold text-slate-800">
+                        {campaign.leadsCollected}/{campaign.leadTarget}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-2.5 text-center">
+                      <p className="font-mono text-[10px] font-bold text-slate-400 uppercase">Qualified</p>
+                      <p className="mt-0.5 font-mono text-sm font-bold text-emerald-600">{campaign.leadsQualified}</p>
+                    </div>
+                    <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-2.5 text-center">
+                      <p className="font-mono text-[10px] font-bold text-slate-400 uppercase">Websites</p>
+                      <p className="mt-0.5 font-mono text-sm font-bold text-blue-600">{campaign.websitesBuilt}</p>
+                    </div>
+                    <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-2.5 text-center">
+                      <p className="font-mono text-[10px] font-bold text-slate-400 uppercase">Messages</p>
+                      <p className="mt-0.5 font-mono text-sm font-bold text-purple-600">{campaign.messagesSent}</p>
+                    </div>
+                  </div>
+
+                  {/* Sub-status line */}
+                  <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 font-mono text-[11px] text-slate-400">
+                    <span className="flex items-center gap-3">
+                      <span className="flex items-center gap-1">
+                        <Globe className="h-3.5 w-3.5 text-slate-400" />
+                        {campaign.websitesDeployed} deployed
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MessageSquare className="h-3.5 w-3.5 text-slate-400" />
+                        {campaign.messagesSent} sent
+                      </span>
                     </span>
-                    <span className="flex items-center gap-1">
-                      <MessageSquare className="h-3.5 w-3.5" />
-                      {campaign.messagesSent} sent
-                    </span>
-                  </span>
-                  <span>Updated {formatDate(campaign.updatedAt)}</span>
+                    <span>Updated {formatDate(campaign.updatedAt)}</span>
+                  </div>
                 </div>
 
                 {/* Direct Action Controls */}
-                {campaign.status === "draft" && (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="mt-4 w-full gap-1.5"
-                    disabled={isExecuting}
-                    onClick={() => handleStartCampaign(campaign)}
-                  >
-                    {isExecuting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Executing Pipeline…
-                      </>
-                    ) : (
-                      <>
-                        <Play className="h-4 w-4" />
-                        Start campaign
-                      </>
-                    )}
-                  </Button>
-                )}
-
-                {campaign.status === "active" && (
-                  <div className="mt-4 flex gap-2">
+                <div className="mt-5">
+                  {campaign.status === "draft" && (
                     <Button
                       variant="default"
                       size="sm"
-                      className="flex-1 gap-1.5"
+                      className="w-full gap-1.5 bg-slate-900 text-white hover:bg-slate-800 font-sans text-xs"
                       disabled={isExecuting}
                       onClick={() => handleStartCampaign(campaign)}
                     >
                       {isExecuting ? (
                         <>
                           <Loader2 className="h-4 w-4 animate-spin" />
-                          Running…
+                          Executing Pipeline…
                         </>
                       ) : (
                         <>
                           <Play className="h-4 w-4" />
-                          Run batch
+                          Start Campaign Pipeline
                         </>
                       )}
                     </Button>
+                  )}
+
+                  {campaign.status === "active" && (
+                    <div className="flex gap-2">
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="flex-1 gap-1.5 bg-blue-600 text-white hover:bg-blue-700 font-sans text-xs"
+                        disabled={isExecuting}
+                        onClick={() => handleStartCampaign(campaign)}
+                      >
+                        {isExecuting ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Running Batch…
+                          </>
+                        ) : (
+                          <>
+                            <Play className="h-4 w-4" />
+                            Run Autonomous Batch
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="font-sans text-xs"
+                        disabled={isExecuting}
+                        onClick={() => handlePauseCampaign(campaign)}
+                      >
+                        <Pause className="h-4 w-4 mr-1 text-slate-500" />
+                        Pause
+                      </Button>
+                    </div>
+                  )}
+
+                  {campaign.status === "paused" && (
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="w-full gap-1.5 bg-blue-600 text-white hover:bg-blue-700 font-sans text-xs"
+                      disabled={isExecuting}
+                      onClick={() => handleResumeCampaign(campaign)}
+                    >
+                      {isExecuting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Resuming Pipeline…
+                        </>
+                      ) : (
+                        <>
+                          <Play className="h-4 w-4" />
+                          Resume Campaign
+                        </>
+                      )}
+                    </Button>
+                  )}
+
+                  {campaign.status === "completed" && (
                     <Button
                       variant="outline"
                       size="sm"
+                      className="w-full gap-1.5 font-sans text-xs"
                       disabled={isExecuting}
-                      onClick={() => handlePauseCampaign(campaign)}
+                      onClick={() => handleStartCampaign(campaign)}
                     >
-                      <Pause className="h-4 w-4" />
-                      Pause
+                      {isExecuting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Re-running…
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="h-4 w-4 text-slate-500" />
+                          Re-run Campaign
+                        </>
+                      )}
                     </Button>
-                  </div>
-                )}
-
-                {campaign.status === "paused" && (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="mt-4 w-full gap-1.5"
-                    disabled={isExecuting}
-                    onClick={() => handleResumeCampaign(campaign)}
-                  >
-                    {isExecuting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Resuming Pipeline…
-                      </>
-                    ) : (
-                      <>
-                        <Play className="h-4 w-4" />
-                        Resume campaign
-                      </>
-                    )}
-                  </Button>
-                )}
-
-                {campaign.status === "completed" && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-4 w-full gap-1.5"
-                    disabled={isExecuting}
-                    onClick={() => handleStartCampaign(campaign)}
-                  >
-                    {isExecuting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Re-running…
-                      </>
-                    ) : (
-                      <>
-                        <RefreshCw className="h-4 w-4" />
-                        Re-run campaign
-                      </>
-                    )}
-                  </Button>
-                )}
-              </Card>
+                  )}
+                </div>
+              </div>
             </motion.div>
           );
         })}
 
+        {/* Create Campaign Action Tile */}
         <button
           onClick={() => document.getElementById("create-campaign-trigger")?.click()}
-          className="flex min-h-[220px] items-center justify-center rounded-xl border border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
+          className="group flex min-h-[260px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white/50 p-6 text-slate-400 transition-all duration-200 hover:border-blue-400 hover:bg-blue-50/30 hover:text-blue-600"
         >
-          <div className="flex flex-col items-center gap-2">
-            <Plus className="h-6 w-6" />
-            <span className="text-sm font-medium">New campaign</span>
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-xs transition-transform group-hover:scale-110">
+            <Plus className="h-6 w-6 text-blue-600" />
           </div>
+          <span className="mt-3 font-display text-sm font-bold text-slate-900 group-hover:text-blue-600">Create New Campaign</span>
+          <p className="mt-1 max-w-xs text-center font-sans text-xs text-slate-500">
+            Deploy a new autonomous acquisition workflow for any business category and geo-region.
+          </p>
         </button>
       </div>
 
-      <Card className="mt-6">
-        <CardContent className="flex items-center gap-3 p-4 text-sm text-muted-foreground">
-          <Target className="h-4 w-4 shrink-0 text-primary" />
-          Campaigns connect directly to the scraping pipeline. When activated, VASAW AI
-          automatically scrapes leads for the selected category and location.
-        </CardContent>
-      </Card>
+      {/* Pipeline Helper Banner */}
+      <div className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm backdrop-blur-md">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+          <Zap className="h-4 w-4" />
+        </div>
+        <p className="font-sans text-xs text-slate-600">
+          <strong className="font-semibold text-slate-900">Autonomous Orchestration:</strong> Campaigns connect directly to the Google Maps Scraping agent. Upon activation, VASAW AI crawls local businesses, scores website opportunity gaps, creates live preview sites, and triggers WhatsApp outreach sequences.
+        </p>
+      </div>
     </div>
   );
 }

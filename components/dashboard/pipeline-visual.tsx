@@ -3,17 +3,16 @@
 import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle2, Circle, Loader2, AlertTriangle } from "lucide-react";
 import type { PipelineStage } from "@/lib/types";
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 const statusConfig = {
-  healthy: { icon: CheckCircle2, className: "text-emerald-400", label: "Healthy" },
-  online: { icon: CheckCircle2, className: "text-emerald-400", label: "Online" },
+  healthy: { icon: CheckCircle2, className: "text-emerald-500", label: "Healthy" },
+  online: { icon: CheckCircle2, className: "text-emerald-500", label: "Online" },
   running: { icon: Loader2, className: "text-primary", label: "Running", spin: true },
-  idle: { icon: Circle, className: "text-muted-foreground", label: "Idle" },
-  error: { icon: AlertTriangle, className: "text-rose-400", label: "Attention" },
-  paused: { icon: Circle, className: "text-amber-400", label: "Paused" },
-  offline: { icon: Circle, className: "text-zinc-500", label: "Offline" },
+  idle: { icon: Circle, className: "text-slate-400", label: "Idle" },
+  error: { icon: AlertTriangle, className: "text-rose-500", label: "Attention" },
+  paused: { icon: Circle, className: "text-amber-500", label: "Paused" },
+  offline: { icon: Circle, className: "text-slate-300", label: "Offline" },
 } as const;
 
 export function PipelineVisual({
@@ -36,10 +35,10 @@ export function PipelineVisual({
             transition={{ duration: 0.3, delay: index * 0.06 }}
             className="relative"
           >
-            <Card className="h-full p-4">
+            <div className="h-full rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm backdrop-blur-md transition-all duration-200 hover-lift">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                  {String(index + 1).padStart(2, "0")}
+                <span className="font-mono text-[10px] font-bold tracking-widest text-slate-400">
+                  STAGE {String(index + 1).padStart(2, "0")}
                 </span>
                 <StatusIcon
                   className={cn(
@@ -49,24 +48,29 @@ export function PipelineVisual({
                   )}
                 />
               </div>
-              <p className="mt-3 text-sm font-semibold">{stage.label}</p>
+              <p className="mt-3 font-display text-sm font-bold text-slate-950">{stage.label}</p>
               {showLabels && (
-                <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
                   {stage.agentName}
                 </p>
               )}
-              <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-secondary">
+              <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 transition-all duration-500"
+                  className="h-full rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 transition-all duration-500"
                   style={{ width: `${stage.completed}%` }}
                 />
               </div>
-              <p className="mt-1.5 text-[11px] text-muted-foreground">
-                {stage.completed}% processed
-              </p>
-            </Card>
+              <div className="mt-2 flex items-center justify-between font-mono text-[10px] text-slate-400">
+                <span>PROGRESS</span>
+                <span className="font-bold text-slate-700">{stage.completed}%</span>
+              </div>
+            </div>
             {index < stages.length - 1 && (
-              <ArrowRight className="absolute -right-3.5 top-1/2 z-10 hidden h-4 w-4 -translate-y-1/2 text-muted-foreground/60 xl:block" />
+              <div className="absolute -right-3 top-1/2 z-10 hidden -translate-y-1/2 xl:block">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white shadow-xs">
+                  <ArrowRight className="h-3 w-3 text-slate-400" />
+                </div>
+              </div>
             )}
           </motion.div>
         );
