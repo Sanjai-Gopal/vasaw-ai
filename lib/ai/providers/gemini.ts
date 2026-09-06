@@ -13,10 +13,12 @@ function mapRole(role: ChatMessage["role"]): "user" | "model" {
   return role === "assistant" ? "model" : "user";
 }
 
+let cachedApiKey = "";
 let adapter: ProviderAdapter | null = null;
 
 export function getGeminiProvider(apiKey: string): ProviderAdapter {
-  if (adapter) return adapter;
+  if (adapter && cachedApiKey === apiKey) return adapter;
+  cachedApiKey = apiKey;
 
   const baseUrl = "https://generativelanguage.googleapis.com/v1beta";
 
@@ -63,8 +65,9 @@ export function getGeminiProvider(apiKey: string): ProviderAdapter {
       const latencyMs = Date.now() - start;
 
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        const { kind } = classifyError(res.status, text);
+        const rawText = await res.text().catch(() => "");
+        const sanitizedText = rawText.replace(/key=[^&\s"']+/gi, "key=[REDACTED]");
+        const { kind } = classifyError(res.status, sanitizedText);
         return {
           provider: "gemini",
           model,
@@ -72,7 +75,7 @@ export function getGeminiProvider(apiKey: string): ProviderAdapter {
           content: null,
           latencyMs,
           errorKind: kind,
-          errorMessage: `[${res.status}] ${text.slice(0, 200)}`,
+          errorMessage: `[${res.status}] ${sanitizedText.slice(0, 200)}`,
           retryCount: 0,
           fallbackUsed: false,
         };
@@ -111,6 +114,9 @@ export function getGeminiProvider(apiKey: string): ProviderAdapter {
         };
       }
 
+      const rawMsg = err instanceof Error ? err.message : "Unknown network error";
+      const sanitizedMsg = rawMsg.replace(/key=[^&\s"']+/gi, "key=[REDACTED]");
+
       return {
         provider: "gemini",
         model,
@@ -118,7 +124,7 @@ export function getGeminiProvider(apiKey: string): ProviderAdapter {
         content: null,
         latencyMs,
         errorKind: "transient",
-        errorMessage: err instanceof Error ? err.message : "Unknown network error",
+        errorMessage: sanitizedMsg,
         retryCount: 0,
         fallbackUsed: false,
       };
