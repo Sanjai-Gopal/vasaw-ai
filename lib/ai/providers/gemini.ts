@@ -4,9 +4,9 @@ import { classifyError, isAbortError } from "../errors";
 const TIMEOUT_MS = 60_000;
 
 const models = {
-  general: "gemini-2.0-flash",
-  reasoning: "gemini-2.5-flash",
-  coding: "gemini-2.0-flash",
+  general: "gemini-flash-latest",
+  reasoning: "gemini-pro-latest",
+  coding: "gemini-flash-latest",
 };
 
 function mapRole(role: ChatMessage["role"]): "user" | "model" {
@@ -51,7 +51,10 @@ export function getGeminiProvider(apiKey: string): ProviderAdapter {
     try {
       const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-goog-api-key": apiKey,
+        },
         body: JSON.stringify(body),
         signal: controller.signal,
       });
@@ -129,7 +132,10 @@ export function getGeminiProvider(apiKey: string): ProviderAdapter {
         `${baseUrl}/models/${models.general}:generateContent?key=${apiKey}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "X-goog-api-key": apiKey,
+          },
           body: JSON.stringify({
             contents: [{ role: "user", parts: [{ text: "ping" }] }],
             generationConfig: { maxOutputTokens: 1 },

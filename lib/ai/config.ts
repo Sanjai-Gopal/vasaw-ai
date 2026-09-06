@@ -33,9 +33,9 @@ const providers: ProviderConfig[] = [
     apiKey: env("GEMINI_API_KEY") ?? "",
     baseUrl: "https://generativelanguage.googleapis.com/v1beta",
     models: {
-      general: "gemini-3.6-flash",
-      reasoning: "gemini-2.5-pro",
-      coding: "gemini-3.6-flash",
+      general: "gemini-flash-latest",
+      reasoning: "gemini-pro-latest",
+      coding: "gemini-flash-latest",
     },
     priority: 3,
   },
