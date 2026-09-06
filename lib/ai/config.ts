@@ -30,7 +30,7 @@ const providers: ProviderConfig[] = [
   },
   {
     id: "gemini",
-    apiKey: env("GEMINI_API_KEY") ?? "",
+    apiKey: env("GEMINI_API_KEY") || env("GOOGLE_API_KEY") || "",
     baseUrl: "https://generativelanguage.googleapis.com/v1beta",
     models: {
       general: "gemini-flash-latest",
