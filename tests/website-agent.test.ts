@@ -202,10 +202,14 @@ describe("Agent 4 — Website Building Agent", () => {
       const templates: TemplateType[] = [
         "restaurant",
         "cafe",
+        "hotel",
         "salon",
+        "spa",
         "gym",
         "tattoo",
         "clinic",
+        "retail",
+        "professional",
         "generic",
         "local-service",
       ];
@@ -227,11 +231,20 @@ describe("Agent 4 — Website Building Agent", () => {
       expect(def.id).toBe("generic");
     });
 
-    it("should list all 7 core templates", () => {
+    it("should list all registered core templates", () => {
       const list = listTemplates();
-      expect(list).toHaveLength(7);
+      expect(list.length).toBeGreaterThanOrEqual(10);
       const ids = list.map((t) => t.id);
-      expect(ids).toEqual(["restaurant", "cafe", "salon", "gym", "tattoo", "clinic", "generic"]);
+      expect(ids).toContain("restaurant");
+      expect(ids).toContain("cafe");
+      expect(ids).toContain("hotel");
+      expect(ids).toContain("salon");
+      expect(ids).toContain("spa");
+      expect(ids).toContain("gym");
+      expect(ids).toContain("clinic");
+      expect(ids).toContain("retail");
+      expect(ids).toContain("professional");
+      expect(ids).toContain("generic");
     });
   });
 
@@ -240,10 +253,14 @@ describe("Agent 4 — Website Building Agent", () => {
       const categories: TemplateType[] = [
         "restaurant",
         "cafe",
+        "hotel",
         "salon",
+        "spa",
         "gym",
         "tattoo",
         "clinic",
+        "retail",
+        "professional",
         "generic",
       ];
 

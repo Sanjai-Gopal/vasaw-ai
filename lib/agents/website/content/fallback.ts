@@ -32,22 +32,22 @@ export function generateDeterministicContent(
   const serviceList: Array<{ title: string; description: string }> = rawServices.length > 0
     ? rawServices.map((srv) => ({
         title: srv,
-        description: `Authentic ${srv.toLowerCase()} prepared with care and fresh ingredients.`,
+        description: `Dedicated ${srv.toLowerCase()} delivered with expertise, care, and quality.`,
       }))
     : defaultServices;
 
-  const metaTitle = `${businessName} | Authentic ${category} in ${city}`;
-  const metaDescription = `${businessName} in ${city}. Rated ${rating}★ based on ${reviews > 0 ? reviews + " reviews" : "customer reviews"}. Enjoy freshly prepared food for dine-in and takeaway. Call ${phone || "us today"}.`;
+  const metaTitle = `${businessName} | ${category} in ${city}`;
+  const metaDescription = `${businessName} in ${city}. Rated ${rating}★ based on ${reviews > 0 ? reviews + " Google reviews" : "verified guest reviews"}. Professional ${category.toLowerCase()} services. Contact us today.`;
 
   // Verified Badge: Only show real review count and rating
   const heroBadge = reviews > 0
     ? `★ ${rating}/5 (${reviews.toLocaleString()} Reviews) · ${city}`
-    : `✦ Authentic ${category} · ${city}`;
+    : `✦ Verified ${category} · ${city}`;
 
   // Category-specific customer-facing value propositions (NO corporate jargon, NO internal AI notes)
   let heroSubheadline = `Authentic flavours crafted with fresh ingredients and traditional recipes. Open for dine-in, takeaway, and family meals in ${city}.`;
   let aboutHeadline = `Welcome to ${businessName}`;
-  let aboutBody = `${businessName} is your trusted neighborhood destination for authentic ${category.toLowerCase()} in ${city}. We are dedicated to providing warm hospitality, fresh daily preparation, and memorable meals for individuals, families, and gatherings.`;
+  let aboutBody = `${businessName} is your trusted neighborhood destination for authentic ${category.toLowerCase()} in ${city}. We are dedicated to providing warm hospitality, fresh daily preparation, and memorable experiences for individuals, families, and gatherings.`;
   let primaryCtaText = "View Menu";
   let primaryCtaLink = "#menu";
   let ctaHeadline = `Craving Authentic Flavours? Visit ${businessName}`;
@@ -74,6 +74,16 @@ export function generateDeterministicContent(
       ctaSubheadline = `Drop by our cafe in ${city} for your daily coffee fix and artisan treats.`;
       break;
 
+    case "hotel":
+      heroSubheadline = `Comfortable accommodations, modern amenities, and attentive hospitality in the heart of ${city}.`;
+      aboutHeadline = `Warm Hospitality & Restful Stays`;
+      aboutBody = `${businessName} welcomes travelers and guests to a relaxing stay in ${city}. With thoughtfully designed rooms, personalized service, and convenient access to key city landmarks, we ensure a seamless and comfortable visit.`;
+      primaryCtaText = "View Accommodations";
+      primaryCtaLink = "#services";
+      ctaHeadline = `Planning Your Stay in ${city}?`;
+      ctaSubheadline = `Reserve your room or get in touch with our front desk team for inquiries.`;
+      break;
+
     case "salon":
       heroSubheadline = `Professional hair styling, rejuvenating skin therapies, and tailored grooming in ${city}.`;
       aboutHeadline = `Elevate Your Style & Self-Care`;
@@ -82,6 +92,16 @@ export function generateDeterministicContent(
       primaryCtaLink = "#contact";
       ctaHeadline = `Ready for a Refreshing Look?`;
       ctaSubheadline = `Schedule your styling session at ${businessName} in ${city} today.`;
+      break;
+
+    case "spa":
+      heroSubheadline = `Holistic body therapies, calming aromatherapy, and restorative wellness in ${city}.`;
+      aboutHeadline = `A Sanctuary of Peace & Rejuvenation`;
+      aboutBody = `Step into tranquility at ${businessName}. Our therapeutic treatments combine soothing techniques with natural essential oils to relieve stress, restore balance, and refresh body and mind.`;
+      primaryCtaText = "Book Therapy Session";
+      primaryCtaLink = "#contact";
+      ctaHeadline = `Give Yourself the Relaxation You Deserve`;
+      ctaSubheadline = `Reserve a personalized wellness session at ${businessName} in ${city}.`;
       break;
 
     case "gym":
@@ -114,6 +134,26 @@ export function generateDeterministicContent(
       ctaSubheadline = `Contact our clinical desk in ${city} to schedule a consultation.`;
       break;
 
+    case "retail":
+      heroSubheadline = `Curated quality products, friendly customer service, and an enjoyable shopping experience in ${city}.`;
+      aboutHeadline = `Quality Products & Everyday Value`;
+      aboutBody = `${businessName} brings you a handpicked selection of top-quality products in ${city}. We focus on reliability, great variety, and attentive customer service for every shopper.`;
+      primaryCtaText = "Explore Collections";
+      primaryCtaLink = "#services";
+      ctaHeadline = `Visit ${businessName} in ${city}`;
+      ctaSubheadline = `Drop by our store today or contact us directly for product inquiries and availability.`;
+      break;
+
+    case "professional":
+      heroSubheadline = `Experienced advisory, clear strategic counsel, and reliable execution for clients in ${city}.`;
+      aboutHeadline = `Expert Guidance Tailored to Your Goals`;
+      aboutBody = `${businessName} provides trusted professional advisory and support in ${city}. We take pride in deep domain expertise, clear communication, and rigorous attention to detail on every engagement.`;
+      primaryCtaText = "Schedule Consultation";
+      primaryCtaLink = "#contact";
+      ctaHeadline = `Discuss Your Project with ${businessName}`;
+      ctaSubheadline = `Get in touch with our team to arrange an initial consultation in ${city}.`;
+      break;
+
     default:
       heroSubheadline = `Dependable, top-quality ${category.toLowerCase()} services serving ${city} and surrounding areas.`;
       aboutHeadline = `Committed to Quality & Reliable Service`;
@@ -127,7 +167,7 @@ export function generateDeterministicContent(
 
   // Verified highlights strictly from source data
   const highlights: string[] = [
-    reviews > 0 ? `★ ${rating}/5 Google Rating (${reviews} Reviews)` : `Top Rated in ${city}`,
+    reviews > 0 ? `★ ${rating}/5 Google Rating (${reviews} Reviews)` : `Verified Quality in ${city}`,
     `Prime Location in ${city}`,
     templateId === "restaurant" || templateId === "cafe"
       ? "Fresh Daily Preparation & Hygienic Kitchen"
@@ -150,7 +190,7 @@ export function generateDeterministicContent(
       highlights,
     },
     services: {
-      headline: templateId === "gym" ? "Training & Programs" : "Our Services",
+      headline: templateId === "gym" ? "Training & Programs" : templateId === "hotel" ? "Accommodations & Amenities" : templateId === "retail" ? "Featured Collections" : templateId === "professional" ? "Practice Areas" : "Our Services",
       items: serviceList.slice(0, 6).map((item) => ({
         title: item.title,
         description: item.description,
@@ -315,12 +355,28 @@ function getDefaultServicesForCategory(templateId: string, category: string): Se
         { title: "Takeaway Coffee & Snacks", description: "Fast on-the-go pickup for your busy mornings." },
       ];
 
+    case "hotel":
+      return [
+        { title: "Deluxe & Executive Rooms", description: "Comfortable, air-conditioned rooms with plush bedding and high-speed Wi-Fi." },
+        { title: "24/7 Front Desk & Concierge", description: "Attentive staff available around the clock for check-in and assistance." },
+        { title: "Room Dining & Breakfast", description: "Freshly prepared morning breakfast and in-room refreshment service." },
+        { title: "Travel & Airport Assistance", description: "Convenient local cab arrangements and travel guidance." },
+      ];
+
     case "salon":
       return [
         { title: "Expert Hair Styling & Cut", description: "Precision haircuts, custom coloring, and restorative spa treatments." },
         { title: "Facial & Skin Care", description: "Rejuvenating therapies for glowing, healthy skin." },
         { title: "Bridal & Event Makeovers", description: "Comprehensive styling packages for special occasions." },
         { title: "Gentleman Grooming", description: "Clean beard trims, scalp treatments, and professional grooming." },
+      ];
+
+    case "spa":
+      return [
+        { title: "Aromatherapy Body Massage", description: "Relaxing full-body massage using soothing essential oils." },
+        { title: "Deep Tissue & Pain Relief", description: "Targeted muscular pressure therapies to relieve tension and fatigue." },
+        { title: "Ayurvedic Body Scrubs", description: "Natural herbal exfoliation and skin polishing treatments." },
+        { title: "Foot Reflexology & Head Massage", description: "Revitalizing pressure-point therapy for immediate stress relief." },
       ];
 
     case "gym":
@@ -345,6 +401,22 @@ function getDefaultServicesForCategory(templateId: string, category: string): Se
         { title: "Preventive Health Screening", description: "Comprehensive wellness checks and routine vital monitoring." },
         { title: "Personalized Treatment Plans", description: "Custom medical management and follow-up care." },
         { title: "Prescription & Pharmacy Support", description: "Direct medication guidance and health counseling." },
+      ];
+
+    case "retail":
+      return [
+        { title: "Curated Product Collections", description: "Handpicked selections from top brands and trusted suppliers." },
+        { title: "In-Store Assistance & Guidance", description: "Knowledgeable staff ready to help you find the right products." },
+        { title: "Special Offers & Seasonal Bundles", description: "Value-packed discounts and seasonal promotional deals." },
+        { title: "WhatsApp Inquiry & Ordering", description: "Check availability and place orders conveniently via chat." },
+      ];
+
+    case "professional":
+      return [
+        { title: "Strategic Advisory & Consulting", description: "Actionable expertise and comprehensive problem-solving." },
+        { title: "Audit, Compliance & Review", description: "Rigorous standards checking and regulatory adherence." },
+        { title: "Tailored Client Solutions", description: "Custom-crafted strategies designed around your operational requirements." },
+        { title: "Dedicated Retainer Support", description: "Reliable ongoing assistance and prompt client communication." },
       ];
 
     default:

@@ -43,10 +43,14 @@ export function createPublicBusinessProfile(lead: Lead): PublicBusinessProfile {
 export type TemplateType =
   | "restaurant"
   | "cafe"
+  | "hotel"
   | "salon"
+  | "spa"
   | "gym"
   | "tattoo"
   | "clinic"
+  | "retail"
+  | "professional"
   | "generic"
   | "local-service";
 

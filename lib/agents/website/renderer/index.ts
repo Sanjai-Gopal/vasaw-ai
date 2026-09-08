@@ -411,7 +411,19 @@ export default function HomePage() {
   const ratingValue = ${rating};
   const reviewCountValue = ${reviewCount};
   const cityName = ${JSON.stringify(city)};
-  const isFoodBusiness = ${template.id === "restaurant" || template.id === "cafe"};
+  const templateId = ${JSON.stringify(template.id)};
+  const isFoodBusiness = templateId === "restaurant" || templateId === "cafe";
+  const isHotel = templateId === "hotel";
+  const isSalonOrSpa = templateId === "salon" || templateId === "spa";
+  const isGym = templateId === "gym";
+  const isClinic = templateId === "clinic";
+  const isRetail = templateId === "retail";
+  const isProfessional = templateId === "professional";
+
+  const bookingCtaLabel = isFoodBusiness ? "Reserve Table" : isHotel ? "Book Stay" : isSalonOrSpa ? "Book Appointment" : isGym ? "Get Free Pass" : isClinic ? "Book Consultation" : isProfessional ? "Schedule Advisory" : isRetail ? "Inquire Online" : "Get in Touch";
+  const modalCategoryHeading = isFoodBusiness ? "Table Reservation" : isHotel ? "Room Reservation & Inquiries" : isSalonOrSpa ? "Appointment Booking" : isGym ? "Free Day Pass & Tour" : isClinic ? "Doctor Consultation Request" : isProfessional ? "Consultation Request" : isRetail ? "Product Inquiry" : "Direct Inquiry";
+  const showDateInput = isFoodBusiness || isHotel || isSalonOrSpa || isGym || isClinic || isProfessional;
+  const showPartyInput = isFoodBusiness || isHotel;
 
   return (
     <main className="min-h-screen flex flex-col bg-[#0c0a09] text-[#fdfbf7] selection:bg-amber-500 selection:text-black">
@@ -427,7 +439,7 @@ export default function HomePage() {
           <nav className="hidden lg:flex items-center gap-7 text-sm font-medium text-stone-300">
             <a href="#about" className="hover:text-amber-400 transition-colors">About</a>
             {isFoodBusiness && <a href="#menu" className="hover:text-amber-400 transition-colors">Menu</a>}
-            <a href="#services" className="hover:text-amber-400 transition-colors">Services</a>
+            <a href="#services" className="hover:text-amber-400 transition-colors">{isHotel ? "Rooms & Amenities" : isRetail ? "Collections" : isProfessional ? "Practice Areas" : "Services"}</a>
             <a href="#gallery" className="hover:text-amber-400 transition-colors">Gallery</a>
             <a href="#reviews" className="hover:text-amber-400 transition-colors">Reviews</a>
             <a href="#contact" className="hover:text-amber-400 transition-colors">Location & Contact</a>
@@ -449,7 +461,7 @@ export default function HomePage() {
               onClick={() => setIsBookingOpen(true)}
               className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-bold text-xs sm:text-sm px-4 sm:px-5 py-2.5 rounded-full shadow-[0_0_20px_rgba(234,88,12,0.3)] hover:shadow-[0_0_28px_rgba(234,88,12,0.5)] transition-all transform hover:-translate-y-0.5"
             >
-              {isFoodBusiness ? "Reserve Table" : "Get in Touch"}
+              {bookingCtaLabel}
             </button>
 
             {/* Mobile Hamburger Button */}
@@ -1091,7 +1103,7 @@ export default function HomePage() {
               ✕
             </button>
             <div className="text-xs uppercase font-bold text-amber-400 tracking-widest mb-1">
-              {isFoodBusiness ? "Table Reservation" : "Direct Inquiry"}
+              {modalCategoryHeading}
             </div>
             <h3 className="font-display text-2xl font-bold text-white mb-5">
               {content.hero.headline}
@@ -1104,9 +1116,17 @@ export default function HomePage() {
                 const date = (form.elements.namedItem("guestDate") as HTMLInputElement)?.value || "";
                 const party = (form.elements.namedItem("guestParty") as HTMLInputElement)?.value || "2";
                 const notes = (form.elements.namedItem("guestNotes") as HTMLInputElement)?.value || "";
+                const dateInfo = date ? (" for " + date) : "";
+                const partyInfo = showPartyInput ? (" for " + party + " guests") : "";
                 const text = encodeURIComponent(
                   "Hello " + content.hero.headline + "! My name is " + name + "." +
-                  (isFoodBusiness ? " I would like to book a table for " + party + " guests on " + date + "." : " I have an inquiry.") +
+                  (isFoodBusiness ? " I would like to book a table" + partyInfo + dateInfo + "." :
+                   isHotel ? " I would like to inquire about room booking" + partyInfo + dateInfo + "." :
+                   isSalonOrSpa ? " I would like to book a styling/spa appointment" + dateInfo + "." :
+                   isGym ? " I would like to request a free gym pass and facility tour" + dateInfo + "." :
+                   isClinic ? " I would like to schedule a consultation" + dateInfo + "." :
+                   isProfessional ? " I would like to schedule an advisory consultation" + dateInfo + "." :
+                   " I have an inquiry regarding your services.") +
                   (notes ? " Note: " + notes : "")
                 );
                 window.open("https://wa.me/" + cleanPhone + "?text=" + text, "_blank");
@@ -1124,10 +1144,10 @@ export default function HomePage() {
                 />
               </div>
 
-              {isFoodBusiness && (
-                <div className="grid grid-cols-2 gap-3">
+              {showDateInput && (
+                <div className={"grid " + (showPartyInput ? "grid-cols-2" : "grid-cols-1") + " gap-3"}>
                   <div>
-                    <label className="block text-xs font-semibold text-stone-300 mb-1">Date</label>
+                    <label className="block text-xs font-semibold text-stone-300 mb-1">Preferred Date</label>
                     <input
                       name="guestDate"
                       type="date"
@@ -1135,24 +1155,26 @@ export default function HomePage() {
                       className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-amber-400 text-xs sm:text-sm"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-300 mb-1">Guests</label>
-                    <input
-                      name="guestParty"
-                      type="number"
-                      defaultValue="2"
-                      min="1"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-amber-400 text-xs sm:text-sm"
-                    />
-                  </div>
+                  {showPartyInput && (
+                    <div>
+                      <label className="block text-xs font-semibold text-stone-300 mb-1">{isHotel ? "Guests" : "Party Size"}</label>
+                      <input
+                        name="guestParty"
+                        type="number"
+                        defaultValue="2"
+                        min="1"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-amber-400 text-xs sm:text-sm"
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-stone-300 mb-1">Special Request (Optional)</label>
+                <label className="block text-xs font-semibold text-stone-300 mb-1">Special Notes / Inquiries (Optional)</label>
                 <input
                   name="guestNotes"
-                  placeholder="e.g. Window table / takeaway pickup"
+                  placeholder="e.g. Specific requirements / timing preferences"
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-stone-500 focus:outline-none focus:border-amber-400 text-sm"
                 />
               </div>

@@ -1,23 +1,38 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterAll } from "vitest";
 import { renderWebsiteProject } from "../lib/agents/website/renderer/index";
 import { getTheme } from "../lib/agents/website/themes/index";
 import { getTemplate } from "../lib/agents/website/templates/registry";
 import { generateDeterministicContent } from "../lib/agents/website/content/fallback";
-import { TemplateType } from "../lib/agents/website/types";
+import { TemplateType, createPublicBusinessProfile } from "../lib/agents/website/types";
 import type { Lead } from "../lib/agents/scraping/types";
 import fs from "fs";
 import path from "path";
 
-describe("Phase 6 & 15: Multi-Category Luxury Website Generation Tests", () => {
+describe("Category-Aware Professional Website Generation Across All 10 Categories", () => {
+  const testOutputDir = path.join(
+    process.cwd(),
+    ".tmp-test-categories-" + Date.now()
+  );
+
+  afterAll(() => {
+    if (fs.existsSync(testOutputDir)) {
+      fs.rmSync(testOutputDir, { recursive: true, force: true });
+    }
+  });
+
   const categories: Array<{ category: string; template: TemplateType; name: string }> = [
-    { category: "Restaurant", template: "restaurant", name: "Royal Dining" },
-    { category: "Cafe", template: "cafe", name: "Artisan Brew Cafe" },
+    { category: "Restaurant", template: "restaurant", name: "Royal South Indian Dining" },
+    { category: "Cafe", template: "cafe", name: "Artisan Roasters Cafe" },
+    { category: "Hotel", template: "hotel", name: "Grand Residency Hotel" },
     { category: "Salon", template: "salon", name: "Luxe Glamour Salon" },
-    { category: "Gym", template: "gym", name: "Apex Strength Gym" },
-    { category: "Tattoo", template: "tattoo", name: "Obsidian Ink Studio" },
-    { category: "Clinic", template: "clinic", name: "Care Dental Clinic" },
-    { category: "Local Service", template: "local-service", name: "Precision Plumbing" },
-    { category: "Generic", template: "generic", name: "Summit Consulting" },
+    { category: "Spa", template: "spa", name: "Serenity Ayurveda Spa" },
+    { category: "Gym", template: "gym", name: "Apex Strength & Fitness" },
+    { category: "Clinic", template: "clinic", name: "Care Multi-Specialty Clinic" },
+    { category: "Retail", template: "retail", name: "Elegance Fashion Boutique" },
+    { category: "Professional", template: "professional", name: "Apex Corporate Advisory" },
+    { category: "Tattoo", template: "tattoo", name: "Obsidian Custom Ink" },
+    { category: "Local Service", template: "local-service", name: "Precision Plumbing & Electrical" },
+    { category: "Generic", template: "generic", name: "Summit Commercial Services" },
   ];
 
   for (const item of categories) {
@@ -26,9 +41,9 @@ describe("Phase 6 & 15: Multi-Category Luxury Website Generation Tests", () => {
         id: `lead-cat-${item.template}`,
         businessName: item.name,
         category: item.category,
-        phone: "+919876543210",
+        phone: "+91 98765 43210",
         website: null,
-        address: "100 Prime St",
+        address: "100 Prime St, Cross Cut Road",
         city: "Coimbatore",
         rating: 4.8,
         reviewCount: 220,
@@ -42,15 +57,17 @@ describe("Phase 6 & 15: Multi-Category Luxury Website Generation Tests", () => {
       expect(theme.primaryColor).toMatch(/^#[0-9a-fA-F]{6}$/);
 
       const template = getTemplate(item.template);
-      const content = generateDeterministicContent(lead, undefined, template);
+      const profile = createPublicBusinessProfile(lead);
+      const content = generateDeterministicContent(profile, undefined, template);
       expect(content.hero.headline).toBe(item.name);
       expect(content.services?.items.length).toBeGreaterThanOrEqual(3);
 
       const result = renderWebsiteProject({
-        lead,
+        profile,
         template,
         theme,
         content,
+        outputBaseDir: testOutputDir,
       });
 
       expect(result.projectName).toBeDefined();

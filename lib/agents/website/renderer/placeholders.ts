@@ -55,6 +55,27 @@ export const CATEGORY_VISUALS: Record<string, CategoryVisualAssets> = {
       },
     ],
   },
+  hotel: {
+    heroImage: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=85",
+    aboutImage: "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1000&q=80",
+    gallery: [
+      {
+        url: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=900&q=80",
+        alt: "Executive Suite",
+        caption: "Comfortable Premium Rooms",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=900&q=80",
+        alt: "Resort Pool & Lounge",
+        caption: "Serene Leisure Amenities",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=900&q=80",
+        alt: "Dining & Banquet",
+        caption: "Warm Hospitality & Banquet Facilities",
+      },
+    ],
+  },
   salon: {
     heroImage: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1600&q=85",
     aboutImage: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1000&q=80",
@@ -68,6 +89,22 @@ export const CATEGORY_VISUALS: Record<string, CategoryVisualAssets> = {
         url: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80",
         alt: "Rejuvenating Skin Care",
         caption: "Glow & Facial Therapies",
+      },
+    ],
+  },
+  spa: {
+    heroImage: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1600&q=85",
+    aboutImage: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1000&q=80",
+    gallery: [
+      {
+        url: "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=900&q=80",
+        alt: "Herbal Aromatherapy Therapy",
+        caption: "Holistic Essential Oil Massage",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=900&q=80",
+        alt: "Relaxing Spa Suite",
+        caption: "Calm & Restorative Atmosphere",
       },
     ],
   },
@@ -87,6 +124,17 @@ export const CATEGORY_VISUALS: Record<string, CategoryVisualAssets> = {
       },
     ],
   },
+  tattoo: {
+    heroImage: "https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?auto=format&fit=crop&w=1600&q=85",
+    aboutImage: "https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?auto=format&fit=crop&w=1000&q=80",
+    gallery: [
+      {
+        url: "https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?auto=format&fit=crop&w=900&q=80",
+        alt: "Custom Tattoo Artistry",
+        caption: "Precision Needle & Ink Work",
+      },
+    ],
+  },
   clinic: {
     heroImage: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1600&q=85",
     aboutImage: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1000&q=80",
@@ -95,6 +143,38 @@ export const CATEGORY_VISUALS: Record<string, CategoryVisualAssets> = {
         url: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=900&q=80",
         alt: "Modern Clinical Consultation Desk",
         caption: "Patient Care & Diagnostic Suite",
+      },
+    ],
+  },
+  retail: {
+    heroImage: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1600&q=85",
+    aboutImage: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=1000&q=80",
+    gallery: [
+      {
+        url: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=900&q=80",
+        alt: "Curated Store Display",
+        caption: "Premium Quality Selections",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=900&q=80",
+        alt: "Storefront & Aisles",
+        caption: "Seamless In-Store Experience",
+      },
+    ],
+  },
+  professional: {
+    heroImage: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=85",
+    aboutImage: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80",
+    gallery: [
+      {
+        url: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=900&q=80",
+        alt: "Executive Conference Room",
+        caption: "Strategic Client Advisory",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=900&q=80",
+        alt: "Professional Consulting Team",
+        caption: "Dedicated Expertise & Precision",
       },
     ],
   },
