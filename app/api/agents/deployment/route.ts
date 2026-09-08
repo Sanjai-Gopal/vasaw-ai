@@ -24,13 +24,20 @@ export async function POST(request: NextRequest) {
     const statusCode = result.success ? 200 : 502;
     return NextResponse.json(result, { status: statusCode });
   } catch (error) {
-    console.error("[API] Deployment agent error:", error);
+    const rawError = error instanceof Error ? error.message : "Internal server error";
+    const sanitizedError = rawError
+      .replace(/(vcp_[a-zA-Z0-9_\-]+)/gi, "[REDACTED_VERCEL_TOKEN]")
+      .replace(/(ghp_[a-zA-Z0-9_\-]+|github_pat_[a-zA-Z0-9_\-]+)/gi, "[REDACTED_GITHUB_TOKEN]")
+      .replace(/(eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-]+)/g, "[REDACTED_SUPABASE_KEY]")
+      .replace(/(sk-[a-zA-Z0-9_\-]{20,})/gi, "[REDACTED_API_KEY]")
+      .replace(/(Bearer\s+)[a-zA-Z0-9._\-]+/gi, "$1[REDACTED_TOKEN]");
+
     return NextResponse.json(
       {
         success: false,
         agent: "deployment",
         mode: "mock",
-        error: error instanceof Error ? error.message : "Internal server error",
+        error: sanitizedError,
       },
       { status: 500 }
     );

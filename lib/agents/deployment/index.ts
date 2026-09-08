@@ -182,6 +182,28 @@ export async function deployWebsite(input: string | DeployRequest): Promise<Depl
         },
       });
     } else {
+      if (request.websiteId && leadId && businessName) {
+        await saveDeployment({
+          websiteId: request.websiteId,
+          leadId,
+          businessName,
+          status: "failed",
+          provider: mode,
+          environment: deployResult.environment,
+          durationSec,
+        }).catch(() => {});
+
+        await saveWebsite({
+          id: request.websiteId,
+          leadId,
+          businessName,
+          category: request.buildResult?.template || "generic",
+          location: "",
+          template: request.buildResult?.template || "generic",
+          status: "failed",
+        }).catch(() => {});
+      }
+
       await recordAgentRun({
         agentId: "deployment",
         status: "failed",

@@ -498,6 +498,38 @@ describe("Agent 5 — Deployment Agent", () => {
       expect(result.metadata?.idempotentReused).toBe(true);
     });
 
+    it("should force redeploy when forceRedeploy is true even if existing deployment exists", async () => {
+      const { getDeployments, saveDeployment } = await import("@/lib/agents/storage");
+      vi.mocked(getDeployments).mockResolvedValueOnce([
+        {
+          id: "old-dep-id",
+          websiteId: "web-test-123",
+          leadId: "lead-test-456",
+          businessName: "Saravana Bhavan",
+          status: "deployed",
+          provider: "mock",
+          environment: "production",
+          liveUrl: "https://old-url.vasaw.app",
+          durationSec: 1,
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+
+      const buildResult = createMockBuildResult();
+      const result = await deployWebsite({
+        websiteId: "web-test-123",
+        buildResult,
+        businessName: "Saravana Bhavan",
+        leadId: "lead-test-456",
+        forceRedeploy: true,
+        mode: "mock",
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.metadata?.idempotentReused).toBeUndefined();
+      expect(saveDeployment).toHaveBeenCalled();
+    });
+
     it("should allow string websiteId as direct argument to deployWebsite and runDeploymentAgent", async () => {
       const buildResult = createMockBuildResult();
       const response = await runDeploymentAgent({
@@ -530,6 +562,17 @@ describe("Agent 5 — Deployment Agent", () => {
       const scan = collectAndScanProjectFiles(testProjectDir);
       expect(scan.valid).toBe(false);
       expect(scan.errors.some((e) => e.includes("GitHub Token"))).toBe(true);
+    });
+
+    it("should block Bearer token leakage in files", () => {
+      fs.writeFileSync(
+        path.join(testProjectDir, "src", "app", "auth.ts"),
+        "const authHeader = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.supersecrettoken123456789';"
+      );
+
+      const scan = collectAndScanProjectFiles(testProjectDir);
+      expect(scan.valid).toBe(false);
+      expect(scan.errors.some((e) => e.includes("Bearer Token") || e.includes("Supabase Service Key"))).toBe(true);
     });
   });
 
@@ -571,6 +614,61 @@ describe("Agent 5 — Deployment Agent", () => {
       expect(data.mode).toBe("mock");
       expect(data.result.status).toBe("READY");
       expect(data.result.url).toContain("mock-saravana-bhavan");
+    });
+  });
+
+  // ==========================================
+  // 8. Regression: Kumar Mess Deployment Verification Flow
+  // ==========================================
+  describe("Kumar Mess Deployment Flow", () => {
+    it("should successfully deploy and verify Kumar Mess website artifact", async () => {
+      const kumarProjectDir = path.join(process.cwd(), `.tmp-test-kumar-${Date.now()}`);
+      fs.mkdirSync(path.join(kumarProjectDir, "src", "app"), { recursive: true });
+
+      try {
+        fs.writeFileSync(
+          path.join(kumarProjectDir, "package.json"),
+          JSON.stringify({ name: "kumar-mess", scripts: { build: "next build" } })
+        );
+        fs.writeFileSync(
+          path.join(kumarProjectDir, "src", "app", "page.tsx"),
+          "export default function Page() { return <div><h1>Kumar Mess</h1><p>Authentic South Indian Mess</p><button>Order on WhatsApp</button></div>; }"
+        );
+
+        const buildResult: WebsiteBuildResult = {
+          websiteId: "web-kumar-mess-001",
+          leadId: "lead-kumar-mess-001",
+          businessName: "Kumar Mess",
+          template: "restaurant",
+          pages: ["index"],
+          buildOutput: "Build successful",
+          status: "READY",
+          buildStatus: "SUCCESS",
+          buildErrors: [],
+          generatedAt: new Date().toISOString(),
+          artifact: {
+            projectName: "kumar-mess-site",
+            projectDir: kumarProjectDir,
+            files: ["package.json", "src/app/page.tsx"],
+            pages: ["index"],
+          },
+        };
+
+        const result = await deployWebsite({
+          websiteId: buildResult.websiteId,
+          buildResult,
+          businessName: "Kumar Mess",
+          leadId: "lead-kumar-mess-001",
+          mode: "mock",
+        });
+
+        expect(result.success).toBe(true);
+        expect(result.status).toBe("READY");
+        expect(result.businessName).toBe("Kumar Mess");
+        expect(result.url).toMatch(/mock-kumar-mess.*\.vasaw\.app/);
+      } finally {
+        fs.rmSync(kumarProjectDir, { recursive: true, force: true });
+      }
     });
   });
 });

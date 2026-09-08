@@ -4,12 +4,13 @@ import { WebsiteBuildResult } from "@/lib/agents/website/types";
 import { ProjectFileInfo } from "./types";
 
 const SECRET_PATTERNS: Array<{ name: string; regex: RegExp }> = [
-  { name: "OpenAI API Key", regex: /sk-[a-zA-Z0-9]{20,}/ },
-  { name: "Vercel Token", regex: /vcp_[a-zA-Z0-9]{20,}/ },
-  { name: "GitHub Token", regex: /ghp_[a-zA-Z0-9]{36,}/ },
-  { name: "Supabase Service Key", regex: /eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[a-zA-Z0-9_-]{30,}\.[a-zA-Z0-9_-]{30,}/ },
+  { name: "OpenAI API Key", regex: /sk-[a-zA-Z0-9_\-]{20,}/ },
+  { name: "Vercel Token", regex: /vcp_[a-zA-Z0-9_\-]{20,}/ },
+  { name: "GitHub Token", regex: /(?:ghp_|github_pat_)[a-zA-Z0-9_\-]{20,}/ },
+  { name: "Supabase Service Key", regex: /eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[a-zA-Z0-9_\-]{20,}\.[a-zA-Z0-9_\-]+/ },
   { name: "Generic Private Key", regex: /-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----/ },
   { name: "AWS Secret Access Key", regex: /(?:aws_secret_access_key|AWS_SECRET_ACCESS_KEY)\s*=\s*['"]?[a-zA-Z0-9/+=]{40}['"]?/ },
+  { name: "Bearer Token", regex: /bearer\s+[a-zA-Z0-9._\-]{25,}/i },
 ];
 
 const EXCLUDED_DIRS = new Set([
@@ -32,6 +33,7 @@ const EXCLUDED_FILES = new Set([
   "npm-debug.log",
   "yarn-debug.log",
   "yarn-error.log",
+  "tsconfig.tsbuildinfo",
 ]);
 
 export interface ValidationResult {
@@ -93,12 +95,29 @@ export function validateProjectDirectory(projectDir: string): { valid: boolean; 
     return { valid: false, errors };
   }
 
-  const requiredFiles = ["package.json", "src/app/page.tsx"];
-  for (const file of requiredFiles) {
-    const filePath = path.join(/*turbopackIgnore: true*/ resolved, file);
-    if (!fs.existsSync(/*turbopackIgnore: true*/ filePath)) {
-      errors.push(`Required project file missing from artifact: ${file}`);
-    }
+  // Required: package.json
+  const packageJsonPath = path.join(/*turbopackIgnore: true*/ resolved, "package.json");
+  if (!fs.existsSync(/*turbopackIgnore: true*/ packageJsonPath)) {
+    errors.push("Required project file missing from artifact: package.json");
+  }
+
+  // Required: at least one main page entrypoint
+  const candidatePages = [
+    "src/app/page.tsx",
+    "src/app/page.jsx",
+    "src/app/page.js",
+    "app/page.tsx",
+    "app/page.jsx",
+    "pages/index.tsx",
+    "pages/index.jsx",
+    "index.html",
+  ];
+  const hasPage = candidatePages.some((candidate) =>
+    fs.existsSync(/*turbopackIgnore: true*/ path.join(resolved, candidate))
+  );
+
+  if (!hasPage) {
+    errors.push("Required project entry point missing (e.g. src/app/page.tsx or index.html)");
   }
 
   return {

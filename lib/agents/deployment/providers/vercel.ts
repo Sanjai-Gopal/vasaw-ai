@@ -50,11 +50,16 @@ export class VercelDeploymentProvider implements DeploymentProvider {
   }
 
   private sanitizeErrorMessage(message: string): string {
-    const token = this.config.token;
-    if (token && token.length > 5) {
-      return message.replaceAll(token, "[REDACTED]");
+    let sanitized = message;
+    if (this.config.token && this.config.token.length > 5) {
+      sanitized = sanitized.replaceAll(this.config.token, "[REDACTED]");
     }
-    return message;
+    return sanitized
+      .replace(/(vcp_[a-zA-Z0-9_\-]+)/gi, "[REDACTED_VERCEL_TOKEN]")
+      .replace(/(ghp_[a-zA-Z0-9_\-]+|github_pat_[a-zA-Z0-9_\-]+)/gi, "[REDACTED_GITHUB_TOKEN]")
+      .replace(/(eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-]+)/g, "[REDACTED_SUPABASE_KEY]")
+      .replace(/(sk-[a-zA-Z0-9_\-]{20,})/gi, "[REDACTED_API_KEY]")
+      .replace(/(Bearer\s+)[a-zA-Z0-9._\-]+/gi, "$1[REDACTED_TOKEN]");
   }
 
   async deploy(request: DeployRequest): Promise<DeploymentResult> {
@@ -171,6 +176,17 @@ export class VercelDeploymentProvider implements DeploymentProvider {
           ? readyDeployment.url
           : `https://${readyDeployment.url}`;
 
+        let verified = false;
+        try {
+          const verifyRes = await fetch(liveUrl, { method: "GET" });
+          if (verifyRes.ok) {
+            verified = true;
+          }
+        } catch {
+          // Verification check is non-blocking for edge propagation
+          verified = false;
+        }
+
         return {
           success: true,
           deploymentId: readyDeployment.id,
@@ -188,6 +204,7 @@ export class VercelDeploymentProvider implements DeploymentProvider {
             vercelProjectId: project.id,
             vercelDeploymentId: readyDeployment.id,
             filesCount: scanResult.files.length,
+            verified,
           },
         };
       }
