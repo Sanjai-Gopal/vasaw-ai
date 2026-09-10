@@ -58,12 +58,17 @@ export default function WebsiteDetailPage() {
     setActionLoading("deploy");
     setStatusMsg(null);
     try {
-      const res = await deployWebsite(website.id, "mock");
-      if (res.ok) {
-        setStatusMsg({ type: "success", text: `Website deployed successfully to ${res.url || "live URL"}` });
-        setWebsite((prev) => (prev ? { ...prev, status: "deployed", liveUrl: res.url || prev.previewUrl } : null));
+      const res = await fetch(`/api/websites/${website.id}/deploy`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (data.ok && data.result) {
+        const liveUrl = data.result.url || "";
+        setStatusMsg({ type: "success", text: `Website deployed successfully to ${liveUrl || "Edge Production"}` });
+        setWebsite((prev) => (prev ? { ...prev, status: "deployed", liveUrl: liveUrl || prev.liveUrl } : null));
       } else {
-        setStatusMsg({ type: "error", text: "Deployment failed" });
+        setStatusMsg({ type: "error", text: data.error || "Deployment failed to complete." });
       }
     } catch (err) {
       setStatusMsg({ type: "error", text: err instanceof Error ? err.message : "Deployment error" });
@@ -77,12 +82,19 @@ export default function WebsiteDetailPage() {
     setActionLoading("rebuild");
     setStatusMsg(null);
     try {
-      const res = await rebuildWebsite(website.id, "mock");
-      if (res.ok && res.website) {
-        setStatusMsg({ type: "success", text: "Website rebuilt successfully" });
-        setWebsite(res.website);
+      const res = await fetch(`/api/websites/${website.id}/rebuild`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setStatusMsg({ type: "success", text: "Website AST rebuilt successfully from updated lead data." });
+        const list = await fetchWebsites();
+        const found = list.find((w) => w.id === id || w.leadId === id);
+        if (found) setWebsite(found);
       } else {
-        setStatusMsg({ type: "error", text: "Rebuild failed" });
+        setStatusMsg({ type: "error", text: data.error || "Rebuild failed" });
       }
     } catch (err) {
       setStatusMsg({ type: "error", text: err instanceof Error ? err.message : "Rebuild error" });
@@ -101,28 +113,36 @@ export default function WebsiteDetailPage() {
 
   if (!website) {
     return (
-      <div className="mx-auto max-w-5xl space-y-4 py-8">
+      <div className="mx-auto max-w-5xl space-y-4 py-8 px-4">
         <Link href="/websites" className="inline-flex items-center gap-1.5 text-xs font-sans text-slate-500 hover:text-slate-900">
           <ArrowLeft className="h-3.5 w-3.5" /> Back to Websites Fleet
         </Link>
-        <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center">
+        <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-xs">
           <h3 className="font-display text-lg font-bold text-slate-950">Website Not Found</h3>
-          <p className="mt-1 font-sans text-xs text-slate-500">The requested website could not be found.</p>
+          <p className="mt-1 font-sans text-xs text-slate-500">The requested website could not be found or has not been synthesized yet.</p>
         </div>
       </div>
     );
   }
 
-  const liveLink = website.liveUrl || website.previewUrl;
+  const isDeployed = website.status === "deployed";
+  const liveLink = isDeployed ? website.liveUrl : undefined;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
       {/* Top Breadcrumb & Actions */}
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <Link href="/websites" className="inline-flex items-center gap-1.5 text-xs font-sans font-semibold text-slate-500 hover:text-slate-900 mb-2">
-            <ArrowLeft className="h-3.5 w-3.5" /> Back to Websites Fleet
-          </Link>
+          <div className="flex items-center gap-3 mb-2">
+            <Link href="/websites" className="inline-flex items-center gap-1.5 text-xs font-sans font-semibold text-slate-500 hover:text-slate-900">
+              <ArrowLeft className="h-3.5 w-3.5" /> Back to Websites Fleet
+            </Link>
+            {website.leadId && (
+              <Link href={`/leads/${website.leadId}`} className="inline-flex items-center gap-1.5 text-xs font-sans font-semibold text-blue-600 hover:underline">
+                View Lead Profile →
+              </Link>
+            )}
+          </div>
           <h1 className="font-display text-2xl font-extrabold tracking-tight text-slate-950 flex items-center gap-2.5">
             <Globe className="h-6 w-6 text-blue-600" /> {website.businessName}
           </h1>
@@ -142,24 +162,27 @@ export default function WebsiteDetailPage() {
             {actionLoading === "rebuild" ? <Loader2 className="h-3.5 w-3.5 animate-spin text-blue-600" /> : <RefreshCw className="h-3.5 w-3.5 text-slate-500" />}
             Rebuild AST
           </Button>
-          <Button
-            size="sm"
-            onClick={handleDeploy}
-            disabled={!!actionLoading || website.status === "deployed"}
-            className="gap-1.5 text-xs font-sans rounded-xl bg-slate-900 text-white hover:bg-slate-800"
-          >
-            {actionLoading === "deploy" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UploadCloud className="h-3.5 w-3.5" />}
-            {website.status === "deployed" ? "Deployed to Edge" : "Deploy Live"}
-          </Button>
+          {!isDeployed && (
+            <Button
+              size="sm"
+              onClick={handleDeploy}
+              disabled={!!actionLoading}
+              className="gap-1.5 text-xs font-sans rounded-xl bg-slate-900 text-white hover:bg-slate-800"
+            >
+              {actionLoading === "deploy" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UploadCloud className="h-3.5 w-3.5" />}
+              Deploy to Vercel
+            </Button>
+          )}
           {liveLink && (
             <a href={liveLink} target="_blank" rel="noopener noreferrer">
               <Button size="sm" className="gap-1.5 text-xs font-sans rounded-xl bg-blue-600 text-white hover:bg-blue-700">
-                <ExternalLink className="h-3.5 w-3.5" /> View Live
+                <ExternalLink className="h-3.5 w-3.5" /> View Live Production
               </Button>
             </a>
           )}
         </div>
       </div>
+
 
       {statusMsg && (
         <div

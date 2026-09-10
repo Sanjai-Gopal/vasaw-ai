@@ -348,6 +348,47 @@ describe("Scraping Agent", () => {
       });
       expect(leads.length).toBe(0);
     });
+
+    it("should return global leads when location is Worldwide or empty", async () => {
+      const provider = new MockProvider();
+      const globalLeads = await provider.scrape({
+        campaignId: "test-camp-global",
+        category: "Restaurant",
+        location: "Worldwide",
+        limit: 8,
+        mode: "mock",
+      });
+      expect(globalLeads.length).toBe(8);
+      const cities = globalLeads.map((l) => l.city);
+      expect(cities.length).toBe(8);
+    });
+
+    it("should return international leads for New York", async () => {
+      const provider = new MockProvider();
+      const leads = await provider.scrape({
+        campaignId: "test-camp-ny",
+        category: "Restaurant",
+        location: "New York",
+        limit: 2,
+        mode: "mock",
+      });
+      expect(leads.length).toBe(2);
+      expect(leads.every((l) => l.city.toLowerCase().includes("new york"))).toBe(true);
+    });
+
+    it("should synthesize dynamic leads for custom global locations", async () => {
+      const provider = new MockProvider();
+      const leads = await provider.scrape({
+        campaignId: "test-camp-chicago",
+        category: "Dental Clinic",
+        location: "Chicago, USA",
+        limit: 5,
+        mode: "mock",
+      });
+      expect(leads.length).toBe(5);
+      expect(leads.every((l) => l.city === "Chicago")).toBe(true);
+      expect(leads.every((l) => l.address.includes("Chicago, USA"))).toBe(true);
+    });
   });
 
   describe("getProvider", () => {

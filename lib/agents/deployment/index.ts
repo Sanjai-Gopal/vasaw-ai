@@ -138,6 +138,19 @@ export async function deployWebsite(input: string | DeployRequest): Promise<Depl
   try {
     if (deployResult.success) {
       if (request.websiteId && leadId && businessName) {
+        // Save/Update website in storage first (parent foreign key)
+        await saveWebsite({
+          id: request.websiteId,
+          leadId,
+          businessName,
+          category: request.buildResult?.template || "generic",
+          location: "",
+          template: request.buildResult?.template || "generic",
+          status: "deployed",
+          liveUrl: deployResult.url,
+        });
+
+        // Save deployment record referencing the website and lead
         await saveDeployment({
           websiteId: request.websiteId,
           leadId,
@@ -148,18 +161,6 @@ export async function deployWebsite(input: string | DeployRequest): Promise<Depl
           liveUrl: deployResult.url,
           durationSec,
           deployedAt: deployResult.completedAt,
-        });
-
-        // Update website in storage
-        await saveWebsite({
-          id: request.websiteId,
-          leadId,
-          businessName,
-          category: request.buildResult?.template || "generic",
-          location: "",
-          template: request.buildResult?.template || "generic",
-          status: "deployed",
-          liveUrl: deployResult.url,
         });
 
         // Update lead status to website_deployed
@@ -183,16 +184,6 @@ export async function deployWebsite(input: string | DeployRequest): Promise<Depl
       });
     } else {
       if (request.websiteId && leadId && businessName) {
-        await saveDeployment({
-          websiteId: request.websiteId,
-          leadId,
-          businessName,
-          status: "failed",
-          provider: mode,
-          environment: deployResult.environment,
-          durationSec,
-        }).catch(() => {});
-
         await saveWebsite({
           id: request.websiteId,
           leadId,
@@ -201,6 +192,16 @@ export async function deployWebsite(input: string | DeployRequest): Promise<Depl
           location: "",
           template: request.buildResult?.template || "generic",
           status: "failed",
+        }).catch(() => {});
+
+        await saveDeployment({
+          websiteId: request.websiteId,
+          leadId,
+          businessName,
+          status: "failed",
+          provider: mode,
+          environment: deployResult.environment,
+          durationSec,
         }).catch(() => {});
       }
 

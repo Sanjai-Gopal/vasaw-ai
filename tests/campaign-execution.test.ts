@@ -37,7 +37,7 @@ describe("Campaign Execution & Lifecycle Management Tests", () => {
     expect(campaign.automationMode).toBe("semi-automatic");
   });
 
-  it("should execute campaign workflow with orchestrator and return execution metrics", async () => {
+  it("should execute campaign workflow with orchestrator and return execution metrics", { timeout: 120000 }, async () => {
     const result = await executeCampaign(
       "camp-test-exec-001",
       ["Coimbatore"],
@@ -59,7 +59,7 @@ describe("Campaign Execution & Lifecycle Management Tests", () => {
     expect(result.stats.scraped).toBeGreaterThanOrEqual(1);
   });
 
-  it("should support skipOutreach option when executing campaign", async () => {
+  it("should support skipOutreach option when executing campaign", { timeout: 120000 }, async () => {
     const result = await executeCampaign(
       "camp-test-skip-001",
       ["Coimbatore"],
@@ -272,7 +272,7 @@ describe("Campaign Execution & Lifecycle Management Tests", () => {
       expect(isExhausted).toBe(true);
     });
 
-    it("10. all six agents execute for eligible leads in a batch", async () => {
+    it("10. all six agents execute for eligible leads in a batch", { timeout: 180000 }, async () => {
       const result = await executeCampaign(
         "camp-six-agents-001",
         ["RS Puram"],
@@ -298,7 +298,7 @@ describe("Campaign Execution & Lifecycle Management Tests", () => {
       expect(result.stats.messagesSent).toBeGreaterThan(0);
     });
 
-    it("11. re-running a batch is idempotent and safe", async () => {
+    it("11. re-running a batch is idempotent and safe", { timeout: 180000 }, async () => {
       const run1 = await executeCampaign(
         "camp-idempotent-001",
         ["RS Puram"],

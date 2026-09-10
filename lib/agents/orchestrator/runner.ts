@@ -123,7 +123,7 @@ export async function executeWorkflow(
     try {
       const scrapeResponse = await runScrapingAgent({
         campaignId,
-        location: request.locations[0] || "Coimbatore",
+        location: request.locations[0] || "Worldwide",
         category: request.categories[0] || "restaurant",
         limit: request.maxItems ?? 10,
         offset: request.offset,
@@ -313,7 +313,7 @@ export async function executeWorkflow(
           result.errors.push({
             stage: "BUILDING_WEBSITE",
             leadId: lead.id,
-            message: `Website build failed for ${lead.businessName}`,
+            message: `Website build failed for ${lead.businessName}: ${buildResult.buildErrors?.join("; ") || "Build failed"}`,
           });
         }
       } catch (buildErr: unknown) {

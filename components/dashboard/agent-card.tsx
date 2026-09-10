@@ -30,10 +30,10 @@ const statusColor: Record<AgentStatus, string> = {
 };
 
 export function AgentCard({ agent, index = 0 }: { agent: Agent; index?: number }) {
-  const meta = agentStatusMeta[agent.status];
-  const Icon = statusIcon[agent.status];
-  const successRate =
-    agent.totalRuns > 0 ? Math.round((agent.successRuns / agent.totalRuns) * 100) : 0;
+  const meta = agentStatusMeta[agent.status] || { label: "Idle", variant: "default" };
+  const Icon = statusIcon[agent.status] || Circle;
+  const hasRuns = (agent.totalRuns ?? 0) > 0;
+  const successRate = hasRuns ? Math.round((agent.successRuns / agent.totalRuns) * 100) : null;
 
   return (
     <motion.div
@@ -61,7 +61,7 @@ export function AgentCard({ agent, index = 0 }: { agent: Agent; index?: number }
                 <Icon
                   className={cn(
                     "h-5 w-5",
-                    statusColor[agent.status],
+                    statusColor[agent.status] || "text-slate-400",
                     agent.status === "running" && "animate-spin"
                   )}
                 />
@@ -69,7 +69,7 @@ export function AgentCard({ agent, index = 0 }: { agent: Agent; index?: number }
               <div>
                 <p className="font-display text-base font-bold tracking-tight text-slate-950">{agent.name}</p>
                 <p className="font-sans text-xs text-slate-500">
-                  Last active {formatRelative(agent.lastRun)}
+                  {agent.lastRun ? `Last active ${formatRelative(agent.lastRun)}` : "No runs yet"}
                 </p>
               </div>
             </div>
@@ -83,33 +83,37 @@ export function AgentCard({ agent, index = 0 }: { agent: Agent; index?: number }
           <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl border border-slate-100 bg-slate-50/80 p-3">
             <div>
               <p className="font-mono text-[10px] font-semibold tracking-wider text-slate-400">TOTAL</p>
-              <p className="mt-0.5 font-mono text-sm font-bold text-slate-800">{agent.totalRuns}</p>
+              <p className="mt-0.5 font-mono text-sm font-bold text-slate-800">{agent.totalRuns ?? 0}</p>
             </div>
             <div>
               <p className="font-mono text-[10px] font-semibold tracking-wider text-slate-400">SUCCESS</p>
               <p className="mt-0.5 font-mono text-sm font-bold text-emerald-600">
-                {agent.successRuns}
+                {agent.successRuns ?? 0}
               </p>
             </div>
             <div>
               <p className="font-mono text-[10px] font-semibold tracking-wider text-slate-400">FAILED</p>
-              <p className="mt-0.5 font-mono text-sm font-bold text-rose-500">{agent.failedRuns}</p>
+              <p className="mt-0.5 font-mono text-sm font-bold text-rose-500">{agent.failedRuns ?? 0}</p>
             </div>
           </div>
 
           <div className="mt-4">
             <div className="mb-1.5 flex items-center justify-between text-xs font-sans">
               <span className="font-medium text-slate-500">Reliability SLA</span>
-              <span className="font-mono font-bold text-slate-800">{successRate}%</span>
+              <span className="font-mono font-bold text-slate-800">
+                {successRate !== null ? `${successRate}%` : "No data yet"}
+              </span>
             </div>
             <Progress
-              value={successRate}
+              value={successRate !== null ? successRate : 0}
               indicatorClassName={
-                successRate >= 90
-                  ? "bg-emerald-500"
-                  : successRate >= 75
-                    ? "bg-amber-500"
-                    : "bg-rose-500"
+                successRate === null
+                  ? "bg-slate-200"
+                  : successRate >= 90
+                    ? "bg-emerald-500"
+                    : successRate >= 75
+                      ? "bg-amber-500"
+                      : "bg-rose-500"
               }
             />
           </div>
@@ -119,28 +123,32 @@ export function AgentCard({ agent, index = 0 }: { agent: Agent; index?: number }
           <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
             Recent Activity
           </p>
-          <div className="space-y-2">
-            {agent.recentActivity.slice(0, 2).map((a) => (
-              <div key={a.id} className="flex items-start gap-2">
-                <span
-                  className={cn(
-                    "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
-                    a.status === "success"
-                      ? "bg-emerald-500"
-                      : a.status === "error"
-                        ? "bg-rose-500"
-                        : "bg-blue-500"
-                  )}
-                />
-                <div className="min-w-0">
-                  <p className="truncate text-xs font-medium text-slate-700">{a.title}</p>
-                  <p className="font-mono text-[10px] text-slate-400">
-                    {formatRelative(a.timestamp)}
-                  </p>
+          {agent.recentActivity && agent.recentActivity.length > 0 ? (
+            <div className="space-y-2">
+              {agent.recentActivity.slice(0, 2).map((a) => (
+                <div key={a.id} className="flex items-start gap-2">
+                  <span
+                    className={cn(
+                      "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
+                      a.status === "success"
+                        ? "bg-emerald-500"
+                        : a.status === "error"
+                          ? "bg-rose-500"
+                          : "bg-blue-500"
+                    )}
+                  />
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-medium text-slate-700">{a.title}</p>
+                    <p className="font-mono text-[10px] text-slate-400">
+                      {formatRelative(a.timestamp)}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-slate-400 font-sans italic py-1">No activity recorded yet</p>
+          )}
         </div>
       </div>
     </motion.div>

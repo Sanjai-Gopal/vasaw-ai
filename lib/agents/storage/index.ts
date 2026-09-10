@@ -266,7 +266,10 @@ export async function saveLeads(request: SaveLeadsRequest): Promise<SaveLeadsRes
     try {
       const dbData = leadToDbFormat(lead, request.campaignId, request.apifyRunId, request.apifyDatasetId);
 
-      // Use the database upsert_lead function for idempotent deduplication
+      let leadId: string | null = null;
+      let wasInsert = true;
+
+      // Try the database upsert_lead RPC function first
       const { data, error } = await admin.rpc("upsert_lead", {
         p_campaign_id: request.campaignId,
         p_business_name: lead.businessName,
@@ -285,25 +288,45 @@ export async function saveLeads(request: SaveLeadsRequest): Promise<SaveLeadsRes
         p_raw_data: dbData,
       });
 
-      if (error) {
+      if (!error && data) {
+        leadId = data as string;
+        const { data: leadData } = await admin
+          .from("leads")
+          .select("created_at, updated_at")
+          .eq("id", leadId)
+          .single();
+
+        if (leadData && leadData.created_at !== leadData.updated_at) {
+          wasInsert = false;
+        }
+      } else if (error && (error.message?.includes("Could not find the function") || error.message?.includes("function public.upsert_lead") || (error as { code?: string }).code === "PGRST202")) {
+        // Fallback to direct table insert/upsert when RPC is not defined in DB
+        const insertObj: Record<string, unknown> = { ...dbData };
+        if (isValidUuid(lead.id)) {
+          insertObj.id = lead.id;
+        }
+        const insertRes = await admin
+          .from("leads")
+          .insert(insertObj)
+          .select("id")
+          .single();
+
+        if (insertRes?.error) {
+          throw new Error(insertRes.error.message);
+        }
+        leadId = insertRes?.data?.id ?? null;
+      } else if (error) {
         throw new Error(error.message);
       }
 
-      const leadId = data as string;
-      result.leadIds.push(leadId);
-
-      // Check if it was an insert or update by checking the lead's created_at
-      const { data: leadData } = await admin
-        .from("leads")
-        .select("created_at, updated_at")
-        .eq("id", leadId)
-        .single();
-
-      if (leadData && leadData.created_at === leadData.updated_at) {
-        result.inserted++;
-      } else {
-        result.updated++;
-        result.duplicates++;
+      if (leadId) {
+        result.leadIds.push(leadId);
+        if (wasInsert) {
+          result.inserted++;
+        } else {
+          result.updated++;
+          result.duplicates++;
+        }
       }
     } catch (err) {
       result.errors.push({
@@ -413,14 +436,27 @@ export async function updateLeadStatus(request: UpdateLeadStatusRequest): Promis
     throw new Error(`Failed to get lead: ${fetchError.message}`);
   }
 
-  // Use database function for validated transition
+  // Try database function for validated transition
   const { data, error } = await admin.rpc("update_lead_status", {
     p_lead_id: request.leadId,
     p_new_status: request.status,
     p_actor: "storage-agent",
   });
 
-  if (error) {
+  if (error && (error.message?.includes("Could not find the function") || error.message?.includes("function public.update_lead_status") || (error as { code?: string }).code === "PGRST202")) {
+    // Fallback to direct table update when RPC is not defined in DB
+    const { error: directError } = await admin
+      .from("leads")
+      .update({
+        status: request.status,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", request.leadId);
+
+    if (directError) {
+      throw new Error(directError.message);
+    }
+  } else if (error) {
     throw new Error(error.message);
   }
 
@@ -645,6 +681,7 @@ export async function saveWebsite(request: SaveWebsiteRequest): Promise<SavedWeb
 }
 
 export async function getWebsite(id: string): Promise<SavedWebsite | null> {
+  if (!isValidUuid(id)) return null;
   const admin = getSupabaseAdmin();
   const { data, error } = await admin
     .from("websites")
@@ -665,6 +702,7 @@ export async function getWebsites(request: GetWebsitesRequest = {}): Promise<Sav
   let query = admin.from("websites").select("*").order("created_at", { ascending: false });
 
   if (request.leadId) {
+    if (!isValidUuid(request.leadId)) return [];
     query = query.eq("lead_id", request.leadId);
   }
   if (request.status) {
@@ -737,6 +775,7 @@ export async function saveDeployment(request: SaveDeploymentRequest): Promise<Sa
 }
 
 export async function getDeployment(id: string): Promise<SavedDeployment | null> {
+  if (!isValidUuid(id)) return null;
   const admin = getSupabaseAdmin();
   const { data, error } = await admin
     .from("deployments")
@@ -757,9 +796,11 @@ export async function getDeployments(request: GetDeploymentsRequest = {}): Promi
   let query = admin.from("deployments").select("*").order("created_at", { ascending: false });
 
   if (request.websiteId) {
+    if (!isValidUuid(request.websiteId)) return [];
     query = query.eq("website_id", request.websiteId);
   }
   if (request.leadId) {
+    if (!isValidUuid(request.leadId)) return [];
     query = query.eq("lead_id", request.leadId);
   }
   if (request.status) {

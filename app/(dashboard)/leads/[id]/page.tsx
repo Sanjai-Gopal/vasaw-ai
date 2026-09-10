@@ -63,10 +63,11 @@ export default function LeadDetailPage() {
           const leadMsgs = messagesList.filter((m) => m.leadId === leadData.id);
           setMessages(leadMsgs);
 
+          const previewLink = foundSite?.liveUrl || foundSite?.previewUrl;
           setCustomMsg(
-            `Hello ${leadData.businessName}! We have generated a custom website preview for your business: ${
-              foundSite?.liveUrl || foundSite?.previewUrl || "https://preview.vasaw.app"
-            }. Would you like to review it?`
+            previewLink
+              ? `Hello ${leadData.businessName}! We have generated a custom website preview for your business: ${previewLink}. Would you like to review it?`
+              : `Hello ${leadData.businessName}! We noticed your business on Google Maps and synthesized a custom website for your brand. Would you like to review it?`
           );
         }
       } catch (err) {
@@ -161,11 +162,24 @@ export default function LeadDetailPage() {
 
         <div className="flex items-center gap-2">
           {website ? (
-            <Link href={`/websites/${website.id}`}>
-              <Button variant="outline" size="sm" className="gap-1.5 text-xs font-sans rounded-xl bg-white border-slate-200">
-                <Globe className="h-3.5 w-3.5 text-blue-600" /> View Live Website
-              </Button>
-            </Link>
+            <>
+              {website.liveUrl && (
+                <a
+                  href={website.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button size="sm" className="gap-1.5 text-xs font-sans rounded-xl bg-blue-600 text-white hover:bg-blue-700 shadow-xs">
+                    <ExternalLink className="h-3.5 w-3.5" /> Open Live Site
+                  </Button>
+                </a>
+              )}
+              <Link href={`/websites/${website.id}`}>
+                <Button variant="outline" size="sm" className="gap-1.5 text-xs font-sans rounded-xl bg-white border-slate-200">
+                  <Globe className="h-3.5 w-3.5 text-blue-600" /> Inspect Website
+                </Button>
+              </Link>
+            </>
           ) : (
             <Link href="/websites">
               <Button size="sm" className="gap-1.5 text-xs font-sans rounded-xl bg-slate-900 text-white hover:bg-slate-800">

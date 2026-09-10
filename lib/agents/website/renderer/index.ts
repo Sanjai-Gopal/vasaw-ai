@@ -305,8 +305,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-[#0c0a09] antialiased text-[#fdfbf7] selection:bg-amber-500 selection:text-black">
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen bg-[#0c0a09] antialiased text-[#fdfbf7] selection:bg-amber-500 selection:text-black" suppressHydrationWarning>
         {children}
       </body>
     </html>
@@ -411,7 +411,7 @@ export default function HomePage() {
   const ratingValue = ${rating};
   const reviewCountValue = ${reviewCount};
   const cityName = ${JSON.stringify(city)};
-  const templateId = ${JSON.stringify(template.id)};
+  const templateId: string = ${JSON.stringify(template.id)};
   const isFoodBusiness = templateId === "restaurant" || templateId === "cafe";
   const isHotel = templateId === "hotel";
   const isSalonOrSpa = templateId === "salon" || templateId === "spa";

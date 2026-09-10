@@ -90,7 +90,7 @@ describe("Production Hardening & Security Audit Tests", () => {
 
       const content = generateDeterministicContent(lead, undefined, undefined);
       expect(content.hero.headline).toBe("Coimbatore Bakes");
-      expect(content.about.headline).toBe("About Coimbatore Bakes");
+      expect(content.about.headline).toBe("Authentic Food, Served with Tradition");
       expect(content.contact.phone).toBe("+919876543210");
     });
   });

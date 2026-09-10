@@ -11,9 +11,9 @@ const daysAgo = (days: number, hour = 10) => {
 export const defaultMockCampaigns: Campaign[] = [
   {
     id: "C-201",
-    name: "Coimbatore Restaurants — Phase 1",
+    name: "Global Dining & Hospitality — Phase 1",
     category: "Restaurant",
-    location: "Coimbatore",
+    location: "New York, USA",
     leadTarget: 150,
     status: "active",
     progress: 62,
@@ -32,9 +32,9 @@ export const defaultMockCampaigns: Campaign[] = [
   },
   {
     id: "C-202",
-    name: "Salons & Gyms — Saibaba Colony",
-    category: "Salon & Fitness",
-    location: "Saibaba Colony",
+    name: "Tech & AI Studios — San Francisco",
+    category: "IT Services",
+    location: "San Francisco, USA",
     leadTarget: 100,
     status: "active",
     progress: 45,
@@ -53,9 +53,9 @@ export const defaultMockCampaigns: Campaign[] = [
   },
   {
     id: "C-203",
-    name: "Healthcare Providers — Peelamedu",
+    name: "Healthcare Providers — London",
     category: "Healthcare",
-    location: "Peelamedu",
+    location: "London, UK",
     leadTarget: 80,
     status: "paused",
     progress: 58,
@@ -74,9 +74,9 @@ export const defaultMockCampaigns: Campaign[] = [
   },
   {
     id: "C-204",
-    name: "Bakery & Sweet Shops — Ganapathy",
+    name: "Artisan Bakeries — Tokyo",
     category: "Bakery",
-    location: "Ganapathy",
+    location: "Tokyo, Japan",
     leadTarget: 60,
     status: "draft",
     progress: 0,
@@ -95,9 +95,9 @@ export const defaultMockCampaigns: Campaign[] = [
   },
   {
     id: "C-205",
-    name: "Textiles & Retail — Cross Cut Road",
+    name: "Luxury Boutiques & Retail — Paris",
     category: "Retail",
-    location: "Gandhipuram",
+    location: "Paris, France",
     leadTarget: 90,
     status: "completed",
     progress: 100,
@@ -116,9 +116,9 @@ export const defaultMockCampaigns: Campaign[] = [
   },
   {
     id: "C-206",
-    name: "Auto Service Centres — Avinashi Road",
+    name: "Specialty Auto & EV Hubs — Toronto",
     category: "Automobile",
-    location: "Avinashi Road",
+    location: "Toronto, Canada",
     leadTarget: 70,
     status: "paused",
     progress: 31,
@@ -155,18 +155,18 @@ export const campaignCategories = [
 ];
 
 export const campaignLocations = [
-  "RS Puram",
-  "Gandhipuram",
-  "Peelamedu",
-  "Saibaba Colony",
-  "Race Course",
-  "Avinashi Road",
-  "Ganapathy",
-  "Singanallur",
-  "Cross Cut Road",
-  "Kurichi",
-  "Tidel Park",
-  "Brookefields",
+  "Worldwide (Global)",
+  "New York, USA",
+  "London, UK",
+  "San Francisco, USA",
+  "Tokyo, Japan",
+  "Dubai, UAE",
+  "Toronto, Canada",
+  "Sydney, Australia",
+  "Paris, France",
+  "Singapore",
+  "Berlin, Germany",
+  "Mumbai, India",
 ];
 
 export function mapCampaignFromDb(row: Record<string, unknown>): Campaign {
@@ -174,7 +174,7 @@ export function mapCampaignFromDb(row: Record<string, unknown>): Campaign {
     id: String(row.id || `C-${Date.now()}`),
     name: String(row.name || "Untitled Campaign"),
     category: String(row.category || "General"),
-    location: String(row.location || "Coimbatore"),
+    location: String(row.location || "Worldwide"),
     leadTarget: typeof row.lead_target === "number" ? row.lead_target : typeof row.leadTarget === "number" ? row.leadTarget : 50,
     status: (row.status as Campaign["status"]) || "draft",
     progress: typeof row.progress === "number" ? row.progress : 0,
@@ -265,7 +265,7 @@ export async function refreshCampaignCounters(campaignId: string): Promise<Campa
     const progress = Math.min(100, Math.round((collected / leadTarget) * 100));
     const status = collected >= leadTarget ? "completed" : campaignData.status === "draft" ? "active" : campaignData.status;
 
-    const { data: updated, error: updateError } = await admin
+    const updateQuery = admin
       .from("campaigns")
       .update({
         leads_collected: collected,
@@ -274,9 +274,11 @@ export async function refreshCampaignCounters(campaignId: string): Promise<Campa
         status,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", campaignId)
-      .select()
-      .single();
+      .eq("id", campaignId);
+
+    const { data: updated, error: updateError } = typeof (updateQuery as unknown as Record<string, unknown>)?.select === "function"
+      ? await (updateQuery as unknown as { select: () => { single: () => Promise<{ data: Record<string, unknown>; error: Error | null }> } }).select().single()
+      : await updateQuery;
 
     if (!updateError && updated) {
       return mapCampaignFromDb(updated);

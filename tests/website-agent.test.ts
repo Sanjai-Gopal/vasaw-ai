@@ -165,8 +165,15 @@ describe("Agent 4 — Website Building Agent", () => {
       expect(selectTemplate("Hair Salon")).toBe("salon");
       expect(selectTemplate("Beauty Parlour")).toBe("salon");
       expect(selectTemplate("Barber Shop")).toBe("salon");
-      expect(selectTemplate("Nail Spa")).toBe("salon");
-      expect(selectTemplate("Skin Care Clinic & Spa")).toBe("salon");
+      expect(selectTemplate("Bridal Studio")).toBe("salon");
+      expect(selectTemplate("Skin Care & Facial Clinic")).toBe("salon");
+    });
+
+    it("should select 'spa' template for wellness & therapy categories", () => {
+      expect(selectTemplate("Ayurvedic Spa")).toBe("spa");
+      expect(selectTemplate("Wellness Sanctuary")).toBe("spa");
+      expect(selectTemplate("Massage Therapy Center")).toBe("spa");
+      expect(selectTemplate("Skin Care Clinic & Spa")).toBe("spa");
     });
 
     it("should select 'gym' template for fitness categories", () => {
@@ -192,10 +199,10 @@ describe("Agent 4 — Website Building Agent", () => {
     });
 
     it("should fallback to 'generic' template for unknown or miscellaneous categories", () => {
-      expect(selectTemplate("Software Agency")).toBe("generic");
-      expect(selectTemplate("Aerospace Consulting")).toBe("generic");
-      expect(selectTemplate("Plumbing Services")).toBe("generic");
+      expect(selectTemplate("Heavy Metal Fabrication")).toBe("generic");
+      expect(selectTemplate("Custom Tooling")).toBe("generic");
       expect(selectTemplate("Commercial Packaging")).toBe("generic");
+      expect(selectTemplate("Bulk Sand Supply")).toBe("generic");
     });
 
     it("should retrieve template definitions for all supported categories", () => {

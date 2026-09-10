@@ -37,8 +37,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       className={`${plusJakarta.variable} ${syne.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full font-sans antialiased bg-[#f8fafc] text-slate-800 selection:bg-blue-600/15 selection:text-blue-700">
+      <body
+        className="min-h-full font-sans antialiased bg-[#f8fafc] text-slate-800 selection:bg-blue-600/15 selection:text-blue-700"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

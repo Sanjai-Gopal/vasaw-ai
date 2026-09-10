@@ -59,6 +59,8 @@ function MockPreview({ website, device }: { website: WebsiteApi; device: "deskto
         ? "max-w-[480px] mx-auto"
         : "w-full";
 
+  const displayUrl = website.liveUrl || website.previewUrl || "https://preview.vasaw.app/";
+
   return (
     <div className={cn("overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl transition-all duration-300", deviceWidthClass)}>
       {/* Browser address bar */}
@@ -68,9 +70,9 @@ function MockPreview({ website, device }: { website: WebsiteApi; device: "deskto
           <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
           <div className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
         </div>
-        <div className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1 font-mono text-[11px] text-slate-500">
-          <ShieldCheck className="h-3 w-3 text-emerald-500" />
-          <span>https://{website.businessName.toLowerCase().replace(/\s+/g, "-")}.vasaw.app</span>
+        <div className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1 font-mono text-[11px] text-slate-500 max-w-sm truncate">
+          <ShieldCheck className="h-3 w-3 text-emerald-500 shrink-0" />
+          <span className="truncate">{displayUrl}</span>
         </div>
         <div className="w-10" />
       </div>
@@ -138,69 +140,142 @@ export default function WebsitesPage() {
   const [websiteList, setWebsiteList] = React.useState<WebsiteApi[]>([]);
   const [preview, setPreview] = React.useState<WebsiteApi | null>(null);
   const [previewDevice, setPreviewDevice] = React.useState<"desktop" | "tablet" | "mobile">("desktop");
-  const [rebuildingId, setRebuildingId] = React.useState<string | null>(null);
+  const [actionId, setActionId] = React.useState<string | null>(null);
+  const [actionType, setActionType] = React.useState<"deploy" | "rebuild" | null>(null);
+  const [notification, setNotification] = React.useState<{ type: "success" | "error"; text: string } | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [filterStatus, setFilterStatus] = React.useState<"all" | "deployed" | "building" | "failed">("all");
 
+  const fetchData = React.useCallback(async () => {
+    try {
+      const res = await fetch("/api/websites");
+      const data = await res.json();
+      if (data.ok && Array.isArray(data.websites)) {
+        setWebsiteList(data.websites);
+        setError(null);
+      } else {
+        setError(data.error || "Failed to fetch websites");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   React.useEffect(() => {
-    async function fetchData() {
+    let ignore = false;
+    async function init() {
       try {
         const res = await fetch("/api/websites");
         const data = await res.json();
-        if (data.ok && Array.isArray(data.websites)) {
-          setWebsiteList(data.websites);
-        } else {
-          setError(data.error || "Failed to fetch websites");
+        if (!ignore) {
+          if (data.ok && Array.isArray(data.websites)) {
+            setWebsiteList(data.websites);
+            setError(null);
+          } else {
+            setError(data.error || "Failed to fetch websites");
+          }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
+        if (!ignore) {
+          setError(err instanceof Error ? err.message : "Unknown error");
+        }
       } finally {
-        setLoading(false);
+        if (!ignore) {
+          setLoading(false);
+        }
       }
     }
-    fetchData();
+    init();
+    return () => {
+      ignore = true;
+    };
   }, []);
 
-  const rebuildWebsite = (id: string) => {
-    if (rebuildingId) return;
-    setRebuildingId(id);
-    setWebsiteList((prev) =>
-      prev.map((w) =>
-        w.id === id ? { ...w, status: "building" as WebsiteStatus, buildProgress: 0 } : w
-      )
-    );
-
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 20;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(interval);
+  const handleDeployWebsite = async (id: string) => {
+    if (actionId) return;
+    setActionId(id);
+    setActionType("deploy");
+    setNotification(null);
+    try {
+      const res = await fetch(`/api/websites/${id}/deploy`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (data.ok && data.result) {
+        const liveUrl = data.result.url || "";
         setWebsiteList((prev) =>
           prev.map((w) =>
             w.id === id
               ? {
                   ...w,
-                  status: "built" as WebsiteStatus,
+                  status: "deployed" as WebsiteStatus,
+                  liveUrl: liveUrl || w.liveUrl,
                   buildProgress: 100,
-                  builtAt: new Date().toISOString(),
-                  liveUrl: w.liveUrl || `https://${w.businessName.toLowerCase().replace(/\s+/g, "-")}.vasaw.app`,
                 }
               : w
           )
         );
-        setRebuildingId(null);
+        setNotification({
+          type: "success",
+          text: `Website deployed successfully! Live URL: ${liveUrl || "Edge Production"}`,
+        });
       } else {
-        setWebsiteList((prev) =>
-          prev.map((w) =>
-            w.id === id ? { ...w, buildProgress: Math.min(99, Math.round(progress)) } : w
-          )
-        );
+        setNotification({
+          type: "error",
+          text: data.error || "Deployment failed to complete.",
+        });
       }
-    }, 400);
+    } catch (err) {
+      setNotification({
+        type: "error",
+        text: err instanceof Error ? err.message : "Deployment network error",
+      });
+    } finally {
+      setActionId(null);
+      setActionType(null);
+    }
   };
+
+  const handleRebuildWebsite = async (id: string) => {
+    if (actionId) return;
+    setActionId(id);
+    setActionType("rebuild");
+    setNotification(null);
+    try {
+      const res = await fetch(`/api/websites/${id}/rebuild`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setNotification({
+          type: "success",
+          text: "Website AST rebuilt successfully from updated lead data.",
+        });
+        await fetchData();
+      } else {
+        setNotification({
+          type: "error",
+          text: data.error || "Rebuild failed to complete.",
+        });
+      }
+    } catch (err) {
+      setNotification({
+        type: "error",
+        text: err instanceof Error ? err.message : "Rebuild network error",
+      });
+    } finally {
+      setActionId(null);
+      setActionType(null);
+    }
+  };
+
 
   if (loading) {
     return (
@@ -259,23 +334,56 @@ export default function WebsitesPage() {
         description="Autonomous Next.js 16 Edge synthesis, AST generation, and Vercel production deployment."
       >
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5 font-sans">
-            <RefreshCw className="h-3.5 w-3.5 text-slate-500" />
-            Sync Vercel
-          </Button>
-          <Button className="gap-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white shadow-sm hover:opacity-95">
-            <Rocket className="h-4 w-4" />
-            Deploy Fleet Queue
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 font-sans"
+            onClick={fetchData}
+            disabled={loading}
+          >
+            <RefreshCw className={cn("h-3.5 w-3.5 text-slate-500", loading && "animate-spin")} />
+            Sync Fleet
           </Button>
         </div>
       </PageHeader>
+
+      {/* Notification Banner */}
+      {notification && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={cn(
+            "flex items-center justify-between rounded-2xl border p-4 shadow-sm backdrop-blur-md",
+            notification.type === "success"
+              ? "border-emerald-200 bg-emerald-50/80 text-emerald-800"
+              : "border-rose-200 bg-rose-50/80 text-rose-800"
+          )}
+        >
+          <div className="flex items-center gap-2.5 text-xs font-sans font-medium">
+            {notification.type === "success" ? (
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+            ) : (
+              <X className="h-4 w-4 text-rose-600 shrink-0" />
+            )}
+            <span>{notification.text}</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-xs font-sans"
+            onClick={() => setNotification(null)}
+          >
+            Dismiss
+          </Button>
+        </motion.div>
+      )}
 
       {/* Porcelain Telemetry Stat Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: "Synthesized Sites", value: counts.total, sub: "Total autonomous builds", color: "text-slate-950", accent: "from-blue-500 to-indigo-500" },
           { label: "Active Pipelines", value: counts.building, sub: "Compiling AST & assets", color: "text-blue-600", accent: "from-blue-400 to-cyan-400" },
-          { label: "Live on Edge SLA", value: counts.deployed, sub: "99.98% Global Uptime", color: "text-emerald-600", accent: "from-emerald-400 to-teal-500" },
+          { label: "Live on Edge SLA", value: counts.deployed, sub: "Production Vercel URLs", color: "text-emerald-600", accent: "from-emerald-400 to-teal-500" },
           { label: "AST Exceptions", value: counts.failed, sub: "Requires auto-rebuild", color: "text-rose-600", accent: "from-rose-400 to-pink-500" },
         ].map((s) => (
           <div
@@ -325,11 +433,45 @@ export default function WebsitesPage() {
         </div>
       </div>
 
+      {/* Empty State */}
+      {filteredWebsites.length === 0 && (
+        <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-xs">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 mb-3 border border-blue-200">
+            <Globe className="h-6 w-6" />
+          </div>
+          <h3 className="font-display text-base font-bold text-slate-950">No Websites Found</h3>
+          <p className="mt-1 font-sans text-xs text-slate-500 max-w-md mx-auto">
+            {searchQuery || filterStatus !== "all"
+              ? "No synthesized websites match your search or filter criteria. Try resetting filters."
+              : "No websites have been synthesized yet. Launch a campaign to scrape and qualify local business prospects."}
+          </p>
+          <div className="mt-4 flex items-center justify-center gap-2">
+            {searchQuery || filterStatus !== "all" ? (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery("");
+                  setFilterStatus("all");
+                }}
+                className="font-sans text-xs"
+              >
+                Reset Filters
+              </Button>
+            ) : (
+              <Button asChild size="sm" className="bg-blue-600 text-white font-sans text-xs hover:bg-blue-700">
+                <a href="/campaigns">Launch Campaign</a>
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Website Cards Grid */}
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {filteredWebsites.map((website, index) => {
           const meta = websiteStatusMeta[website.status] || { label: website.status || "Queued", variant: "default" as const };
-          const isRebuilding = rebuildingId === website.id;
+          const isBusy = actionId === website.id;
 
           return (
             <motion.div
@@ -359,9 +501,9 @@ export default function WebsitesPage() {
                         <Globe className="h-5 w-5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate font-display text-base font-bold text-slate-950">
+                        <a href={`/websites/${website.id}`} className="truncate font-display text-base font-bold text-slate-950 hover:text-blue-600 transition-colors block">
                           {website.businessName || "Untitled Project"}
-                        </p>
+                        </a>
                         <p className="font-sans text-xs text-slate-500">
                           {website.category || "General"} · {website.location || "Coimbatore"}
                         </p>
@@ -460,10 +602,10 @@ export default function WebsitesPage() {
                       variant="outline"
                       size="sm"
                       className="gap-1 text-xs font-sans h-7 px-2.5"
-                      disabled={isRebuilding}
-                      onClick={() => rebuildWebsite(website.id)}
+                      disabled={isBusy}
+                      onClick={() => handleRebuildWebsite(website.id)}
                     >
-                      {isRebuilding ? (
+                      {isBusy && actionType === "rebuild" ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin text-blue-600" />
                       ) : (
                         <RefreshCw className="h-3.5 w-3.5 text-slate-500" />
@@ -474,9 +616,14 @@ export default function WebsitesPage() {
                       <Button
                         size="sm"
                         className="gap-1 text-xs font-sans h-7 px-2.5 bg-slate-900 text-white hover:bg-slate-800"
-                        onClick={() => rebuildWebsite(website.id)}
+                        disabled={isBusy}
+                        onClick={() => handleDeployWebsite(website.id)}
                       >
-                        <Rocket className="h-3.5 w-3.5" />
+                        {isBusy && actionType === "deploy" ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Rocket className="h-3.5 w-3.5" />
+                        )}
                         Deploy
                       </Button>
                     )}
@@ -487,6 +634,7 @@ export default function WebsitesPage() {
           );
         })}
       </div>
+
 
       {/* Interactive Live Preview Dialog */}
       <Dialog open={preview !== null} onOpenChange={(open) => !open && setPreview(null)}>

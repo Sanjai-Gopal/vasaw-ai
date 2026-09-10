@@ -26,21 +26,40 @@ export default function AgentsPage() {
   const [runningId, setRunningId] = React.useState<string | null>(null);
   const [pipeline, setPipeline] = React.useState<PipelineStage[]>([]);
   const [loadingPipeline, setLoadingPipeline] = React.useState(true);
+  const [loadingAgents, setLoadingAgents] = React.useState(true);
+
+  const fetchAgentsStatus = React.useCallback(async () => {
+    try {
+      const res = await fetch("/api/agents/status");
+      const data = await res.json();
+      if (data.ok && Array.isArray(data.agents)) {
+        setAgents(data.agents);
+      }
+    } catch (err) {
+      console.warn("Failed to fetch agent telemetry:", err);
+    } finally {
+      setLoadingAgents(false);
+    }
+  }, []);
 
   React.useEffect(() => {
     async function fetchPipeline() {
       try {
-        const { getPipeline } = await import("@/lib/data");
-        const stages = await getPipeline();
-        setPipeline(stages);
+        const res = await fetch("/api/pipeline");
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.pipeline)) {
+          setPipeline(data.pipeline);
+        }
       } catch (err) {
-        console.error("Failed to fetch pipeline:", err);
+        console.warn("Failed to fetch pipeline:", err);
       } finally {
         setLoadingPipeline(false);
       }
     }
     fetchPipeline();
-  }, []);
+    fetchAgentsStatus();
+  }, [fetchAgentsStatus]);
+
 
   const runNow = async (id: string) => {
     if (runningId) return;
@@ -238,7 +257,7 @@ export default function AgentsPage() {
   const healthyCount = agents.filter((a) => a.status === "healthy" || a.status === "online").length;
   const totalRunsAll = agents.reduce((acc, a) => acc + (a.totalRuns || 0), 0);
   const totalSuccessAll = agents.reduce((acc, a) => acc + (a.successRuns || 0), 0);
-  const fleetSuccessRate = totalRunsAll > 0 ? Math.round((totalSuccessAll / totalRunsAll) * 100) : 99;
+  const fleetSuccessRate = totalRunsAll > 0 ? Math.round((totalSuccessAll / totalRunsAll) * 100) : null;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 space-y-6">
@@ -246,15 +265,26 @@ export default function AgentsPage() {
         title="Autonomous Fleet"
         description="Six specialized micro-agents orchestrated in real-time across scraping, AST synthesis, Edge deployment, and messaging."
       >
-        <Button
-          variant="outline"
-          className="gap-1.5 font-sans text-xs"
-          onClick={runAllAgents}
-          disabled={anyRunning}
-        >
-          <RefreshCw className={cn("h-3.5 w-3.5 text-slate-500", anyRunning && "animate-spin")} />
-          Run All Fleet Agents
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 font-sans text-xs"
+            onClick={() => fetchAgentsStatus()}
+            disabled={loadingAgents}
+          >
+            <RefreshCw className={cn("h-3.5 w-3.5 text-slate-500", loadingAgents && "animate-spin")} />
+            Sync Telemetry
+          </Button>
+          <Button
+            className="gap-1.5 font-sans text-xs bg-slate-900 text-white hover:bg-slate-800"
+            onClick={runAllAgents}
+            disabled={anyRunning}
+          >
+            <Play className={cn("h-3.5 w-3.5", anyRunning && "animate-spin")} />
+            Run All Fleet Agents
+          </Button>
+        </div>
       </PageHeader>
 
       {/* Porcelain Summary Telemetry Cards */}
@@ -262,7 +292,7 @@ export default function AgentsPage() {
         {[
           { label: "Active Fleet Units", value: `${healthyCount}/6`, sub: "Operational nodes online", color: "text-emerald-600", accent: "from-emerald-400 to-teal-500" },
           { label: "Total Executions", value: totalRunsAll.toLocaleString(), sub: "Cumulative task runs", color: "text-slate-950", accent: "from-slate-600 to-slate-800" },
-          { label: "Fleet Success SLA", value: `${fleetSuccessRate}%`, sub: "Error-free task completion", color: "text-blue-600", accent: "from-blue-500 to-indigo-500" },
+          { label: "Fleet Success SLA", value: fleetSuccessRate !== null ? `${fleetSuccessRate}%` : "No data yet", sub: "Error-free task completion", color: "text-blue-600", accent: "from-blue-500 to-indigo-500" },
           { label: "Heartbeat Interval", value: "250ms", sub: "Distributed state sync", color: "text-purple-600", accent: "from-purple-400 to-indigo-500" },
         ].map((s) => (
           <div

@@ -83,7 +83,7 @@ const initialNodes: Record<NodeKey, NodeData> = {
       p99: "420ms",
     },
     logs: [
-      { time: "20:39:10.102", tag: "INIT", tagColor: "text-sky-400", text: "Apify scraper actor initialized for zone Coimbatore Central" },
+      { time: "20:39:10.102", tag: "INIT", tagColor: "text-sky-400", text: "Apify scraper actor initialized for Global Discovery Zone" },
       { time: "20:39:24.441", tag: "EXTRACT", tagColor: "text-purple-300", text: "Extracted 42 Google Maps business entities with verified contact cards" },
       { time: "20:39:35.890", tag: "DEDUPE", tagColor: "text-emerald-400", text: "0 duplicate phone records found across existing production tables" },
       { time: "20:39:40.012", tag: "COMPLETE", tagColor: "text-emerald-400", text: "Discovery pass yielded 42 fresh target prospects (100% SLA)" },
@@ -108,7 +108,7 @@ const initialNodes: Record<NodeKey, NodeData> = {
     logs: [
       { time: "20:40:02.115", tag: "FETCH", tagColor: "text-sky-400", text: "Queried DNS records, Google Place ratings, and Instagram presence" },
       { time: "20:40:11.332", tag: "LLM_EVAL", tagColor: "text-purple-300", text: "Assigned website potential score: 92/100 to target cohort" },
-      { time: "20:40:22.091", tag: "FILTER", tagColor: "text-emerald-400", text: "Verified Sri Krishna Sweets & Kovai Kitchen as high-value ICP" },
+      { time: "20:40:22.091", tag: "FILTER", tagColor: "text-emerald-400", text: "Verified high-value global ICP leads with legacy web stack" },
       { time: "20:40:30.554", tag: "EMIT", tagColor: "text-emerald-400", text: "Pushed 18 hot-tier leads to vector ingestion channel" },
     ],
   },
@@ -200,7 +200,7 @@ const initialNodes: Record<NodeKey, NodeData> = {
       p99: "290ms",
     },
     logs: [
-      { time: "20:38:00.001", tag: "TEMPLATE", tagColor: "text-sky-400", text: "Pre-compiled 18 personalized Tamil/English pitch variations" },
+      { time: "20:38:00.001", tag: "TEMPLATE", tagColor: "text-sky-400", text: "Pre-compiled 18 personalized multi-language pitch variations" },
       { time: "20:38:15.220", tag: "PREVIEW", tagColor: "text-purple-300", text: "Embedded dynamic demo URLs into sandbox message payload" },
       { time: "20:38:30.500", tag: "STANDBY", tagColor: "text-slate-400", text: "Safety guardrail active: awaiting operator authorization" },
     ],
@@ -213,52 +213,203 @@ export function CommandCenterView({ stats, activities, onRefresh }: CommandCente
   const [inspectorOpen, setInspectorOpen] = React.useState(false);
   const [isStreamActive, setIsStreamActive] = React.useState(true);
   const [secondsAgo, setSecondsAgo] = React.useState(4);
-  const [nodes, setNodes] = React.useState<Record<NodeKey, NodeData>>(initialNodes);
   const [isRunningPipeline, setIsRunningPipeline] = React.useState(false);
   const [isPaused, setIsPaused] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [toastMessage, setToastMessage] = React.useState<string | null>(null);
 
-  // Attention Center items state
-  const [attentionItems, setAttentionItems] = React.useState([
-    {
-      id: "leads_ambiguous",
-      title: "Review 3 ambiguous leads",
-      badge: "SCORE ~65%",
-      badgeColor: "bg-amber-100/70 text-amber-800 border border-amber-200",
-      description: "Automated revenue score fell below threshold due to fuzzy registration tax records.",
-      actionLabel: "Review Leads →",
-      btnClass: "bg-white hover:bg-amber-50 text-slate-800 border-amber-300/80 shadow-xs",
-      borderLeft: "border-l-amber-500",
-      bgClass: "bg-amber-50/50 border-amber-200/80",
-      route: "/leads",
+  // Derived metrics from real API stats
+  const totalLeads = stats?.totalLeads ?? 0;
+  const qualifiedAccounts = stats?.qualifiedLeads ?? 0;
+  const sitesSynthesized = stats?.websitesGenerated ?? 0;
+  const edgeDeployments = stats?.websitesDeployed ?? 0;
+  const outreachStaged = stats?.messagesSent ?? 0;
+  const activeCampaigns = stats?.activeCampaigns ?? 0;
+
+  // Build dynamic nodes derived from real stats
+  const nodes = React.useMemo<Record<NodeKey, NodeData>>(() => ({
+    DISCOVERY: {
+      key: "DISCOVERY",
+      step: "01 / DISCOVERY",
+      title: "Cluster Scrape",
+      subtitle: totalLeads > 0 ? `${totalLeads} entities discovered in pipeline` : "Ready to discover entities",
+      status: totalLeads > 0 ? "DONE" : "STANDBY",
+      metricLabel: "Discovered",
+      metricValue: `${totalLeads}`,
+      hardware: {
+        cpu: "14.8%",
+        cpuPercent: 15,
+        memory: "24.1 MB / 128 MB",
+        memoryPercent: 19,
+        backend: "Apify Maps Crawler",
+        p99: "420ms",
+      },
+      logs: [
+        { time: "20:39:10.102", tag: "INIT", tagColor: "text-sky-400", text: "Scraper agent initialized for regional campaigns" },
+        { time: "20:39:24.441", tag: "EXTRACT", tagColor: "text-purple-300", text: `Extracted ${totalLeads} business entities with verified phone contacts` },
+        { time: "20:39:35.890", tag: "DEDUPE", tagColor: "text-emerald-400", text: "Deduplication active across database records" },
+        { time: "20:39:40.012", tag: "COMPLETE", tagColor: "text-emerald-400", text: `Discovery pass complete: ${totalLeads} entities available` },
+      ],
     },
-    {
-      id: "whatsapp_sandbox",
-      title: "WhatsApp Sandbox Active",
-      badge: "STAGED",
-      badgeColor: "bg-blue-100/70 text-blue-800 border border-blue-200",
-      description: "18 prospects verified and waiting for production token authorization.",
-      actionLabel: "Authorize Sandbox →",
-      btnClass: "bg-white hover:bg-blue-50 text-slate-800 border-blue-300/80 shadow-xs",
-      borderLeft: "border-l-blue-600",
-      bgClass: "bg-blue-50/50 border-blue-200/80",
-      route: "/messages",
+    QUALIFY: {
+      key: "QUALIFY",
+      step: "02 / QUALIFY",
+      title: "Score Revenue",
+      subtitle: qualifiedAccounts > 0 ? `${qualifiedAccounts} accounts qualified via Gemini` : "Awaiting lead qualification",
+      status: qualifiedAccounts > 0 ? "DONE" : "STANDBY",
+      metricLabel: "Qualified",
+      metricValue: `${qualifiedAccounts}`,
+      hardware: {
+        cpu: "21.4%",
+        cpuPercent: 21,
+        memory: "31.2 MB / 128 MB",
+        memoryPercent: 24,
+        backend: "Gemini Flash LLM",
+        p99: "780ms",
+      },
+      logs: [
+        { time: "20:40:02.115", tag: "FETCH", tagColor: "text-sky-400", text: "Checked business digital presence, ratings, and contact info" },
+        { time: "20:40:11.332", tag: "LLM_EVAL", tagColor: "text-purple-300", text: `Assigned AI scores to discovered target cohort` },
+        { time: "20:40:30.554", tag: "EMIT", tagColor: "text-emerald-400", text: `Pushed ${qualifiedAccounts} qualified accounts to pipeline` },
+      ],
     },
-    {
-      id: "dns_latency",
-      title: "Edge DNS latency timeout",
-      badge: "TIMEOUT",
-      badgeColor: "bg-rose-100/70 text-rose-800 border border-rose-200",
-      description: "Propagation latency on krishna.vasaw.site exceeded 4.0s.",
-      actionLabel: "Retry Route →",
-      btnClass: "bg-white hover:bg-rose-50 text-slate-800 border-rose-300/80 shadow-xs",
-      borderLeft: "border-l-rose-500",
-      bgClass: "bg-rose-50/50 border-rose-200/80",
-      route: "/websites",
+    STORE: {
+      key: "STORE",
+      step: "03 / STORE",
+      title: "Vector Ingest",
+      subtitle: totalLeads > 0 ? `${totalLeads} rows persisted in Supabase` : "Awaiting records to persist",
+      status: totalLeads > 0 ? "DONE" : "STANDBY",
+      metricLabel: "Persisted",
+      metricValue: `${totalLeads}`,
+      hardware: {
+        cpu: "11.2%",
+        cpuPercent: 11,
+        memory: "19.5 MB / 128 MB",
+        memoryPercent: 15,
+        backend: "Supabase PostgreSQL",
+        p99: "110ms",
+      },
+      logs: [
+        { time: "20:40:40.092", tag: "DB_SYNC", tagColor: "text-sky-400", text: "Connecting to Supabase PostgreSQL cluster" },
+        { time: "20:40:45.301", tag: "UPSERT", tagColor: "text-purple-300", text: `Committed ${totalLeads} entity records with unique constraints` },
+      ],
     },
-  ]);
+    BUILD: {
+      key: "BUILD",
+      step: "04 / BUILD",
+      title: "Site Synthesis",
+      subtitle: sitesSynthesized > 0 ? `${sitesSynthesized} sites synthesized via AST` : "Awaiting website generation",
+      status: sitesSynthesized > 0 ? "DONE" : "STANDBY",
+      metricLabel: "Synthesized",
+      metricValue: `${sitesSynthesized}`,
+      hardware: {
+        cpu: "24.2%",
+        cpuPercent: 24,
+        memory: "38.4 MB / 128 MB",
+        memoryPercent: 30,
+        backend: "Mixtral AST Compiler",
+        p99: "1.82s",
+      },
+      logs: [
+        { time: "20:41:38.102", tag: "INVOKE", tagColor: "text-sky-400", text: "SynthesizeLandingPage AST builder" },
+        { time: "20:41:39.014", tag: "AST_GEN", tagColor: "text-emerald-400", text: `${sitesSynthesized} semantic Tailwind/Next.js components emitted` },
+        { time: "20:41:40.119", tag: "VALIDATE", tagColor: "text-slate-200", text: "Clean AST pass; 0 bundle warnings" },
+      ],
+    },
+    DEPLOY: {
+      key: "DEPLOY",
+      step: "05 / DEPLOY",
+      title: "Edge DNS",
+      subtitle: edgeDeployments > 0 ? `${edgeDeployments} production sites live on Vercel` : "Awaiting deployment trigger",
+      status: edgeDeployments > 0 ? "DONE" : "STANDBY",
+      metricLabel: "Deployed",
+      metricValue: `${edgeDeployments}`,
+      hardware: {
+        cpu: "8.5%",
+        cpuPercent: 9,
+        memory: "16.8 MB / 128 MB",
+        memoryPercent: 13,
+        backend: "Vercel Edge Network",
+        p99: "620ms",
+      },
+      logs: [
+        { time: "20:40:22.100", tag: "DEPLOY_REQ", tagColor: "text-sky-400", text: "Allocating isolated Vercel project deployment" },
+        { time: "20:40:25.402", tag: "VERIFY", tagColor: "text-emerald-400", text: "SSL certificate verified & Edge HTTP 200 OK" },
+      ],
+    },
+    OUTREACH: {
+      key: "OUTREACH",
+      step: "06 / OUTREACH",
+      title: "Multichannel",
+      subtitle: outreachStaged > 0 ? `${outreachStaged} messages sent` : "Sandbox dispatch ready",
+      status: "STANDBY",
+      metricLabel: "Dispatch State",
+      metricValue: outreachStaged > 0 ? `${outreachStaged} sent` : "Dry-run",
+      hardware: {
+        cpu: "5.1%",
+        cpuPercent: 5,
+        memory: "12.0 MB / 128 MB",
+        memoryPercent: 9,
+        backend: "Meta Cloud WhatsApp API",
+        p99: "290ms",
+      },
+      logs: [
+        { time: "20:38:00.001", tag: "TEMPLATE", tagColor: "text-sky-400", text: "Compiled pitch variations with dynamic demo links" },
+        { time: "20:38:30.500", tag: "STANDBY", tagColor: "text-slate-400", text: "Outreach boundary guardrail active" },
+      ],
+    },
+  }), [totalLeads, qualifiedAccounts, sitesSynthesized, edgeDeployments, outreachStaged]);
+
+  const [dismissedAttentionIds, setDismissedAttentionIds] = React.useState<string[]>([]);
+
+  // Compute real attention items based on CRM and pipeline state
+  const attentionItems = React.useMemo(() => {
+    const items = [];
+    if (totalLeads > qualifiedAccounts) {
+      items.push({
+        id: "leads_qualification",
+        title: `Review ${totalLeads - qualifiedAccounts} unscored leads`,
+        badge: "PENDING",
+        badgeColor: "bg-amber-100/70 text-amber-800 border border-amber-200",
+        description: "Discovered entities awaiting AI opportunity scoring.",
+        actionLabel: "Review Leads →",
+        btnClass: "bg-white hover:bg-amber-50 text-slate-800 border-amber-300/80 shadow-xs",
+        borderLeft: "border-l-amber-500",
+        bgClass: "bg-amber-50/50 border-amber-200/80",
+        route: "/leads",
+      });
+    }
+    if (sitesSynthesized > edgeDeployments) {
+      items.push({
+        id: "sites_deploy",
+        title: `${sitesSynthesized - edgeDeployments} sites ready for deployment`,
+        badge: "DEPLOY",
+        badgeColor: "bg-blue-100/70 text-blue-800 border border-blue-200",
+        description: "Generated Next.js website builds awaiting Vercel edge deployment.",
+        actionLabel: "View Websites →",
+        btnClass: "bg-white hover:bg-blue-50 text-slate-800 border-blue-300/80 shadow-xs",
+        borderLeft: "border-l-blue-600",
+        bgClass: "bg-blue-50/50 border-blue-200/80",
+        route: "/websites",
+      });
+    }
+    if (activeCampaigns === 0) {
+      items.push({
+        id: "campaign_inactive",
+        title: "No active acquisition campaigns",
+        badge: "IDLE",
+        badgeColor: "bg-slate-100 text-slate-800 border border-slate-200",
+        description: "Create or start a campaign to continuously ingest and qualify local businesses.",
+        actionLabel: "Create Campaign →",
+        btnClass: "bg-white hover:bg-slate-50 text-slate-800 border-slate-300 shadow-xs",
+        borderLeft: "border-l-slate-400",
+        bgClass: "bg-slate-50 border-slate-200",
+        route: "/campaigns",
+      });
+    }
+    return items.filter((item) => !dismissedAttentionIds.includes(item.id));
+  }, [totalLeads, qualifiedAccounts, sitesSynthesized, edgeDeployments, activeCampaigns, dismissedAttentionIds]);
 
   // Sync tick counter
   React.useEffect(() => {
@@ -322,7 +473,7 @@ export function CommandCenterView({ stats, activities, onRefresh }: CommandCente
   };
 
   const handleResolveAction = (id: string, actionName: string, route?: string) => {
-    setAttentionItems((prev) => prev.filter((item) => item.id !== id));
+    setDismissedAttentionIds((prev) => [...prev, id]);
     showToast(`Resolved: ${actionName}`);
     if (route) {
       setTimeout(() => router.push(route), 600);
@@ -358,13 +509,6 @@ export function CommandCenterView({ stats, activities, onRefresh }: CommandCente
   };
 
   const selectedNode = nodes[selectedNodeKey];
-
-  // Derived metrics from real API stats
-  const totalLeads = stats?.totalLeads ?? 2481;
-  const qualifiedAccounts = stats?.qualifiedLeads ?? 684;
-  const sitesSynthesized = stats?.websitesGenerated ?? 127;
-  const edgeDeployments = stats?.websitesDeployed ?? 119;
-  const outreachStaged = stats?.messagesSent ?? 843;
 
   return (
     <div className="relative min-h-screen font-sans text-slate-800 antialiased selection:bg-blue-600/15 selection:text-blue-700">
@@ -462,7 +606,7 @@ export function CommandCenterView({ stats, activities, onRefresh }: CommandCente
                 <span>Autonomous Command Center</span>
               </h1>
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono tracking-wide bg-blue-50 text-blue-700 border border-blue-200 font-semibold shadow-xs">
-                Kovai Cluster • v4.8
+                VASAW Engine • v4.8
               </span>
             </div>
             <p className="text-[13px] text-slate-500 mt-1 font-normal tracking-[-0.01em] leading-relaxed">
@@ -520,15 +664,15 @@ export function CommandCenterView({ stats, activities, onRefresh }: CommandCente
               <span className="tracking-[-0.01em] font-semibold text-slate-600">Leads Discovered</span>
               <span className="text-emerald-700 font-mono text-[11px] font-bold tracking-tight flex items-center gap-0.5 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60">
                 <TrendingUp className="w-3 h-3" />
-                +142<span className="text-[9px] text-emerald-600/70 font-sans font-medium">/hr</span>
+                {totalLeads > 0 ? `${totalLeads} in CRM` : "0 in CRM"}
               </span>
             </div>
             <div className="text-[30px] font-bold font-mono text-slate-950 tracking-[-0.04em] leading-none mb-3">
               {totalLeads.toLocaleString()}
             </div>
             <div className="text-[11.5px] text-slate-500 font-mono flex items-center justify-between pt-2 border-t border-slate-100">
-              <span className="text-slate-400 tracking-tight">Scrape yield</span>
-              <span className="text-slate-800 font-semibold">98.4%</span>
+              <span className="text-slate-400 tracking-tight">Active campaigns</span>
+              <span className="text-slate-800 font-semibold">{activeCampaigns} active</span>
             </div>
           </div>
 
@@ -538,15 +682,15 @@ export function CommandCenterView({ stats, activities, onRefresh }: CommandCente
             <div className="text-[12px] text-slate-500 font-medium tracking-tight mb-2.5 flex items-center justify-between">
               <span className="tracking-[-0.01em] font-semibold text-slate-600">Qualified Accounts</span>
               <span className="text-slate-600 font-mono text-[11px] font-bold tracking-tight bg-slate-100 px-1.5 py-0.5 rounded">
-                {totalLeads > 0 ? ((qualifiedAccounts / totalLeads) * 100).toFixed(1) : "27.5"}%
+                {totalLeads > 0 ? `${((qualifiedAccounts / totalLeads) * 100).toFixed(0)}%` : "0%"}
               </span>
             </div>
             <div className="text-[30px] font-bold font-mono text-slate-950 tracking-[-0.04em] leading-none mb-3">
               {qualifiedAccounts.toLocaleString()}
             </div>
             <div className="text-[11.5px] text-slate-500 font-mono flex items-center justify-between pt-2 border-t border-slate-100">
-              <span className="text-slate-400 tracking-tight">Priority Hot Tier</span>
-              <span className="text-emerald-700 font-bold">182 hot</span>
+              <span className="text-slate-400 tracking-tight">AI scored</span>
+              <span className="text-emerald-700 font-bold">{qualifiedAccounts} qualified</span>
             </div>
           </div>
 
@@ -556,15 +700,15 @@ export function CommandCenterView({ stats, activities, onRefresh }: CommandCente
             <div className="text-[12px] text-slate-500 font-medium tracking-tight mb-2.5 flex items-center justify-between">
               <span className="tracking-[-0.01em] font-semibold text-slate-600">Sites Synthesized</span>
               <span className="text-blue-700 font-mono text-[10.5px] font-bold tracking-tight bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">
-                +8 queued
+                {sitesSynthesized} sites
               </span>
             </div>
             <div className="text-[30px] font-bold font-mono text-slate-950 tracking-[-0.04em] leading-none mb-3">
               {sitesSynthesized.toLocaleString()}
             </div>
             <div className="text-[11.5px] text-slate-500 font-mono flex items-center justify-between pt-2 border-t border-slate-100">
-              <span className="text-slate-400 tracking-tight">Avg synthesis</span>
-              <span className="text-slate-800 font-semibold">1.8s</span>
+              <span className="text-slate-400 tracking-tight">AST generation</span>
+              <span className="text-slate-800 font-semibold">Next.js 16</span>
             </div>
           </div>
 
@@ -573,14 +717,16 @@ export function CommandCenterView({ stats, activities, onRefresh }: CommandCente
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-teal-500 to-emerald-400 opacity-80" />
             <div className="text-[12px] text-slate-500 font-medium tracking-tight mb-2.5 flex items-center justify-between">
               <span className="tracking-[-0.01em] font-semibold text-slate-600">Edge Deployments</span>
-              <span className="text-emerald-700 font-mono text-[11px] font-bold tracking-tight">100% SLA</span>
+              <span className="text-emerald-700 font-mono text-[11px] font-bold tracking-tight">
+                {sitesSynthesized > 0 ? `${Math.round((edgeDeployments / sitesSynthesized) * 100)}% deployed` : "0 deployed"}
+              </span>
             </div>
             <div className="text-[30px] font-bold font-mono text-slate-950 tracking-[-0.04em] leading-none mb-3">
               {edgeDeployments.toLocaleString()}
             </div>
             <div className="text-[11.5px] text-slate-500 font-mono flex items-center justify-between pt-2 border-t border-slate-100">
-              <span className="text-slate-400 tracking-tight">Edge network</span>
-              <span className="text-slate-800 font-semibold">Cloudflare</span>
+              <span className="text-slate-400 tracking-tight">Edge provider</span>
+              <span className="text-slate-800 font-semibold">Vercel Production</span>
             </div>
           </div>
 
@@ -589,14 +735,14 @@ export function CommandCenterView({ stats, activities, onRefresh }: CommandCente
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-violet-500 to-purple-400 opacity-80" />
             <div className="text-[12px] text-slate-500 font-medium tracking-tight mb-2.5 flex items-center justify-between">
               <span className="tracking-[-0.01em] font-semibold text-slate-600">Outreach Staged</span>
-              <span className="text-slate-600 font-mono text-[11px] font-bold tracking-tight">38.4% open</span>
+              <span className="text-slate-600 font-mono text-[11px] font-bold tracking-tight">{outreachStaged} sent</span>
             </div>
             <div className="text-[30px] font-bold font-mono text-slate-950 tracking-[-0.04em] leading-none mb-3">
               {outreachStaged.toLocaleString()}
             </div>
             <div className="text-[11.5px] text-slate-500 font-mono flex items-center justify-between pt-2 border-t border-slate-100">
-              <span className="text-slate-400 tracking-tight">Channel</span>
-              <span className="text-slate-800 font-semibold">WhatsApp / SMS</span>
+              <span className="text-slate-400 tracking-tight">Gateway</span>
+              <span className="text-slate-800 font-semibold">WhatsApp Cloud API</span>
             </div>
           </div>
         </section>
@@ -629,201 +775,63 @@ export function CommandCenterView({ stats, activities, onRefresh }: CommandCente
 
           {/* Node Cards */}
           <div className="grid grid-cols-1 md:grid-cols-6 gap-3 relative z-10">
-            {/* 01 DISCOVERY */}
-            <div
-              onClick={() => handleSelectNode("DISCOVERY")}
-              className={cn(
-                "cursor-pointer p-4 rounded-xl border transition-all hover-lift flex flex-col justify-between group",
-                selectedNodeKey === "DISCOVERY"
-                  ? "bg-blue-50/70 border-blue-500 shadow-sm ring-2 ring-blue-500/20"
-                  : "bg-slate-50/70 border-slate-200/90 hover:border-blue-300 hover:bg-white"
-              )}
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-mono tracking-widest text-slate-400 uppercase font-bold">
-                    01 / DISCOVERY
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[9.5px] font-mono font-bold tracking-tight text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                    <span className="w-1 h-1 rounded-full bg-emerald-500" /> DONE
-                  </span>
-                </div>
-                <h3 className="text-[13.5px] font-semibold text-slate-900 group-hover:text-blue-600 transition-colors tracking-[-0.015em]">
-                  Cluster Scrape
-                </h3>
-                <p className="text-[11.5px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                  42 dining entities scraped in Coimbatore zone
-                </p>
-              </div>
-              <div className="pt-3 mt-3 border-t border-slate-200/80 text-[11px] font-mono text-slate-400 flex justify-between tracking-tight">
-                <span>Rate</span>
-                <span className="text-slate-800 font-semibold">142/min</span>
-              </div>
-            </div>
+            {(Object.keys(nodes) as NodeKey[]).map((key) => {
+              const node = nodes[key];
+              const isSelected = selectedNodeKey === key;
+              const isDone = node.status === "DONE";
+              const isRunning = node.status === "RUNNING";
 
-            {/* 02 QUALIFY */}
-            <div
-              onClick={() => handleSelectNode("QUALIFY")}
-              className={cn(
-                "cursor-pointer p-4 rounded-xl border transition-all hover-lift flex flex-col justify-between group",
-                selectedNodeKey === "QUALIFY"
-                  ? "bg-blue-50/70 border-blue-500 shadow-sm ring-2 ring-blue-500/20"
-                  : "bg-slate-50/70 border-slate-200/90 hover:border-blue-300 hover:bg-white"
-              )}
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-mono tracking-widest text-slate-400 uppercase font-bold">
-                    02 / QUALIFY
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[9.5px] font-mono font-bold tracking-tight text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                    <span className="w-1 h-1 rounded-full bg-emerald-500" /> DONE
-                  </span>
+              return (
+                <div
+                  key={key}
+                  onClick={() => handleSelectNode(key)}
+                  className={cn(
+                    "cursor-pointer p-4 rounded-xl border transition-all hover-lift flex flex-col justify-between group",
+                    isSelected
+                      ? "bg-blue-50/70 border-blue-500 shadow-sm ring-2 ring-blue-500/20"
+                      : isRunning
+                      ? "bg-blue-50/50 border-blue-400 shadow-xs"
+                      : "bg-slate-50/70 border-slate-200/90 hover:border-blue-300 hover:bg-white"
+                  )}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-mono tracking-widest text-slate-400 uppercase font-bold">
+                        {node.step}
+                      </span>
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1 text-[9.5px] font-mono font-bold tracking-tight px-1.5 py-0.5 rounded border",
+                          isDone
+                            ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                            : isRunning
+                            ? "text-blue-700 bg-blue-100 border-blue-300"
+                            : "text-slate-600 bg-slate-100 border-slate-200"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "w-1 h-1 rounded-full",
+                            isDone ? "bg-emerald-500" : isRunning ? "bg-blue-600 animate-pulse" : "bg-slate-400"
+                          )}
+                        />{" "}
+                        {node.status}
+                      </span>
+                    </div>
+                    <h3 className="text-[13.5px] font-semibold text-slate-900 group-hover:text-blue-600 transition-colors tracking-[-0.015em]">
+                      {node.title}
+                    </h3>
+                    <p className="text-[11.5px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                      {node.subtitle}
+                    </p>
+                  </div>
+                  <div className="pt-3 mt-3 border-t border-slate-200/80 text-[11px] font-mono text-slate-400 flex justify-between tracking-tight">
+                    <span>{node.metricLabel}</span>
+                    <span className="text-slate-800 font-semibold">{node.metricValue}</span>
+                  </div>
                 </div>
-                <h3 className="text-[13.5px] font-semibold text-slate-900 group-hover:text-blue-600 transition-colors tracking-[-0.015em]">
-                  Score Revenue
-                </h3>
-                <p className="text-[11.5px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                  Financial validation & legacy stack check
-                </p>
-              </div>
-              <div className="pt-3 mt-3 border-t border-slate-200/80 text-[11px] font-mono text-slate-400 flex justify-between tracking-tight">
-                <span>Scored</span>
-                <span className="text-slate-800 font-semibold">48/min</span>
-              </div>
-            </div>
-
-            {/* 03 STORE */}
-            <div
-              onClick={() => handleSelectNode("STORE")}
-              className={cn(
-                "cursor-pointer p-4 rounded-xl border transition-all hover-lift flex flex-col justify-between group",
-                selectedNodeKey === "STORE"
-                  ? "bg-blue-50/70 border-blue-500 shadow-sm ring-2 ring-blue-500/20"
-                  : "bg-slate-50/70 border-slate-200/90 hover:border-blue-300 hover:bg-white"
-              )}
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-mono tracking-widest text-slate-400 uppercase font-bold">
-                    03 / STORE
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[9.5px] font-mono font-bold tracking-tight text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                    <span className="w-1 h-1 rounded-full bg-emerald-500" /> DONE
-                  </span>
-                </div>
-                <h3 className="text-[13.5px] font-semibold text-slate-900 group-hover:text-blue-600 transition-colors tracking-[-0.015em]">
-                  Vector Ingest
-                </h3>
-                <p className="text-[11.5px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                  Embedding leads into pgvector index
-                </p>
-              </div>
-              <div className="pt-3 mt-3 border-t border-slate-200/80 text-[11px] font-mono text-slate-400 flex justify-between tracking-tight">
-                <span>Writes</span>
-                <span className="text-slate-800 font-semibold">18/min</span>
-              </div>
-            </div>
-
-            {/* 04 BUILD (Active Highlight State) */}
-            <div
-              onClick={() => handleSelectNode("BUILD")}
-              className={cn(
-                "cursor-pointer p-4 rounded-xl border-2 transition-all hover-lift flex flex-col justify-between group shadow-[0_6px_20px_rgba(37,99,235,0.14)]",
-                selectedNodeKey === "BUILD"
-                  ? "bg-blue-50/90 border-blue-600 ring-3 ring-blue-500/25"
-                  : "bg-blue-50/70 border-blue-500 hover:border-blue-600"
-              )}
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-mono tracking-widest text-blue-700 uppercase font-extrabold">
-                    04 / BUILD
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 text-[9.5px] font-mono font-bold tracking-tight text-blue-700 bg-blue-100/90 px-1.5 py-0.5 rounded border border-blue-300">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" /> RUNNING
-                  </span>
-                </div>
-                <h3 className="text-[13.5px] font-bold text-slate-900 group-hover:text-blue-700 transition-colors tracking-[-0.015em]">
-                  Site Synthesis
-                </h3>
-                <p className="text-[11.5px] text-slate-600 mt-1 leading-relaxed font-medium">
-                  Compiling for <span className="text-blue-700 font-bold tracking-tight">Kovai Kitchen</span>
-                </p>
-                {/* Shimmer Bar */}
-                <div className="mt-3 w-full bg-blue-100 h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-blue-600 h-full rounded-full animate-shimmer" style={{ width: "68%" }} />
-                </div>
-              </div>
-              <div className="pt-2 mt-2 border-t border-blue-200 text-[11px] font-mono text-blue-700 flex justify-between tracking-tight">
-                <span>AST Pass 2</span>
-                <span className="font-extrabold">68%</span>
-              </div>
-            </div>
-
-            {/* 05 DEPLOY */}
-            <div
-              onClick={() => handleSelectNode("DEPLOY")}
-              className={cn(
-                "cursor-pointer p-4 rounded-xl border transition-all hover-lift flex flex-col justify-between group",
-                selectedNodeKey === "DEPLOY"
-                  ? "bg-blue-50/70 border-blue-500 shadow-sm ring-2 ring-blue-500/20"
-                  : "bg-slate-50/70 border-slate-200/90 hover:border-blue-300 hover:bg-white"
-              )}
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-mono tracking-widest text-slate-400 uppercase font-bold">
-                    05 / DEPLOY
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[9.5px] font-mono font-bold tracking-tight text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-                    <span className="w-1 h-1 rounded-full bg-amber-500" /> QUEUED
-                  </span>
-                </div>
-                <h3 className="text-[13.5px] font-semibold text-slate-900 group-hover:text-blue-600 transition-colors tracking-[-0.015em]">
-                  Edge DNS
-                </h3>
-                <p className="text-[11.5px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                  Vercel edge preview & subzone allocation
-                </p>
-              </div>
-              <div className="pt-3 mt-3 border-t border-slate-200/80 text-[11px] font-mono text-slate-400 flex justify-between tracking-tight">
-                <span>Pending</span>
-                <span className="text-slate-800 font-semibold">2 items</span>
-              </div>
-            </div>
-
-            {/* 06 OUTREACH */}
-            <div
-              onClick={() => handleSelectNode("OUTREACH")}
-              className={cn(
-                "cursor-pointer p-4 rounded-xl border transition-all hover-lift flex flex-col justify-between group",
-                selectedNodeKey === "OUTREACH"
-                  ? "bg-blue-50/70 border-blue-500 shadow-sm ring-2 ring-blue-500/20"
-                  : "bg-slate-50/70 border-slate-200/90 hover:border-blue-300 hover:bg-white"
-              )}
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-mono tracking-widest text-slate-400 uppercase font-bold">
-                    06 / OUTREACH
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[9.5px] font-mono font-bold tracking-tight text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
-                    <span className="w-1 h-1 rounded-full bg-slate-400" /> STANDBY
-                  </span>
-                </div>
-                <h3 className="text-[13.5px] font-semibold text-slate-900 group-hover:text-blue-600 transition-colors tracking-[-0.015em]">
-                  Multichannel
-                </h3>
-                <p className="text-[11.5px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                  WhatsApp / SMS dispatch dry-run preview
-                </p>
-              </div>
-              <div className="pt-3 mt-3 border-t border-slate-200/80 text-[11px] font-mono text-slate-400 flex justify-between tracking-tight">
-                <span>Status</span>
-                <span className="text-slate-700 font-semibold">Dry-run</span>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </section>
 
@@ -853,84 +861,41 @@ export function CommandCenterView({ stats, activities, onRefresh }: CommandCente
 
               {/* Stream List */}
               <div className="divide-y divide-slate-100 font-mono text-[11.5px]">
-                {/* Event 1 */}
-                <div className="py-2.5 flex items-center justify-between hover:bg-slate-50/90 px-1 rounded-lg transition-colors group">
-                  <div className="flex items-center gap-3 min-w-0 pr-2">
-                    <span className="text-slate-400 shrink-0 font-mono text-[11px] tracking-tight">20:41:42</span>
-                    <span className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold tracking-wider bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
-                      BUILD
-                    </span>
-                    <span className="text-slate-700 truncate font-sans text-[12.5px] group-hover:text-slate-950 transition-colors">
-                      Synthesized hero component for <span className="text-blue-600 font-semibold">Kovai Kitchen</span>
-                    </span>
-                  </div>
-                  <span className="text-slate-400 shrink-0 font-mono text-[11px] font-semibold">240ms</span>
-                </div>
+                {activities && activities.length > 0 ? (
+                  activities.slice(0, 6).map((act) => {
+                    const timeStr = act.timestamp
+                      ? new Date(act.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+                      : "—";
 
-                {/* Event 2 */}
-                <div className="py-2.5 flex items-center justify-between hover:bg-slate-50/90 px-1 rounded-lg transition-colors group">
-                  <div className="flex items-center gap-3 min-w-0 pr-2">
-                    <span className="text-slate-400 shrink-0 font-mono text-[11px] tracking-tight">20:41:30</span>
-                    <span className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold tracking-wider bg-purple-50 text-purple-700 border border-purple-200 shrink-0">
-                      QUALIFY
-                    </span>
-                    <span className="text-slate-700 truncate font-sans text-[12.5px] group-hover:text-slate-950 transition-colors">
-                      Verified account <span className="text-slate-900 font-semibold">&quot;Sri Krishna Sweets&quot;</span>{" "}
-                      <span className="text-slate-400 font-mono text-[11px]">(Score: 89)</span>
-                    </span>
+                    return (
+                      <div
+                        key={act.id}
+                        className="py-2.5 flex items-center justify-between hover:bg-slate-50/90 px-1 rounded-lg transition-colors group"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 pr-2">
+                          <span className="text-slate-400 shrink-0 font-mono text-[11px] tracking-tight">
+                            {timeStr}
+                          </span>
+                          <span className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold tracking-wider bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
+                            {act.actor ? act.actor.toUpperCase() : act.type.toUpperCase()}
+                          </span>
+                          <span className="text-slate-700 truncate font-sans text-[12.5px] group-hover:text-slate-950 transition-colors">
+                            {act.title}
+                          </span>
+                        </div>
+                        <span className="text-emerald-700 shrink-0 font-mono text-[10px] font-bold tracking-wider bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                          {act.status ? act.status.toUpperCase() : "OK"}
+                        </span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="py-10 text-center text-slate-400 font-mono text-[11.5px]">
+                    <Activity className="w-5 h-5 mx-auto mb-2 text-slate-300 animate-pulse" />
+                    <p className="font-sans text-xs text-slate-500">System idle — awaiting multi-agent pipeline execution</p>
+                    <p className="text-[11px] text-slate-400 mt-1">Run a campaign or trigger the pipeline to stream live telemetry</p>
                   </div>
-                  <span className="text-emerald-700 shrink-0 font-mono text-[10px] font-bold tracking-wider bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                    HOT_TIER
-                  </span>
-                </div>
-
-                {/* Event 3 */}
-                <div className="py-2.5 flex items-center justify-between hover:bg-slate-50/90 px-1 rounded-lg transition-colors group">
-                  <div className="flex items-center gap-3 min-w-0 pr-2">
-                    <span className="text-slate-400 shrink-0 font-mono text-[11px] tracking-tight">20:41:18</span>
-                    <span className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
-                      STORE
-                    </span>
-                    <span className="text-slate-700 truncate font-sans text-[12.5px] group-hover:text-slate-950 transition-colors">
-                      Committed 18 rows to table{" "}
-                      <code className="text-slate-700 font-mono text-[11px] bg-slate-100 px-1 py-0.5 rounded border border-slate-200">
-                        leads_prod
-                      </code>
-                    </span>
-                  </div>
-                  <span className="text-slate-500 shrink-0 font-mono text-[11px] font-semibold">+18 rows</span>
-                </div>
-
-                {/* Event 4 */}
-                <div className="py-2.5 flex items-center justify-between hover:bg-slate-50/90 px-1 rounded-lg transition-colors group">
-                  <div className="flex items-center gap-3 min-w-0 pr-2">
-                    <span className="text-slate-400 shrink-0 font-mono text-[11px] tracking-tight">20:40:55</span>
-                    <span className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold tracking-wider bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
-                      DISCOVERY
-                    </span>
-                    <span className="text-slate-700 truncate font-sans text-[12.5px] group-hover:text-slate-950 transition-colors">
-                      RS Puram zone ingestion: 34 commercial entities
-                    </span>
-                  </div>
-                  <span className="text-slate-500 shrink-0 font-mono text-[11px] font-semibold">34 items</span>
-                </div>
-
-                {/* Event 5 */}
-                <div className="py-2.5 flex items-center justify-between hover:bg-slate-50/90 px-1 rounded-lg transition-colors group">
-                  <div className="flex items-center gap-3 min-w-0 pr-2">
-                    <span className="text-slate-400 shrink-0 font-mono text-[11px] tracking-tight">20:40:22</span>
-                    <span className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
-                      DEPLOY
-                    </span>
-                    <span className="text-slate-700 truncate font-sans text-[12.5px] group-hover:text-slate-950 transition-colors">
-                      Edge preview live:{" "}
-                      <span className="text-blue-600 font-mono text-[11.5px] font-semibold">annapoorna.vasaw.site</span>
-                    </span>
-                  </div>
-                  <span className="text-emerald-700 shrink-0 font-mono text-[10px] font-bold tracking-wider bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                    200_OK
-                  </span>
-                </div>
+                )}
               </div>
             </div>
 

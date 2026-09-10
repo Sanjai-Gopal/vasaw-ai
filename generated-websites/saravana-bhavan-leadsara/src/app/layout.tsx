@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Saravana Bhavan | Authentic Restaurant in Coimbatore",
-  description: "Saravana Bhavan in Coimbatore. Rated 4.6★ based on 420 reviews. Enjoy freshly prepared food for dine-in and takeaway. Call +91 422 239 1234.",
+  title: "Saravana Bhavan | Restaurant in Coimbatore",
+  description: "Saravana Bhavan in Coimbatore. Rated 4.6★ based on 420 Google reviews. Professional restaurant services. Contact us today.",
   openGraph: {
-    title: "Saravana Bhavan | Authentic Restaurant in Coimbatore",
-    description: "Saravana Bhavan in Coimbatore. Rated 4.6★ based on 420 reviews. Enjoy freshly prepared food for dine-in and takeaway. Call +91 422 239 1234.",
+    title: "Saravana Bhavan | Restaurant in Coimbatore",
+    description: "Saravana Bhavan in Coimbatore. Rated 4.6★ based on 420 Google reviews. Professional restaurant services. Contact us today.",
     type: "website",
   },
 };

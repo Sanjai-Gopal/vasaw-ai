@@ -61,38 +61,59 @@ function CreateCampaignDialog({
   const [name, setName] = React.useState("");
   const [category, setCategory] = React.useState(campaignCategories[0]);
   const [location, setLocation] = React.useState(campaignLocations[0]);
-  const [target, setTarget] = React.useState("100");
+  const [target, setTarget] = React.useState("50");
   const [minRating, setMinRating] = React.useState("4.0");
   const [minReviews, setMinReviews] = React.useState("25");
   const [websiteOpp, setWebsiteOpp] = React.useState(true);
   const [socialPresence, setSocialPresence] = React.useState(false);
   const [autoMode, setAutoMode] = React.useState<"manual" | "semi-automatic" | "automatic">("semi-automatic");
   const [submitting, setSubmitting] = React.useState(false);
+  const [formError, setFormError] = React.useState<string | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
+    const targetNum = Number(target);
+
+    if (!name.trim()) {
+      setFormError("Campaign name is required.");
+      return;
+    }
+    if (!category) {
+      setFormError("Please select a target business category.");
+      return;
+    }
+    if (!location) {
+      setFormError("Please select a target geographic location.");
+      return;
+    }
+    if (isNaN(targetNum) || targetNum < 1 || targetNum > 500) {
+      setFormError("Target quota must be a valid number between 1 and 500.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const campaign = await createCampaign({
-        name: name || `${category} — ${location}`,
+        name: name.trim(),
         category,
         location,
-        leadTarget: Number(target) || 100,
+        leadTarget: targetNum,
         automationMode: autoMode,
       });
       onCreated(campaign);
       setName("");
-      setTarget("100");
+      setTarget("50");
       setOpen(false);
     } catch (err) {
-      console.error("Failed to create campaign:", err);
+      setFormError(err instanceof Error ? err.message : "Failed to create campaign. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(val) => { setOpen(val); if (!val) setFormError(null); }}>
       <DialogTrigger asChild>
         <Button id="create-campaign-trigger" className="gap-1.5 bg-slate-900 text-white shadow-sm hover:bg-slate-800 font-sans">
           <Plus className="h-4 w-4" />
@@ -109,15 +130,24 @@ function CreateCampaignDialog({
             Configure geo-targeted discovery criteria, qualification filters, and execution automation mode.
           </DialogDescription>
         </DialogHeader>
+
+        {formError && (
+          <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-sans text-rose-800">
+            <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
+            <span>{formError}</span>
+          </div>
+        )}
+
         <form onSubmit={submit} className="space-y-4 pt-2">
           <div className="space-y-1.5">
             <Label htmlFor="campaign-name" className="text-xs font-semibold text-slate-700">Campaign Name</Label>
             <Input
               id="campaign-name"
-              placeholder="e.g. Coimbatore Restaurants — Phase 2"
+              placeholder="e.g. Coimbatore Restaurants — Zone A"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="bg-slate-50 border-slate-200 text-xs rounded-xl font-sans"
+              required
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -137,30 +167,51 @@ function CreateCampaignDialog({
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="campaign-location" className="text-xs font-semibold text-slate-700">Location</Label>
-              <Select
+              <Label htmlFor="campaign-location" className="text-xs font-semibold text-slate-700">Location (City, Country or Global)</Label>
+              <Input
                 id="campaign-location"
+                list="global-campaign-locations"
+                placeholder="e.g. Worldwide, New York, London, Tokyo..."
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 className="bg-slate-50 border-slate-200 text-xs rounded-xl font-sans"
-              >
+                required
+              />
+              <datalist id="global-campaign-locations">
                 {campaignLocations.map((l) => (
-                  <option key={l} value={l}>
-                    {l}
-                  </option>
+                  <option key={l} value={l} />
                 ))}
-              </Select>
+              </datalist>
+              <div className="flex flex-wrap gap-1 pt-1">
+                {["Worldwide (Global)", "New York, USA", "London, UK", "Tokyo, Japan", "San Francisco, USA"].map((quickLoc) => (
+                  <button
+                    type="button"
+                    key={quickLoc}
+                    onClick={() => setLocation(quickLoc)}
+                    className={cn(
+                      "px-2 py-0.5 text-[10px] rounded-md font-sans border transition-colors cursor-pointer",
+                      location === quickLoc
+                        ? "bg-blue-50 text-blue-700 border-blue-200 font-semibold"
+                        : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100"
+                    )}
+                  >
+                    {quickLoc}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="campaign-target" className="text-xs font-semibold text-slate-700">Lead Target Quota</Label>
+            <Label htmlFor="campaign-target" className="text-xs font-semibold text-slate-700">Lead Target Quota (1–500)</Label>
             <Input
               id="campaign-target"
               type="number"
-              min={10}
+              min={1}
+              max={500}
               value={target}
               onChange={(e) => setTarget(e.target.value)}
               className="bg-slate-50 border-slate-200 text-xs rounded-xl font-sans"
+              required
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -236,20 +287,17 @@ function CreateCampaignDialog({
 }
 
 export default function CampaignsPage() {
-  const [campaigns, setCampaigns] = React.useState<Campaign[]>(defaultMockCampaigns);
+  const [campaigns, setCampaigns] = React.useState<Campaign[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [executingId, setExecutingId] = React.useState<string | null>(null);
   const [notification, setNotification] = React.useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const refreshCampaigns = React.useCallback(async () => {
-    setLoading(true);
     try {
       const data = await fetchCampaigns();
-      if (data && data.length > 0) {
-        setCampaigns(data);
-      }
+      setCampaigns(data || []);
     } catch (err) {
-      console.warn("Failed to load campaigns from API, using fallback:", err);
+      console.warn("Failed to load campaigns from API:", err);
     } finally {
       setLoading(false);
     }
@@ -259,17 +307,13 @@ export default function CampaignsPage() {
     let mounted = true;
     fetchCampaigns()
       .then((data) => {
-        if (mounted && data && data.length > 0) {
-          setCampaigns(data);
-        }
+        if (mounted) setCampaigns(data || []);
       })
       .catch((err) => {
-        console.warn("Failed to load campaigns from API, using fallback:", err);
+        console.warn("Failed to load campaigns from API:", err);
       })
       .finally(() => {
-        if (mounted) {
-          setLoading(false);
-        }
+        if (mounted) setLoading(false);
       });
     return () => {
       mounted = false;
@@ -281,7 +325,6 @@ export default function CampaignsPage() {
     setNotification(null);
     try {
       const res = await executeCampaign(campaign.id, {
-        mode: "mock",
         locations: [campaign.location || "RS Puram"],
         categories: [campaign.category || "Restaurant"],
       });
@@ -416,6 +459,22 @@ export default function CampaignsPage() {
             Dismiss
           </Button>
         </motion.div>
+      )}
+
+      {/* Empty State */}
+      {campaigns.length === 0 && !loading && (
+        <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-xs">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 mb-3 border border-blue-200">
+            <Target className="h-6 w-6" />
+          </div>
+          <h3 className="font-display text-base font-bold text-slate-950">No Campaigns Configured</h3>
+          <p className="mt-1 font-sans text-xs text-slate-500 max-w-md mx-auto">
+            Launch your first autonomous prospecting campaign to discover local businesses, score website opportunities, and synthesize edge websites.
+          </p>
+          <div className="mt-4 flex justify-center">
+            <CreateCampaignDialog onCreated={addCampaign} />
+          </div>
+        </div>
       )}
 
       {/* Campaigns Grid */}

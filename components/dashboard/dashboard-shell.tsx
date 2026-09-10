@@ -58,7 +58,7 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
   {
     id: "n2",
     title: "42 Fresh Dining Leads Ingested",
-    description: "Scrape batch completed for Coimbatore zone.",
+    description: "Scrape batch completed for Global Discovery zone.",
     timestamp: "2026-09-06T09:00:00.000Z",
     read: false,
     type: "lead",

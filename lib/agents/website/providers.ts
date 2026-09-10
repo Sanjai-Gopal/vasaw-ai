@@ -30,7 +30,7 @@ export class MockWebsiteProvider implements WebsiteProvider {
 
     // Validate generated project with real production build
     const validation = validateWebsiteProject(renderResult.projectDir);
-    const websiteId = `web-${lead.id.slice(0, 8)}-${Date.now()}`;
+    const websiteId = crypto.randomUUID();
 
     return {
       websiteId,
@@ -84,7 +84,7 @@ export class AIWebsiteProvider implements WebsiteProvider {
 
     // Validate generated project with real production build
     const validation = validateWebsiteProject(renderResult.projectDir);
-    const websiteId = `web-${lead.id.slice(0, 8)}-${Date.now()}`;
+    const websiteId = crypto.randomUUID();
 
     return {
       websiteId,

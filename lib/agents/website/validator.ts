@@ -163,17 +163,17 @@ export function executeWebsiteBuild(projectDir: string): {
   const exitCode = result.status;
 
   if (exitCode !== 0 || result.error) {
-    // Extract actual error lines
+    // Extract actual error lines from stderr and stdout
     const rawError = result.error
       ? result.error.message
-      : (stderr.trim() || stdout.trim() || `Process exited with code ${exitCode}`);
+      : (stderr.trim() + "\n" + stdout.trim() || `Process exited with code ${exitCode}`);
 
     const errorLines = rawError
       .split("\n")
       .map((l) => l.trim())
-      .filter((l) => l.length > 0 && !l.startsWith("Attention:") && !l.startsWith("https://"));
+      .filter((l) => l.length > 0 && !l.startsWith("Attention:") && !l.startsWith("https://") && !l.startsWith("⚠ Warning:"));
 
-    const primaryError = errorLines.find((l) => l.toLowerCase().includes("error")) || errorLines[0] || "Unknown build error";
+    const primaryError = errorLines.find((l) => l.toLowerCase().includes("error ts") || l.toLowerCase().includes("error:")) || errorLines.find((l) => l.toLowerCase().includes("error")) || errorLines[0] || "Unknown build error";
 
     return {
       success: false,

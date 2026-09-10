@@ -19,7 +19,7 @@ export async function POST(
     const existing = await getCampaignById(id);
     const locations = Array.isArray(body.locations) && body.locations.length > 0
       ? body.locations
-      : [existing?.location || "RS Puram"];
+      : [existing?.location || "Worldwide"];
     const categories = Array.isArray(body.categories) && body.categories.length > 0
       ? body.categories
       : [existing?.category || "Restaurant"];

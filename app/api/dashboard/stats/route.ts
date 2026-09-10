@@ -33,6 +33,7 @@ export async function GET() {
       { data: deployments, error: deploymentsError },
       { data: messages, error: messagesError },
       { data: activities, error: activitiesError },
+      { data: agentRuns, error: agentRunsError },
     ] = await Promise.all([
       admin.from("campaigns").select("*"),
       admin.from("leads").select("*"),
@@ -40,6 +41,7 @@ export async function GET() {
       admin.from("deployments").select("*"),
       admin.from("messages").select("*"),
       admin.from("activities").select("*").order("timestamp", { ascending: false }).limit(20),
+      admin.from("agent_runs").select("*").order("created_at", { ascending: false }).limit(50),
     ]);
 
     if (campaignsError) throw campaignsError;
@@ -50,7 +52,7 @@ export async function GET() {
     if (activitiesError) throw activitiesError;
 
     const totalLeads = leads?.length ?? 0;
-    const qualifiedLeads = leads?.filter((l) => l.status === "qualified").length ?? 0;
+    const qualifiedLeads = leads?.filter((l) => l.status === "qualified" || l.status === "interested" || l.status === "website_building" || l.status === "website_deployed").length ?? 0;
     const websitesGenerated = websites?.filter((w) => w.status !== "queued").length ?? 0;
     const websitesDeployed = websites?.filter((w) => w.status === "deployed").length ?? 0;
     const messagesSent = messages?.filter((m) => m.status !== "prepared" && m.status !== "failed").length ?? 0;
@@ -60,6 +62,16 @@ export async function GET() {
       l.status === "website_deployed" || 
       l.status === "won"
     ).length ?? 0;
+
+    // Dynamically derive agent status
+    const getAgentStatus = (agentId: string, hasCompletedWork: boolean): AgentStatus => {
+      const runs = (agentRuns ?? []).filter((r) => r.agent_id === agentId);
+      if (runs.some((r) => r.status === "running")) return "running";
+      if (runs.length > 0) {
+        return runs[0].success ? "healthy" : "error";
+      }
+      return hasCompletedWork ? "healthy" : "idle";
+    };
 
     const byDate: Record<string, number> = {};
     for (const lead of leads ?? []) {
@@ -93,7 +105,7 @@ export async function GET() {
         label: "Scraping",
         agentName: "Scraping Agent",
         description: agentDescriptions.scraping,
-        status: agentStatusMap.scraping,
+        status: getAgentStatus("scraping", totalLeads > 0),
         completed: totalLeads > 0 ? Math.min(100, Math.round((leads?.filter((l) => l.status !== "new").length ?? 0) / totalLeads * 100)) : 0,
       },
       {
@@ -101,7 +113,7 @@ export async function GET() {
         label: "Checking",
         agentName: "Checking Agent",
         description: agentDescriptions.checking,
-        status: agentStatusMap.checking,
+        status: getAgentStatus("checking", qualifiedLeads > 0),
         completed: totalLeads > 0 ? Math.min(100, Math.round((leads?.filter((l) => l.status === "qualified" || l.status === "rejected").length ?? 0) / totalLeads * 100)) : 0,
       },
       {
@@ -109,7 +121,7 @@ export async function GET() {
         label: "Storage",
         agentName: "Storage Agent",
         description: agentDescriptions.storage,
-        status: agentStatusMap.storage,
+        status: getAgentStatus("storage", totalLeads > 0),
         completed: totalLeads > 0 ? 100 : 0,
       },
       {
@@ -117,7 +129,7 @@ export async function GET() {
         label: "Website Building",
         agentName: "Website Building Agent",
         description: agentDescriptions["website-building"],
-        status: agentStatusMap["website-building"],
+        status: getAgentStatus("website-building", websitesGenerated > 0),
         completed: websitesGenerated > 0 ? Math.min(100, Math.round((websites?.filter((w) => w.status === "built" || w.status === "deployed").length ?? 0) / Math.max(1, qualifiedLeads) * 100)) : 0,
       },
       {
@@ -125,7 +137,7 @@ export async function GET() {
         label: "Deployment",
         agentName: "Deployment Agent",
         description: agentDescriptions.deployment,
-        status: agentStatusMap.deployment,
+        status: getAgentStatus("deployment", websitesDeployed > 0),
         completed: websitesDeployed > 0 ? Math.min(100, Math.round((deployments?.filter((d) => d.status === "deployed").length ?? 0) / Math.max(1, websitesGenerated) * 100)) : 0,
       },
       {
@@ -133,10 +145,11 @@ export async function GET() {
         label: "WhatsApp",
         agentName: "WhatsApp Agent",
         description: agentDescriptions.whatsapp,
-        status: agentStatusMap.whatsapp,
+        status: getAgentStatus("whatsapp", messagesSent > 0),
         completed: messagesSent > 0 ? 100 : 0,
       },
     ];
+
 
     const formattedActivities: ActivityItem[] = (activities ?? []).map((a) => ({
       id: a.id,

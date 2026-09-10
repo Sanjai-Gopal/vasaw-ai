@@ -1,6 +1,6 @@
 import { ScrapingProvider, ScrapingRequest, Lead, RawRecord } from "./types";
 import { normalizeRecords } from "./normalize";
-import { MOCK_BUSINESSES } from "./mock-businesses";
+import { MOCK_BUSINESSES, generateDynamicMockBusinesses } from "./mock-businesses";
 
 export { MOCK_BUSINESSES };
 
@@ -8,31 +8,55 @@ export class MockProvider implements ScrapingProvider {
   async scrape(request: ScrapingRequest): Promise<Lead[]> {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    const reqCategory = (request.category || "").toLowerCase();
-    const reqLocation = (request.location || "").toLowerCase();
+    const reqCategory = (request.category || "").toLowerCase().trim();
+    const rawLocation = (request.location || "").toLowerCase().trim();
+    const isGlobal =
+      !rawLocation ||
+      rawLocation === "worldwide" ||
+      rawLocation === "global" ||
+      rawLocation === "worldwide (global)" ||
+      rawLocation === "all";
 
-    const filtered = MOCK_BUSINESSES.filter((b) => {
+    let filtered = MOCK_BUSINESSES.filter((b) => {
       const bCat = (b.category || "").toLowerCase();
       const bSubCat = (b.sub_category || "").toLowerCase();
       const matchCategory = !reqCategory || bCat.includes(reqCategory) || bSubCat.includes(reqCategory);
 
+      if (isGlobal) {
+        return matchCategory;
+      }
+
       const bCity = (b.city || "").toLowerCase();
       const bAddress = (b.address || "").toLowerCase();
       const matchLocation =
-        !reqLocation ||
-        bCity.includes(reqLocation) ||
-        bAddress.includes(reqLocation) ||
-        (reqLocation === "coimbatore" && bCity.includes("coimbatore"));
+        bCity.includes(rawLocation) ||
+        bAddress.includes(rawLocation) ||
+        rawLocation.includes(bCity) ||
+        (rawLocation === "coimbatore" && bCity.includes("coimbatore"));
 
       return matchCategory && matchLocation;
     });
+
+    const offset = typeof request.offset === "number" && request.offset >= 0 ? request.offset : 0;
+    const needed = offset + request.limit;
+
+    // If static mock pool has fewer leads than needed for custom city/region, synthesize dynamic leads for that location
+    if (filtered.length < needed && !isGlobal && rawLocation && rawLocation !== "nonexistent" && rawLocation !== "nowhere") {
+      const dynamicNeeded = needed - filtered.length + 5;
+      const dynamicRecords = generateDynamicMockBusinesses(
+        request.category || "General Business",
+        request.location || "Global City",
+        dynamicNeeded,
+        filtered.length
+      );
+      filtered = [...filtered, ...dynamicRecords];
+    }
 
     const uncollected =
       request.excludeExternalIds && request.excludeExternalIds.length > 0
         ? filtered.filter((b) => !request.excludeExternalIds!.includes(String(b.place_id || b.placeId || "")))
         : filtered;
 
-    const offset = typeof request.offset === "number" && request.offset >= 0 ? request.offset : 0;
     const limited = uncollected.slice(offset, offset + request.limit);
     return normalizeRecords(limited, "Google Maps (Mock)");
   }
@@ -52,7 +76,17 @@ export class ApifyProvider implements ScrapingProvider {
       throw new Error("APIFY_API_TOKEN is not configured on the server. Please set APIFY_API_TOKEN in .env.local to execute live scraping.");
     }
 
-    const searchQuery = `${request.category} in ${request.location}`;
+    const isGlobal =
+      !request.location ||
+      request.location.toLowerCase() === "worldwide" ||
+      request.location.toLowerCase() === "global" ||
+      request.location.toLowerCase() === "worldwide (global)" ||
+      request.location.toLowerCase() === "all";
+
+    const searchQuery = isGlobal
+      ? `${request.category}`
+      : `${request.category} in ${request.location}`;
+
     const maxItems = Math.max(request.limit * 2, request.limit); // Fetch extra buffer for post-filtering
 
     const input = {

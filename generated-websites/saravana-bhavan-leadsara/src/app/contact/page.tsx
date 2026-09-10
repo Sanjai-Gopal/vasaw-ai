@@ -19,8 +19,8 @@ interface ContentData {
 }
 
 const content: ContentData = {
-  "metaTitle": "Saravana Bhavan | Authentic Restaurant in Coimbatore",
-  "metaDescription": "Saravana Bhavan in Coimbatore. Rated 4.6★ based on 420 reviews. Enjoy freshly prepared food for dine-in and takeaway. Call +91 422 239 1234.",
+  "metaTitle": "Saravana Bhavan | Restaurant in Coimbatore",
+  "metaDescription": "Saravana Bhavan in Coimbatore. Rated 4.6★ based on 420 Google reviews. Professional restaurant services. Contact us today.",
   "hero": {
     "headline": "Saravana Bhavan",
     "subheadline": "Traditional recipes prepared fresh daily with the finest ingredients. Made for dine-in, takeaway, and family dining in Coimbatore.",

@@ -1,7 +1,7 @@
 # Saravana Bhavan
 
 Generated website project for **Saravana Bhavan** (Restaurant).
-Template: `Restaurant` (restaurant)
+Template: `Restaurant & Mess` (restaurant)
 
 ## Quick Start
 ```bash

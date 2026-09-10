@@ -42,7 +42,7 @@ describe("Frontend Data Contract & Client Mappers", () => {
   it("should provide robust fallback defaults for unconfigured campaigns", () => {
     expect(defaultMockCampaigns.length).toBeGreaterThan(0);
     const first = defaultMockCampaigns[0];
-    expect(first.name).toContain("Coimbatore");
+    expect(first.name).toContain("Global Dining");
     expect(first.leadTarget).toBe(150);
   });
 

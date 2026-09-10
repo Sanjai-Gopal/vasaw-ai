@@ -133,7 +133,7 @@ export interface Agent {
   shortName: string;
   description: string;
   status: AgentStatus;
-  lastRun: string;
+  lastRun?: string;
   totalRuns: number;
   successRuns: number;
   failedRuns: number;
@@ -272,6 +272,9 @@ export interface DashboardStats {
   interestedLeads: number;
   weeklyLeads: Array<{ label: string; leads: number }>;
   categoryDistribution: Array<{ name: string; value: number }>;
+  activeCampaigns?: number;
+  campaigns?: number;
+  pipeline?: PipelineStage[];
 }
 
 export interface Notification {
