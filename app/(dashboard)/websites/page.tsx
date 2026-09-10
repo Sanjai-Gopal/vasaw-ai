@@ -505,7 +505,7 @@ export default function WebsitesPage() {
                           {website.businessName || "Untitled Project"}
                         </a>
                         <p className="font-sans text-xs text-slate-500">
-                          {website.category || "General"} · {website.location || "Coimbatore"}
+                          {website.category || "General"} · {website.location || "Worldwide (Global)"}
                         </p>
                       </div>
                     </div>

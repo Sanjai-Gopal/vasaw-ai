@@ -33,7 +33,7 @@ export function SidebarContent({
             <p className="text-[14.5px] font-display font-extrabold tracking-tight text-slate-950 group-hover:text-blue-600 transition-colors">
               VASAW AI
             </p>
-            <p className="text-[11px] font-mono text-slate-400 font-medium">Kovai Cluster • v4.8</p>
+            <p className="text-[11px] font-mono text-slate-400 font-medium">Global Cluster • v4.8</p>
           </div>
         </Link>
 

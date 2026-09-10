@@ -2,17 +2,21 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import type { Lead } from "@/lib/types";
 
 export async function getLeads(): Promise<Lead[]> {
-  const admin = getSupabaseAdmin();
-  const { data, error } = await admin
-    .from("leads")
-    .select("*")
-    .order("created_at", { ascending: false });
+  try {
+    const admin = getSupabaseAdmin();
+    const { data, error } = await admin
+      .from("leads")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  if (error) {
-    throw new Error(`Failed to fetch leads: ${error.message}`);
+    if (error) {
+      return [];
+    }
+
+    return (data ?? []).map(mapLeadFromDb);
+  } catch {
+    return [];
   }
-
-  return (data ?? []).map(mapLeadFromDb);
 }
 
 export async function getLeadById(id: string): Promise<Lead | null> {
@@ -100,5 +104,9 @@ export function mapLeadFromDb(row: Record<string, unknown>): Lead {
       reasons: [],
       estimatedValue: 0,
     },
+    source_mode: ((row.qualification_json as Record<string, unknown>)?.source_mode as ("mock" | "live")) || ((row.source as string)?.toLowerCase().includes("mock") ? "mock" : "live"),
+    is_synthetic: ((row.qualification_json as Record<string, unknown>)?.is_synthetic as boolean) ?? ((row.source as string)?.toLowerCase().includes("mock") ? true : false),
+    campaignLocation: ((row.qualification_json as Record<string, unknown>)?.campaignLocation as string) || (row.location as string) || undefined,
+    normalizedLocation: ((row.qualification_json as Record<string, unknown>)?.normalizedLocation as string) || undefined,
   };
 }

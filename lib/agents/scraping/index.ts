@@ -3,13 +3,21 @@ import { getProvider } from "./providers";
 
 export async function runScrapingAgent(request: ScrapingRequest): Promise<ScrapingResponse> {
   try {
-    const provider = getProvider(request.mode);
-    const leads = await provider.scrape(request);
+    const rawLoc = (request.location || "").trim();
+    const normalizedLocation = !rawLoc || ["worldwide", "global", "worldwide (global)", "all"].includes(rawLoc.toLowerCase())
+      ? "Worldwide (Global)"
+      : rawLoc;
+    const effectiveRequest: ScrapingRequest = {
+      ...request,
+      location: normalizedLocation,
+    };
+    const provider = getProvider(effectiveRequest.mode);
+    const leads = await provider.scrape(effectiveRequest);
 
     return {
       success: true,
       agent: "scraping",
-      mode: request.mode,
+      mode: effectiveRequest.mode,
       count: leads.length,
       leads,
     };
@@ -41,9 +49,14 @@ export function validateRequest(body: unknown): { valid: boolean; request?: Scra
     return { valid: false, error: "category is required and must be a string" };
   }
 
-  if (!b.location || typeof b.location !== "string") {
+  if (b.location === undefined || typeof b.location !== "string") {
     return { valid: false, error: "location is required and must be a string" };
   }
+
+  const rawLoc = b.location.trim();
+  const location = !rawLoc || ["worldwide", "global", "worldwide (global)", "all"].includes(rawLoc.toLowerCase())
+    ? "Worldwide (Global)"
+    : rawLoc;
 
   const limit = typeof b.limit === "number" ? b.limit : 10;
   if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
@@ -61,7 +74,7 @@ export function validateRequest(body: unknown): { valid: boolean; request?: Scra
     request: {
       campaignId: b.campaignId,
       category: b.category,
-      location: b.location,
+      location,
       limit,
       offset,
       excludeExternalIds,

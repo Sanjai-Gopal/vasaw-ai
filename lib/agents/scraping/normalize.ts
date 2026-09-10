@@ -39,7 +39,13 @@ function extractCityFromAddress(address: string): string {
   return parts[0] || "";
 }
 
-export function normalizeRecord(raw: RawRecord, source: string): Lead {
+export interface NormalizeOptions {
+  source_mode?: "mock" | "live";
+  campaignLocation?: string;
+  normalizedLocation?: string;
+}
+
+export function normalizeRecord(raw: RawRecord, source: string, options?: NormalizeOptions): Lead {
   const businessName = safeString(
     raw.business_name ?? raw.title ?? raw.name ?? raw.businessName
   );
@@ -76,6 +82,15 @@ export function normalizeRecord(raw: RawRecord, source: string): Lead {
     raw.place_id ?? raw.placeId ?? raw.id ?? raw.fid ?? raw.cid
   );
 
+  const isMock = options?.source_mode ? options.source_mode === "mock" : source.toLowerCase().includes("mock");
+  const source_mode: "mock" | "live" = isMock ? "mock" : "live";
+  const is_synthetic = isMock;
+
+  const campaignLoc = options?.campaignLocation?.trim();
+  const normalizedLoc = options?.normalizedLocation || (!campaignLoc || ["worldwide", "global", "worldwide (global)", "all"].includes(campaignLoc.toLowerCase())
+    ? "Worldwide (Global)"
+    : campaignLoc);
+
   return {
     id: randomUUID(),
     externalId: externalId || undefined,
@@ -90,9 +105,13 @@ export function normalizeRecord(raw: RawRecord, source: string): Lead {
     socialLinks,
     source,
     scrapedAt,
+    source_mode,
+    is_synthetic,
+    campaignLocation: campaignLoc || normalizedLoc,
+    normalizedLocation: normalizedLoc,
   };
 }
 
-export function normalizeRecords(records: RawRecord[], source: string): Lead[] {
-  return records.map((record) => normalizeRecord(record, source));
+export function normalizeRecords(records: RawRecord[], source: string, options?: NormalizeOptions): Lead[] {
+  return records.map((record) => normalizeRecord(record, source, options));
 }

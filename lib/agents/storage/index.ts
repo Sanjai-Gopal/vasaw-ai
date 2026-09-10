@@ -60,6 +60,10 @@ function mapLeadRow(row: Record<string, unknown>): SavedLead {
     outreachStatus: row.outreach_status as string,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
+    source_mode: ((row.qualification_json as Record<string, unknown>)?.source_mode as ("mock" | "live")) || ((row.source as string)?.toLowerCase().includes("mock") ? "mock" : "live"),
+    is_synthetic: ((row.qualification_json as Record<string, unknown>)?.is_synthetic as boolean) ?? ((row.source as string)?.toLowerCase().includes("mock") ? true : false),
+    campaignLocation: ((row.qualification_json as Record<string, unknown>)?.campaignLocation as string) || undefined,
+    normalizedLocation: ((row.qualification_json as Record<string, unknown>)?.normalizedLocation as string) || undefined,
   };
 }
 
@@ -234,6 +238,10 @@ function leadToDbFormat(lead: Lead, campaignId: string, apifyRunId?: string, api
       hasReviews: lead.reviewCount > 0,
       responseLikelihood: "medium",
       notes: `Business identified from ${lead.source} with ${lead.reviewCount} reviews, rating ${lead.rating}/5`,
+      source_mode: lead.source_mode || (lead.source?.toLowerCase().includes("mock") ? "mock" : "live"),
+      is_synthetic: lead.is_synthetic ?? (lead.source?.toLowerCase().includes("mock") ? true : false),
+      campaignLocation: lead.campaignLocation,
+      normalizedLocation: lead.normalizedLocation,
     },
     opportunity_json: {
       score: 0,

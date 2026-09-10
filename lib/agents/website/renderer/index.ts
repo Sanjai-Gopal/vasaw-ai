@@ -50,8 +50,8 @@ export function renderWebsiteProject(params: RenderProjectParams): RenderProject
     id: "site",
     businessName: "Local Business",
     category: "Local Business",
-    city: "Coimbatore",
-    address: "Coimbatore",
+    city: "Worldwide",
+    address: "Worldwide",
     rating: 4.5,
     reviewCount: 0,
     socialLinks: [],
@@ -373,7 +373,7 @@ function generatePageTsx(params: {
   const rawRating = typeof profile.rating === "number" ? profile.rating : 4.5;
   const rating = Number(rawRating.toFixed(1));
   const reviewCount = typeof profile.reviewCount === "number" ? profile.reviewCount : 0;
-  const city = profile.city || profile.address || "Coimbatore";
+  const city = profile.city || profile.address || "Worldwide";
 
   return `'use client';
 

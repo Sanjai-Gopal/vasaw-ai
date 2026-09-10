@@ -123,7 +123,7 @@ export async function executeWorkflow(
     try {
       const scrapeResponse = await runScrapingAgent({
         campaignId,
-        location: request.locations[0] || "Worldwide",
+        location: request.locations[0] || "Worldwide (Global)",
         category: request.categories[0] || "restaurant",
         limit: request.maxItems ?? 10,
         offset: request.offset,

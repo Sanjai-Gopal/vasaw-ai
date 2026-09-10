@@ -83,21 +83,19 @@ function CreateCampaignDialog({
       setFormError("Please select a target business category.");
       return;
     }
-    if (!location) {
-      setFormError("Please select a target geographic location.");
-      return;
-    }
     if (isNaN(targetNum) || targetNum < 1 || targetNum > 500) {
       setFormError("Target quota must be a valid number between 1 and 500.");
       return;
     }
+
+    const chosenLocation = location.trim() || "Worldwide (Global)";
 
     setSubmitting(true);
     try {
       const campaign = await createCampaign({
         name: name.trim(),
         category,
-        location,
+        location: chosenLocation,
         leadTarget: targetNum,
         automationMode: autoMode,
       });
@@ -143,7 +141,7 @@ function CreateCampaignDialog({
             <Label htmlFor="campaign-name" className="text-xs font-semibold text-slate-700">Campaign Name</Label>
             <Input
               id="campaign-name"
-              placeholder="e.g. Coimbatore Restaurants — Zone A"
+              placeholder="e.g. London Dining, Tokyo Cafes, Downtown Dubai..."
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="bg-slate-50 border-slate-200 text-xs rounded-xl font-sans"
@@ -175,7 +173,6 @@ function CreateCampaignDialog({
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 className="bg-slate-50 border-slate-200 text-xs rounded-xl font-sans"
-                required
               />
               <datalist id="global-campaign-locations">
                 {campaignLocations.map((l) => (
@@ -183,7 +180,7 @@ function CreateCampaignDialog({
                 ))}
               </datalist>
               <div className="flex flex-wrap gap-1 pt-1">
-                {["Worldwide (Global)", "New York, USA", "London, UK", "Tokyo, Japan", "San Francisco, USA"].map((quickLoc) => (
+                {["Worldwide (Global)", "London, UK", "New York, USA", "Tokyo, Japan", "Dubai, UAE", "Chennai, India", "San Francisco, USA"].map((quickLoc) => (
                   <button
                     type="button"
                     key={quickLoc}
@@ -325,7 +322,7 @@ export default function CampaignsPage() {
     setNotification(null);
     try {
       const res = await executeCampaign(campaign.id, {
-        locations: [campaign.location || "RS Puram"],
+        locations: [campaign.location || "Worldwide (Global)"],
         categories: [campaign.category || "Restaurant"],
       });
 

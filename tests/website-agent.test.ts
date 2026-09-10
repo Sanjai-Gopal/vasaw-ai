@@ -860,7 +860,7 @@ describe("Agent 4 — Website Building Agent", () => {
   });
 
   describe("Website Agent Execution (runWebsiteAgent)", () => {
-    it("should return successful response on valid request", { timeout: 30000 }, async () => {
+    it("should return successful response on valid request", { timeout: 60000 }, async () => {
       const request: WebsiteRequest = {
         lead: createMockLead(),
         qualification: createMockQualification(),

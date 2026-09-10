@@ -12,6 +12,10 @@ export interface Lead {
   socialLinks: string[];
   source: string;
   scrapedAt: string;
+  source_mode?: "mock" | "live";
+  is_synthetic?: boolean;
+  campaignLocation?: string;
+  normalizedLocation?: string;
 }
 
 export interface ScrapingRequest {

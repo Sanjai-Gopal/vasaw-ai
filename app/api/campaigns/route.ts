@@ -24,10 +24,14 @@ export async function POST(req: Request) {
     const {
       name,
       category = "Restaurant",
-      location = "Coimbatore",
       leadTarget = 50,
       automationMode = "semi-automatic",
     } = body;
+
+    const rawLocation = typeof body.location === "string" ? body.location.trim() : "";
+    const location = !rawLocation || ["worldwide", "global", "worldwide (global)", "all"].includes(rawLocation.toLowerCase())
+      ? "Worldwide (Global)"
+      : rawLocation;
 
     if (!name || typeof name !== "string") {
       return NextResponse.json(

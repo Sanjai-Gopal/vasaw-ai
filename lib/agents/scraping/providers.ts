@@ -17,6 +17,9 @@ export class MockProvider implements ScrapingProvider {
       rawLocation === "worldwide (global)" ||
       rawLocation === "all";
 
+    const isNonExistentCategory = reqCategory.includes("nonexistent") || reqCategory.includes("nowhere");
+    const isNonExistentLocation = rawLocation === "nonexistent" || rawLocation === "nowhere";
+
     let filtered = MOCK_BUSINESSES.filter((b) => {
       const bCat = (b.category || "").toLowerCase();
       const bSubCat = (b.sub_category || "").toLowerCase();
@@ -31,8 +34,7 @@ export class MockProvider implements ScrapingProvider {
       const matchLocation =
         bCity.includes(rawLocation) ||
         bAddress.includes(rawLocation) ||
-        rawLocation.includes(bCity) ||
-        (rawLocation === "coimbatore" && bCity.includes("coimbatore"));
+        rawLocation.includes(bCity);
 
       return matchCategory && matchLocation;
     });
@@ -40,12 +42,13 @@ export class MockProvider implements ScrapingProvider {
     const offset = typeof request.offset === "number" && request.offset >= 0 ? request.offset : 0;
     const needed = offset + request.limit;
 
-    // If static mock pool has fewer leads than needed for custom city/region, synthesize dynamic leads for that location
-    if (filtered.length < needed && !isGlobal && rawLocation && rawLocation !== "nonexistent" && rawLocation !== "nowhere") {
+    // If static mock pool has fewer leads than needed, synthesize dynamic leads for that location or distributed globally
+    if (filtered.length < needed && !isNonExistentCategory && !isNonExistentLocation) {
       const dynamicNeeded = needed - filtered.length + 5;
+      const targetLocation = isGlobal ? "Worldwide (Global)" : (request.location || "Worldwide (Global)");
       const dynamicRecords = generateDynamicMockBusinesses(
         request.category || "General Business",
-        request.location || "Global City",
+        targetLocation,
         dynamicNeeded,
         filtered.length
       );
@@ -58,7 +61,10 @@ export class MockProvider implements ScrapingProvider {
         : filtered;
 
     const limited = uncollected.slice(offset, offset + request.limit);
-    return normalizeRecords(limited, "Google Maps (Mock)");
+    return normalizeRecords(limited, "Google Maps (Mock)", {
+      source_mode: "mock",
+      campaignLocation: request.location || "Worldwide (Global)",
+    });
   }
 }
 
@@ -136,7 +142,10 @@ export class ApifyProvider implements ScrapingProvider {
     }
 
     const rawRecords = (await datasetResponse.json()) as RawRecord[];
-    const normalized = normalizeRecords(rawRecords, "Google Maps (Apify)");
+    const normalized = normalizeRecords(rawRecords, "Google Maps (Apify)", {
+      source_mode: "live",
+      campaignLocation: request.location || "Worldwide (Global)",
+    });
 
     // Apply quality criteria filters
     const minRating = typeof request.minimumRating === "number" ? request.minimumRating : 0;

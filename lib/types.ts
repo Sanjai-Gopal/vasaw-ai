@@ -45,6 +45,8 @@ export interface ScrapedInfo {
   source: string;
   scrapedAt: string;
   placeId?: string;
+  source_mode?: "mock" | "live";
+  is_synthetic?: boolean;
 }
 
 export interface Qualification {
@@ -81,6 +83,10 @@ export interface Lead {
   opportunity: Opportunity;
   createdAt: string;
   updatedAt: string;
+  source_mode?: "mock" | "live";
+  is_synthetic?: boolean;
+  campaignLocation?: string;
+  normalizedLocation?: string;
 }
 
 export type CampaignStatus = "draft" | "active" | "paused" | "completed";

@@ -102,7 +102,7 @@ export default function OnboardingPage() {
 
       const res = await runOrchestrator({
         campaignId: "onboarding-demo",
-        locations: ["Coimbatore"],
+        locations: ["Worldwide (Global)"],
         categories: ["restaurant"],
         maxItems: 3,
         mode: "mock",

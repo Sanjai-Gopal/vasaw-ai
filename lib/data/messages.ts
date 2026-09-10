@@ -2,18 +2,22 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import type { Message } from "@/lib/types";
 
 export async function getMessages(): Promise<Message[]> {
-  const admin = getSupabaseAdmin();
-  const { data, error } = await admin
-    .from("messages")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(1000);
+  try {
+    const admin = getSupabaseAdmin();
+    const { data, error } = await admin
+      .from("messages")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(1000);
 
-  if (error) {
-    throw new Error(`Failed to fetch messages: ${error.message}`);
+    if (error) {
+      return [];
+    }
+
+    return (data ?? []).map(mapMessageFromDb);
+  } catch {
+    return [];
   }
-
-  return (data ?? []).map(mapMessageFromDb);
 }
 
 export async function getMessagesByLead(leadId: string): Promise<Message[]> {

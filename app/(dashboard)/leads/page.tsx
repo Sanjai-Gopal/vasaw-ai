@@ -503,7 +503,7 @@ export default function LeadsPage() {
                               {name}
                             </p>
                             <p className="truncate text-[11.5px] text-slate-500 font-mono">
-                              {lead.location || "Coimbatore"}
+                              {lead.location || lead.scraped?.address || "Worldwide (Global)"}
                             </p>
                           </div>
                         </Link>

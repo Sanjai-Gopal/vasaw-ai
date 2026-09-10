@@ -21,14 +21,26 @@ export function createPublicBusinessProfile(lead: Lead): PublicBusinessProfile {
   const rawRating = typeof lead.rating === "number" ? lead.rating : 4.5;
   const rating = Number(rawRating.toFixed(1));
   const reviewCount = typeof lead.reviewCount === "number" ? lead.reviewCount : 0;
-  const city = (lead.city || lead.address || "Coimbatore").trim();
+
+  let city = (lead.city || "").trim();
+  if (!city && lead.address) {
+    const parts = lead.address.split(",").map((p) => p.trim()).filter(Boolean);
+    city = parts.length >= 2 ? parts[parts.length - 2] : (parts[0] || "");
+  }
+  if (!city && lead.campaignLocation) {
+    city = lead.campaignLocation.split(",")[0].trim();
+  }
+  if (!city || ["worldwide", "global", "worldwide (global)"].includes(city.toLowerCase())) {
+    city = "Worldwide";
+  }
+
   const rawServices = (lead as unknown as { scraped?: { services?: string[] } }).scraped?.services ?? [];
 
   return {
     id: lead.id,
     businessName: (lead.businessName || "Local Business").trim(),
     category: (lead.category || "Local Business").trim(),
-    city: city || "Coimbatore",
+    city,
     address: lead.address ? lead.address.trim() : `${(lead.businessName || "Local Business").trim()}, ${city}`,
     phone: lead.phone ? lead.phone.trim() : undefined,
     email: (lead as unknown as { email?: string }).email?.trim() || undefined,

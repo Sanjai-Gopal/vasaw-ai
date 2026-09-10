@@ -1378,6 +1378,21 @@ export const MOCK_BUSINESSES: RawRecord[] = [
  * Dynamically synthesizes realistic business leads for ANY location worldwide and category.
  * Used when querying mock mode with custom cities or when more mock leads are needed.
  */
+const GLOBAL_HUBS = [
+  { city: "London", region: "London, UK", country: "United Kingdom", phoneCode: "+44 20" },
+  { city: "New York", region: "New York, NY 10001, USA", country: "USA", phoneCode: "+1 212" },
+  { city: "Tokyo", region: "Tokyo 104-0061, Japan", country: "Japan", phoneCode: "+81 3" },
+  { city: "Dubai", region: "Dubai, UAE", country: "UAE", phoneCode: "+971 4" },
+  { city: "Sydney", region: "Sydney NSW 2000, Australia", country: "Australia", phoneCode: "+61 2" },
+  { city: "Toronto", region: "Toronto, ON M5H 2N2, Canada", country: "Canada", phoneCode: "+1 416" },
+  { city: "Berlin", region: "Berlin 10115, Germany", country: "Germany", phoneCode: "+49 30" },
+  { city: "Singapore", region: "Singapore 018983", country: "Singapore", phoneCode: "+65" },
+  { city: "Paris", region: "75001 Paris, France", country: "France", phoneCode: "+33 1" },
+  { city: "Chennai", region: "Chennai, Tamil Nadu 600001, India", country: "India", phoneCode: "+91 44" },
+  { city: "Mumbai", region: "Mumbai, Maharashtra 400001, India", country: "India", phoneCode: "+91 22" },
+  { city: "San Francisco", region: "San Francisco, CA 94105, USA", country: "USA", phoneCode: "+1 415" },
+];
+
 export function generateDynamicMockBusinesses(
   category: string,
   location: string,
@@ -1385,9 +1400,10 @@ export function generateDynamicMockBusinesses(
   offset = 0
 ): RawRecord[] {
   const normCat = (category || "General").trim();
-  const normLoc = (location || "Global").trim();
-  const city = normLoc.split(",")[0].trim() || "Global City";
-  const countryOrRegion = normLoc.includes(",") ? normLoc.split(",").slice(1).join(",").trim() : "International";
+  const normLoc = (location || "").trim();
+  const isWorldwide =
+    !normLoc ||
+    ["worldwide", "global", "worldwide (global)", "all"].includes(normLoc.toLowerCase());
 
   const prefixes = [
     "Apex", "Prime", "Summit", "Heritage", "Metro", "Vanguard", "Urban",
@@ -1417,24 +1433,50 @@ export function generateDynamicMockBusinesses(
     const idx = offset + i;
     const prefix = prefixes[idx % prefixes.length];
     const suffix = matchedSuffixes[idx % matchedSuffixes.length];
-    const businessName = `${prefix} ${city} ${suffix}`;
+
+    let targetCity: string;
+    let targetAddress: string;
+    let phonePrefix = "+1 555";
+
+    if (isWorldwide) {
+      const hub = GLOBAL_HUBS[idx % GLOBAL_HUBS.length];
+      targetCity = hub.city;
+      const streetNumber = 10 + ((idx * 17) % 890);
+      targetAddress = `${streetNumber} Central Ave, ${hub.region}`;
+      phonePrefix = hub.phoneCode;
+    } else {
+      targetCity = normLoc.split(",")[0].trim() || "Global City";
+      const streetNumber = 10 + ((idx * 17) % 890);
+      const streetNames = ["Main St", "High St", "Commercial Blvd", "Central Ave", "Grand Way", "Market St", "Ocean Drive", "Park Ave"];
+      const street = streetNames[idx % streetNames.length];
+      targetAddress = `${streetNumber} ${street}, ${normLoc}`;
+      if (normLoc.toLowerCase().includes("uk") || normLoc.toLowerCase().includes("london")) {
+        phonePrefix = "+44 20";
+      } else if (normLoc.toLowerCase().includes("india") || normLoc.toLowerCase().includes("chennai") || normLoc.toLowerCase().includes("mumbai") || normLoc.toLowerCase().includes("coimbatore")) {
+        phonePrefix = "+91 44";
+      } else if (normLoc.toLowerCase().includes("japan") || normLoc.toLowerCase().includes("tokyo")) {
+        phonePrefix = "+81 3";
+      } else if (normLoc.toLowerCase().includes("uae") || normLoc.toLowerCase().includes("dubai")) {
+        phonePrefix = "+971 4";
+      }
+    }
+
+    const businessName = `${prefix} ${targetCity} ${suffix}`;
     const slug = businessName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const hasWebsite = idx % 3 !== 0; // 33% opportunity without existing site
-    const streetNumber = 10 + ((idx * 17) % 890);
-    const streetNames = ["Main St", "High St", "Commercial Blvd", "Central Ave", "Grand Way", "Market St", "Ocean Drive", "Park Ave"];
-    const street = streetNames[idx % streetNames.length];
     const rating = Math.min(5.0, Math.round((4.0 + ((idx * 7) % 10) * 0.1) * 10) / 10);
     const reviews = 45 + ((idx * 83) % 1400);
+    const suffixNumber = String(1000 + (idx % 9000)).padStart(4, "0");
 
     results.push({
       business_name: businessName,
       category: normCat,
       sub_category: `${normCat} & Local Services`,
-      phone: `+1 ${200 + (idx % 800)} 555 ${String(1000 + (idx % 9000)).padStart(4, "0")}`,
-      phone_raw: `+1${200 + (idx % 800)}555${String(1000 + (idx % 9000)).padStart(4, "0")}`,
+      phone: `${phonePrefix} 555 ${suffixNumber}`,
+      phone_raw: `${phonePrefix.replace(/\s+/g, "")}555${suffixNumber}`,
       website: hasWebsite ? `https://${slug}.com` : null,
-      address: `${streetNumber} ${street}, ${normLoc}`,
-      city,
+      address: targetAddress,
+      city: targetCity,
       rating,
       reviews,
       scraped_at: new Date(Date.now() - (idx * 3600000)).toISOString(),

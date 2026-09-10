@@ -174,7 +174,7 @@ export function mapCampaignFromDb(row: Record<string, unknown>): Campaign {
     id: String(row.id || `C-${Date.now()}`),
     name: String(row.name || "Untitled Campaign"),
     category: String(row.category || "General"),
-    location: String(row.location || "Worldwide"),
+    location: String(row.location || "Worldwide (Global)"),
     leadTarget: typeof row.lead_target === "number" ? row.lead_target : typeof row.leadTarget === "number" ? row.leadTarget : 50,
     status: (row.status as Campaign["status"]) || "draft",
     progress: typeof row.progress === "number" ? row.progress : 0,

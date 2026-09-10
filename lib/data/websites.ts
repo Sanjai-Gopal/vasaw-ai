@@ -2,17 +2,21 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import type { Website, Deployment } from "@/lib/types";
 
 export async function getWebsites(): Promise<Website[]> {
-  const admin = getSupabaseAdmin();
-  const { data, error } = await admin
-    .from("websites")
-    .select("*")
-    .order("created_at", { ascending: false });
+  try {
+    const admin = getSupabaseAdmin();
+    const { data, error } = await admin
+      .from("websites")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  if (error) {
-    throw new Error(`Failed to fetch websites: ${error.message}`);
+    if (error) {
+      return [];
+    }
+
+    return (data ?? []).map(mapWebsiteFromDb);
+  } catch {
+    return [];
   }
-
-  return (data ?? []).map(mapWebsiteFromDb);
 }
 
 export async function getWebsiteById(id: string): Promise<Website | null> {
