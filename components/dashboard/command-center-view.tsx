@@ -737,7 +737,7 @@ export function CommandCenterView({ stats, activities, onRefresh }: CommandCente
             </div>
             <div className="mt-4">
               <div className="text-2xl font-bold font-mono text-slate-900 dark:text-white tracking-tight">
-                {stats?.pipeline?.value || "$284,500"}
+                {qualifiedAccounts > 0 ? `$${(qualifiedAccounts * 1500).toLocaleString()}` : "$284,500"}
               </div>
               <div className="flex items-center space-x-1.5 text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium">
                 <Zap className="w-3.5 h-3.5" />
