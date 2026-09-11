@@ -24,6 +24,13 @@ import {
   Paperclip,
   ShieldCheck,
   RefreshCw,
+  FileSpreadsheet,
+  Loader2,
+  CheckCircle2,
+  Edit2,
+  Trash2,
+  SlidersHorizontal,
+  ArrowLeft,
 } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +39,7 @@ import { Input } from "@/components/ui/input";
 import { formatRelative, formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import type { Message } from "@/lib/types";
+import { exportMessagesToSheets } from "@/lib/api/sheets";
 
 interface ConversationLead {
   id: string;
@@ -61,7 +69,7 @@ const mockConversations: ConversationLead[] = [
     phone: "+44 20 7946 0991",
     category: "Restaurant",
     location: "Covent Garden, London",
-    websiteUrl: "https://saravana-bhavan.vasaw.app",
+    websiteUrl: "/preview/conv-1",
     lastMessage: "Yes, we would love to connect! Can you customize our catering menu section?",
     lastTimestamp: new Date(Date.now() - 1000 * 60 * 14).toISOString(),
     status: "replied",
@@ -70,7 +78,7 @@ const mockConversations: ConversationLead[] = [
       {
         id: "m-1",
         direction: "outbound",
-        body: "Hello Saravana Bhavan team! 👋 We noticed your popular restaurant on Google Maps in Covent Garden doesn't have a modern mobile website. Our AI synthesized a live custom website for you: https://saravana-bhavan.vasaw.app — Check it out and let us know if you'd like to claim it!",
+        body: "Hello Saravana Bhavan team! 👋 We noticed your popular restaurant on Google Maps in Covent Garden doesn't have a modern mobile website. Our AI synthesized a live custom website for you: /preview/conv-1 — Check it out and let us know if you'd like to claim it!",
         timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
         status: "read",
       },
@@ -89,7 +97,7 @@ const mockConversations: ConversationLead[] = [
     phone: "+1 212 555 0192",
     category: "Salon & Spa",
     location: "SoHo, New York",
-    websiteUrl: "https://aura-luxury-spa.vasaw.app",
+    websiteUrl: "/preview/conv-2",
     lastMessage: "What are your pricing packages for hosting and domain management?",
     lastTimestamp: new Date(Date.now() - 1000 * 60 * 85).toISOString(),
     status: "replied",
@@ -98,7 +106,7 @@ const mockConversations: ConversationLead[] = [
       {
         id: "m-3",
         direction: "outbound",
-        body: "Hi Aura Salon! 🌸 We created a bespoke booking website for your SoHo salon with appointment scheduling: https://aura-luxury-spa.vasaw.app. It's ready to launch on your custom domain in 1 click.",
+        body: "Hi Aura Salon! 🌸 We created a bespoke booking website for your SoHo salon with appointment scheduling: /preview/conv-2. It's ready to launch on your custom domain in 1 click.",
         timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
         status: "read",
       },
@@ -117,7 +125,7 @@ const mockConversations: ConversationLead[] = [
     phone: "+81 3 5555 0143",
     category: "Healthcare",
     location: "Shibuya, Tokyo",
-    websiteUrl: "https://metropolitan-dental.vasaw.app",
+    websiteUrl: "/preview/conv-3",
     lastMessage: "Can we schedule a 10 min call tomorrow at 3 PM?",
     lastTimestamp: new Date(Date.now() - 1000 * 60 * 240).toISOString(),
     status: "replied",
@@ -126,7 +134,7 @@ const mockConversations: ConversationLead[] = [
       {
         id: "m-5",
         direction: "outbound",
-        body: "Hello Metropolitan Dental team! 🦷 We built an appointment booking preview for your Shibuya clinic: https://metropolitan-dental.vasaw.app. Optimized for Google Maps patient traffic.",
+        body: "Hello Metropolitan Dental team! 🦷 We built an appointment booking preview for your Shibuya clinic: /preview/conv-3. Optimized for Google Maps patient traffic.",
         timestamp: new Date(Date.now() - 1000 * 60 * 360).toISOString(),
         status: "read",
       },
@@ -145,7 +153,7 @@ const mockConversations: ConversationLead[] = [
     phone: "+971 4 321 4567",
     category: "Cafe",
     location: "Downtown, Dubai",
-    websiteUrl: "https://artisan-boulangerie.vasaw.app",
+    websiteUrl: "/preview/conv-4",
     lastMessage: "Message delivered to WhatsApp inbox",
     lastTimestamp: new Date(Date.now() - 1000 * 60 * 300).toISOString(),
     status: "delivered",
@@ -153,7 +161,7 @@ const mockConversations: ConversationLead[] = [
       {
         id: "m-7",
         direction: "outbound",
-        body: "Hello L'Artisan Boulangerie! 🥐 We designed a mobile bakery order portal for your Downtown Dubai store: https://artisan-boulangerie.vasaw.app. Check it out anytime!",
+        body: "Hello L'Artisan Boulangerie! 🥐 We designed a mobile bakery order portal for your Downtown Dubai store: /preview/conv-4. Check it out anytime!",
         timestamp: new Date(Date.now() - 1000 * 60 * 300).toISOString(),
         status: "delivered",
       },
@@ -165,7 +173,7 @@ const mockConversations: ConversationLead[] = [
     phone: "+1 415 555 0188",
     category: "Fitness",
     location: "SOMA, San Francisco",
-    websiteUrl: "https://apex-crossfit.vasaw.app",
+    websiteUrl: "/preview/conv-5",
     lastMessage: "We already have a web developer under contract, thank you.",
     lastTimestamp: new Date(Date.now() - 1000 * 60 * 500).toISOString(),
     status: "replied",
@@ -174,7 +182,7 @@ const mockConversations: ConversationLead[] = [
       {
         id: "m-8",
         direction: "outbound",
-        body: "Hey Apex CrossFit! 💪 Your gym preview website is ready at https://apex-crossfit.vasaw.app with class schedule filters.",
+        body: "Hey Apex CrossFit! 💪 Your gym preview website is ready at /preview/conv-5 with class schedule filters.",
         timestamp: new Date(Date.now() - 1000 * 60 * 600).toISOString(),
         status: "read",
       },
@@ -204,6 +212,7 @@ export default function MessagesPage() {
   const [filterTab, setFilterTab] = React.useState<"all" | "interested" | "replied" | "outbound">("all");
   const [replyInput, setReplyInput] = React.useState("");
   const [isSending, setIsSending] = React.useState(false);
+  const [mobileView, setMobileView] = React.useState<"list" | "chat">("list");
 
   const selectedConversation = conversations.find((c) => c.id === selectedId) || conversations[0];
 
@@ -255,6 +264,26 @@ export default function MessagesPage() {
   const replyRate = Math.round((totalReplies / conversations.length) * 100);
   const interestedCount = conversations.filter((c) => c.classification === "interested" || c.classification === "call_request").length;
 
+  const [isExportingSheets, setIsExportingSheets] = React.useState(false);
+  const [exportNotice, setExportNotice] = React.useState<string | null>(null);
+
+  const handleExportSheets = async () => {
+    setIsExportingSheets(true);
+    try {
+      const res = await exportMessagesToSheets("mock-spreadsheet-vasaw");
+      if (res.success) {
+        setExportNotice(`Successfully exported ${res.rowsWritten} outreach messages to Google Sheets (${res.filename || "file downloaded"}).`);
+      } else {
+        setExportNotice(res.error || "Failed to export outreach logs.");
+      }
+    } catch (err) {
+      setExportNotice(err instanceof Error ? err.message : "Export network error");
+    } finally {
+      setIsExportingSheets(false);
+      setTimeout(() => setExportNotice(null), 4000);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 space-y-6">
       <PageHeader
@@ -262,12 +291,33 @@ export default function MessagesPage() {
         description="Meta WhatsApp Cloud API bidirectional gateway, automated template delivery, and LLM intent intelligence."
       >
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportSheets}
+            disabled={isExportingSheets}
+            className="gap-1.5 font-sans border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+          >
+            {isExportingSheets ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-600" />
+            ) : (
+              <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" />
+            )}
+            Export to Sheets
+          </Button>
           <Badge variant="outline" className="gap-1.5 font-mono text-[11px] text-emerald-600 border-emerald-200 bg-emerald-50 py-1 px-3">
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             Meta Cloud Gateway: Connected
           </Badge>
         </div>
       </PageHeader>
+
+      {exportNotice && (
+        <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/90 px-4 py-2.5 text-xs font-sans text-emerald-800 shadow-xs animate-in fade-in">
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+          <span>{exportNotice}</span>
+        </div>
+      )}
 
       {/* Porcelain Summary Telemetry Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -289,81 +339,112 @@ export default function MessagesPage() {
         ))}
       </div>
 
-      {/* Split View: Conversation Stream & Message Inspector */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[640px]">
-        {/* Left Pane: Conversation List (5 cols) */}
-        <div className="lg:col-span-5 flex flex-col rounded-3xl border border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-md overflow-hidden">
-          {/* Search & Tabs */}
-          <div className="p-4 border-b border-slate-100 space-y-3">
+      {/* Split View: Conversation Stream & Message Inspector (Matching Stitch Dual-Pane with Mobile Responsiveness) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[660px]">
+        {/* Left Pane: Conversation List (5 cols on lg, toggled on mobile) */}
+        <div className={cn("lg:col-span-5 flex-col rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs overflow-hidden transition-colors", mobileView === "chat" ? "hidden lg:flex" : "flex")}>
+          {/* Search & Tabs matching Stitch Inbox */}
+          <div className="p-4 border-b border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <h2 className="font-bold text-[17px] text-slate-900 dark:text-white tracking-tight">Inbox</h2>
+                <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[11px] font-mono font-medium">
+                  {conversations.length} Conversations
+                </span>
+              </div>
+              <button
+                onClick={() => setExportNotice("Inbox filter preferences applied")}
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                title="Filter settings"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+              </button>
+            </div>
+
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
               <Input
-                placeholder="Search by business, phone or category…"
+                placeholder="Filter by sender, company or tag..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 bg-slate-50 border-slate-200 text-xs rounded-xl font-sans"
+                className="pl-9 h-8 bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700/80 text-xs rounded-lg font-sans placeholder:text-slate-400"
               />
             </div>
-            <div className="flex items-center gap-1">
-              {(["all", "interested", "replied", "outbound"] as const).map((tab) => (
+
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+              {(
+                [
+                  { id: "all", label: "All" },
+                  { id: "replied", label: "Needs Reply" },
+                  { id: "interested", label: "High Intent" },
+                  { id: "outbound", label: "Automated" },
+                ] as const
+              ).map((tab) => (
                 <button
-                  key={tab}
-                  onClick={() => setFilterTab(tab)}
+                  key={tab.id}
+                  onClick={() => setFilterTab(tab.id)}
                   className={cn(
-                    "px-3 py-1 text-xs font-sans rounded-xl font-medium transition-all capitalize",
-                    filterTab === tab
-                      ? "bg-slate-900 text-white shadow-xs"
-                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                    "px-2.5 py-1 text-[11px] rounded-md font-medium transition-all whitespace-nowrap",
+                    filterTab === tab.id
+                      ? "bg-slate-900 dark:bg-blue-600 text-white shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800"
                   )}
                 >
-                  {tab}
+                  {tab.label}
                 </button>
               ))}
             </div>
           </div>
 
           {/* List items */}
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+          <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/80">
             {filteredConversations.map((conv) => {
               const isSelected = conv.id === selectedConversation.id;
-              const classification = conv.classification ? classificationConfig[conv.classification] : null;
 
               return (
                 <div
                   key={conv.id}
-                  onClick={() => setSelectedId(conv.id)}
+                  onClick={() => {
+                    setSelectedId(conv.id);
+                    setMobileView("chat");
+                  }}
                   className={cn(
-                    "p-4 cursor-pointer transition-all duration-150 flex flex-col gap-2",
+                    "p-3.5 cursor-pointer transition-colors duration-150 flex flex-col gap-1.5",
                     isSelected
-                      ? "bg-blue-50/70 border-l-4 border-blue-600 pl-3.5"
-                      : "hover:bg-slate-50/80"
+                      ? "bg-blue-50/60 dark:bg-blue-950/30 border-l-2 border-blue-600"
+                      : "hover:bg-slate-50 dark:hover:bg-slate-800/40"
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="font-display text-sm font-bold text-slate-950 truncate">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={cn(
+                        "w-2 h-2 rounded-full shrink-0",
+                        conv.status === "replied" ? "bg-blue-600 ring-2 ring-blue-200 dark:ring-blue-900" : "bg-slate-300 dark:bg-slate-600"
+                      )} />
+                      <span className="font-semibold text-[13px] text-slate-900 dark:text-white truncate">
                         {conv.businessName}
-                      </p>
-                      <p className="font-mono text-[11px] text-slate-500">{conv.phone}</p>
+                      </span>
+                      <span className="text-[12px] text-slate-500 dark:text-slate-400 truncate">
+                        · {conv.category}
+                      </span>
                     </div>
-                    <span className="font-mono text-[10px] text-slate-400 whitespace-nowrap">
+                    <span className="font-mono text-[10.5px] text-slate-400 shrink-0" suppressHydrationWarning>
                       {formatRelative(conv.lastTimestamp)}
                     </span>
                   </div>
 
-                  <p className="line-clamp-2 font-sans text-xs text-slate-600 leading-relaxed">
+                  <p className="line-clamp-1 font-sans text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                     {conv.lastMessage}
                   </p>
 
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="font-mono text-[10px] font-semibold text-slate-400 uppercase">
-                      {conv.category}
+                  <div className="flex items-center justify-between pt-0.5">
+                    <span className="text-[11px] text-blue-600 dark:text-blue-400 flex items-center gap-1 font-medium font-sans">
+                      <Sparkles className="w-3 h-3" />
+                      Smart Draft Ready
                     </span>
-                    {classification && (
-                      <Badge variant={classification.variant} className="text-[10px] py-0 px-2">
-                        {classification.label}
-                      </Badge>
-                    )}
+                    <span className="text-[10px] font-mono text-slate-400">
+                      {conv.location}
+                    </span>
                   </div>
                 </div>
               );
@@ -371,24 +452,39 @@ export default function MessagesPage() {
           </div>
         </div>
 
-        {/* Right Pane: WhatsApp Conversation Inspector (7 cols) */}
-        <div className="lg:col-span-7 flex flex-col rounded-3xl border border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-md overflow-hidden">
-          {/* Header */}
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600">
-                <MessageSquare className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="font-display text-base font-bold text-slate-950">
+        {/* Right Pane: Active Conversation & AI Copilot Workspace (7 cols on lg, toggled on mobile) */}
+        <div className={cn("lg:col-span-7 flex-col rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs overflow-hidden transition-colors", mobileView === "list" ? "hidden lg:flex" : "flex")}>
+          {/* Mobile Back Header */}
+          <div className="lg:hidden px-4 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50 flex items-center">
+            <button
+              onClick={() => setMobileView("list")}
+              className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Conversations</span>
+            </button>
+          </div>
+
+          {/* Header matching Stitch */}
+          <div className="px-6 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="font-bold text-[16px] text-slate-900 dark:text-white tracking-tight">
                   {selectedConversation.businessName}
-                </h3>
-                <div className="flex items-center gap-2 font-mono text-[11px] text-slate-500">
-                  <Phone className="h-3 w-3 text-slate-400" />
-                  <span>{selectedConversation.phone}</span>
-                  <span>·</span>
-                  <span>{selectedConversation.location}</span>
-                </div>
+                </h2>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-300 text-[10.5px] font-semibold font-mono">
+                  Active
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-[11.5px] text-slate-500 dark:text-slate-400 mt-0.5 font-sans">
+                <span className="flex items-center gap-1 text-slate-700 dark:text-slate-300 font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Live channel
+                </span>
+                <span>·</span>
+                <span>{selectedConversation.phone}</span>
+                <span>·</span>
+                <span>{selectedConversation.location}</span>
               </div>
             </div>
 
@@ -397,31 +493,37 @@ export default function MessagesPage() {
                 href={selectedConversation.websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 font-sans text-xs font-semibold text-blue-600 shadow-xs hover:bg-slate-50"
+                className="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 shadow-xs transition-colors"
               >
                 <span>Live Site</span>
-                <ExternalLink className="h-3.5 w-3.5" />
+                <ExternalLink className="h-3 w-3" />
               </a>
+              <button
+                onClick={() => setExportNotice(`Synced lead record for ${selectedConversation.businessName}`)}
+                className="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 shadow-xs transition-colors"
+              >
+                <User className="h-3.5 w-3.5" />
+                <span>CRM</span>
+              </button>
             </div>
           </div>
 
-          {/* AI Intent Summary Badge */}
-          {selectedConversation.classification && (
-            <div className="bg-blue-50/80 border-b border-blue-100 px-4 py-2.5 flex items-center justify-between">
-              <div className="flex items-center gap-2 font-sans text-xs text-blue-900">
-                <Sparkles className="h-4 w-4 text-blue-600" />
-                <span>
-                  <strong>AI Classification:</strong> {classificationConfig[selectedConversation.classification]?.label}
-                </span>
-              </div>
-              <span className="font-mono text-[10px] text-blue-600 font-bold uppercase">
-                AUTOMATED LLM INTENT
-              </span>
+          {/* Sub-ribbon matching Stitch */}
+          <div className="px-6 py-2 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11.5px] text-slate-600 dark:text-slate-400 font-sans">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span><strong className="font-semibold text-slate-800 dark:text-slate-200">Campaign:</strong> Q3 Autonomous Inbound</span>
+              <span>·</span>
+              <span><strong className="font-semibold text-slate-800 dark:text-slate-200">Stage:</strong> Discovery & Qualification</span>
+              <span>·</span>
+              <span><strong className="font-semibold text-slate-800 dark:text-slate-200">Lead Owner:</strong> Sarah Jenkins</span>
             </div>
-          )}
+            <span className="font-mono text-[10.5px] text-emerald-600 dark:text-emerald-400 font-semibold">
+              99.2% DELIVERY SLA
+            </span>
+          </div>
 
           {/* Chat Messages Body */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/30">
+          <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/40 dark:bg-slate-950/20">
             {selectedConversation.messages.map((msg) => {
               const isOutbound = msg.direction === "outbound";
 
@@ -432,32 +534,32 @@ export default function MessagesPage() {
                 >
                   <div
                     className={cn(
-                      "p-4 rounded-2xl shadow-xs text-xs font-sans leading-relaxed",
+                      "p-4 rounded-2xl shadow-xs text-[13px] font-sans leading-relaxed",
                       isOutbound
-                        ? "bg-slate-900 text-white rounded-br-xs"
-                        : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs"
+                        ? "bg-blue-50/90 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-900 text-slate-900 dark:text-white rounded-tr-xs"
+                        : "bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 text-slate-800 dark:text-slate-200 rounded-tl-xs"
                     )}
                   >
                     <p>{msg.body}</p>
 
-                    {/* If message has link, show a synthetic website preview card */}
+                    {/* Live Site Preview Card */}
                     {isOutbound && (
-                      <div className="mt-3 rounded-xl border border-white/20 bg-white/10 p-3 backdrop-blur-sm">
+                      <div className="mt-3 rounded-xl border border-blue-200 dark:border-blue-800 bg-white/80 dark:bg-slate-800/80 p-3 backdrop-blur-sm">
                         <div className="flex items-center gap-2">
-                          <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
-                          <span className="font-mono text-[10px] text-white/90 truncate font-semibold">
+                          <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
+                          <span className="font-mono text-[11px] text-blue-700 dark:text-blue-300 truncate font-semibold">
                             {selectedConversation.websiteUrl}
                           </span>
                         </div>
-                        <p className="mt-1 text-[11px] text-white/70">
-                          {selectedConversation.businessName} — Custom Business Portal
+                        <p className="mt-1 text-[11.5px] text-slate-500 dark:text-slate-400">
+                          {selectedConversation.businessName} — Custom Edge Portal
                         </p>
                       </div>
                     )}
                   </div>
 
                   <div className="flex items-center gap-1.5 mt-1 px-1 font-mono text-[10px] text-slate-400">
-                    <span>{formatRelative(msg.timestamp)}</span>
+                    <span suppressHydrationWarning>{formatRelative(msg.timestamp)}</span>
                     {isOutbound && <CheckCheck className="h-3 w-3 text-blue-600" />}
                   </div>
                 </div>
@@ -465,53 +567,86 @@ export default function MessagesPage() {
             })}
           </div>
 
-          {/* Pre-written quick response suggestions */}
-          <div className="p-3 bg-white border-t border-slate-100 flex items-center gap-2 overflow-x-auto">
-            <span className="font-mono text-[10px] font-bold text-slate-400 uppercase whitespace-nowrap">
-              Quick AI Reply:
-            </span>
-            <button
-              onClick={() => handleSendReply("Great! Here is our standard onboarding package: 1 domain, 99.9% Edge SLA hosting, and dynamic WhatsApp inquiries for ₹2,499/mo.")}
-              className="whitespace-nowrap px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-[11px] font-sans font-medium text-slate-700 hover:bg-slate-100 transition-colors"
-            >
-              Send Pricing Packages
-            </button>
-            <button
-              onClick={() => handleSendReply("Sure thing! Would 3:30 PM tomorrow work best for a quick 10-minute preview walkthrough call?")}
-              className="whitespace-nowrap px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-[11px] font-sans font-medium text-slate-700 hover:bg-slate-100 transition-colors"
-            >
-              Confirm 10m Call
-            </button>
-            <button
-              onClick={() => handleSendReply("We can certainly add a dedicated catering menu with online PDF downloads. Updating your live preview now!")}
-              className="whitespace-nowrap px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-[11px] font-sans font-medium text-slate-700 hover:bg-slate-100 transition-colors"
-            >
-              Confirm Customization
-            </button>
-          </div>
+          {/* AI Copilot Workspace: AI Suggested Reply Card (Matching Stitch) */}
+          <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <div className="rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/40 dark:bg-blue-950/20 p-4 shadow-xs">
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <span className="font-semibold text-[13px] text-slate-900 dark:text-white">AI Suggested Reply</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-mono">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Synthesized live</span>
+                </div>
+              </div>
 
-          {/* Reply Input Bar */}
-          <div className="p-4 border-t border-slate-100 bg-white flex items-center gap-2">
-            <Input
-              placeholder={`Reply to ${selectedConversation.businessName} via Meta WhatsApp API…`}
-              value={replyInput}
-              onChange={(e) => setReplyInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendReply();
-                }
-              }}
-              className="bg-slate-50 border-slate-200 text-xs rounded-xl font-sans"
-            />
-            <Button
-              onClick={() => handleSendReply()}
-              disabled={!replyInput.trim() || isSending}
-              className="bg-emerald-600 text-white hover:bg-emerald-700 rounded-xl font-sans text-xs gap-1.5 px-4"
-            >
-              <Send className="h-3.5 w-3.5" />
-              Send
-            </Button>
+              <div className="p-3 rounded-lg bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-800 dark:text-slate-200 leading-relaxed font-sans">
+                <p className="mb-1 text-[11px] font-medium text-slate-400 dark:text-slate-500 font-mono">Proposed message:</p>
+                &ldquo;Here is our custom SLA breakdown and dedicated onboarding package configured for {selectedConversation.businessName}. I’ve attached the full security packet with volume discounting. Let me know if you need any adjustments before your review.&rdquo;
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 mt-3">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleSendReply(`Here is our custom SLA breakdown and dedicated onboarding package configured for ${selectedConversation.businessName}. I’ve attached the full security packet with volume discounting. Let me know if you need any adjustments before your review.`)}
+                    disabled={isSending}
+                    className="h-8 px-3.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-medium flex items-center gap-1.5 shadow-xs transition-all active:scale-[0.98]"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Send Reply</span>
+                  </button>
+                  <button
+                    onClick={() => setReplyInput(`Here is our custom SLA breakdown and dedicated onboarding package configured for ${selectedConversation.businessName}. I’ve attached the full security packet with volume discounting. Let me know if you need any adjustments before your review.`)}
+                    className="h-8 px-3 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-[12px] font-medium flex items-center gap-1.5 transition-all shadow-xs"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>Edit Text</span>
+                  </button>
+                  <button
+                    onClick={() => setReplyInput(`Confirmed! Custom package sent over for ${selectedConversation.businessName}. Let us know if you need any updates.`)}
+                    className="h-8 px-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 text-[12px] font-medium flex items-center gap-1 transition-colors"
+                  >
+                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                    <span>Shorten</span>
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-slate-400 font-mono">Press ⌘ + Enter to send</span>
+                  <button
+                    onClick={() => setReplyInput("")}
+                    className="text-slate-400 hover:text-rose-500 p-1 rounded transition-colors"
+                    title="Discard suggestion"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Manual Reply Input Bar */}
+            <div className="mt-3 flex items-center gap-2">
+              <Input
+                placeholder={`Reply to ${selectedConversation.businessName} via Meta WhatsApp API…`}
+                value={replyInput}
+                onChange={(e) => setReplyInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendReply();
+                  }
+                }}
+                className="h-9 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-xs rounded-lg font-sans"
+              />
+              <Button
+                onClick={() => handleSendReply()}
+                disabled={!replyInput.trim() || isSending}
+                className="h-9 bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-sans text-xs gap-1.5 px-4 shadow-xs"
+              >
+                <Send className="h-3.5 w-3.5" />
+                Send
+              </Button>
+            </div>
           </div>
         </div>
       </div>

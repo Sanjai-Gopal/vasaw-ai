@@ -16,6 +16,9 @@ import {
   MessageSquare,
   ShieldCheck,
   Zap,
+  Laptop,
+  Tablet,
+  Smartphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +36,7 @@ export default function WebsiteDetailPage() {
   const [loading, setLoading] = React.useState(true);
   const [actionLoading, setActionLoading] = React.useState<string | null>(null);
   const [statusMsg, setStatusMsg] = React.useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [sandboxDevice, setSandboxDevice] = React.useState<"desktop" | "tablet" | "mobile">("desktop");
 
   React.useEffect(() => {
     async function load() {
@@ -126,7 +130,10 @@ export default function WebsiteDetailPage() {
   }
 
   const isDeployed = website.status === "deployed";
-  const liveLink = isDeployed ? website.liveUrl : undefined;
+  const resolvedPreviewUrl = `/preview/${website.id}`;
+  const liveLink = (website.liveUrl && !website.liveUrl.includes("vasaw.app"))
+    ? website.liveUrl
+    : resolvedPreviewUrl;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
@@ -244,46 +251,95 @@ export default function WebsiteDetailPage() {
               <h3 className="font-display text-base font-bold text-slate-950 flex items-center gap-2">
                 <Eye className="h-4 w-4 text-blue-600" /> Live Preview Sandbox
               </h3>
-              {liveLink && (
-                <span className="font-mono text-[11px] text-slate-400 truncate max-w-xs">
-                  {liveLink}
-                </span>
-              )}
+              <div className="flex items-center gap-3">
+                {/* Viewport switchers */}
+                <div className="flex items-center rounded-xl border border-slate-200 bg-slate-100/80 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setSandboxDevice("desktop")}
+                    className={cn(
+                      "flex h-6 w-6 items-center justify-center rounded-lg transition-colors",
+                      sandboxDevice === "desktop" ? "bg-white shadow-xs text-blue-600" : "text-slate-400 hover:text-slate-800"
+                    )}
+                    title="Desktop View"
+                  >
+                    <Laptop className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSandboxDevice("tablet")}
+                    className={cn(
+                      "flex h-6 w-6 items-center justify-center rounded-lg transition-colors",
+                      sandboxDevice === "tablet" ? "bg-white shadow-xs text-blue-600" : "text-slate-400 hover:text-slate-800"
+                    )}
+                    title="Tablet View"
+                  >
+                    <Tablet className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSandboxDevice("mobile")}
+                    className={cn(
+                      "flex h-6 w-6 items-center justify-center rounded-lg transition-colors",
+                      sandboxDevice === "mobile" ? "bg-white shadow-xs text-blue-600" : "text-slate-400 hover:text-slate-800"
+                    )}
+                    title="Mobile View"
+                  >
+                    <Smartphone className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+
+                <a
+                  href={resolvedPreviewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-sans font-semibold text-blue-600 hover:underline"
+                >
+                  <span>Open Full Tab</span>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm aspect-[16/10] flex flex-col">
+            <div className="rounded-2xl border border-slate-200 bg-slate-900 overflow-hidden shadow-inner flex flex-col min-h-[500px] h-[540px]">
               {/* Browser bar */}
-              <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2.5 text-xs text-slate-400">
+              <div className="flex items-center gap-2 border-b border-slate-800 bg-slate-950 px-4 py-2.5 text-xs text-slate-400">
                 <div className="flex gap-1.5">
-                  <div className="h-2.5 w-2.5 rounded-full bg-rose-400" />
-                  <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-                  <div className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-rose-500" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
                 </div>
-                <div className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-1 text-center font-mono text-[11px] text-slate-600 truncate flex items-center justify-center gap-1.5">
-                  <ShieldCheck className="h-3 w-3 text-emerald-500" />
-                  {liveLink || "https://preview.vasaw.app/"}
+                <div className="flex-1 rounded-lg border border-slate-800 bg-slate-900 px-3 py-1 text-center font-mono text-[11px] text-slate-300 truncate flex items-center justify-center gap-1.5">
+                  <ShieldCheck className="h-3 w-3 text-emerald-400" />
+                  {resolvedPreviewUrl}
                 </div>
+                <a
+                  href={resolvedPreviewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1 text-slate-400 hover:text-white"
+                  title="Open in new tab"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
               </div>
 
-              {/* Preview Content */}
-              <div className="flex-1 p-8 flex flex-col justify-center items-center text-center bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 text-white">
-                <Globe className="h-12 w-12 text-white/40 mb-3" />
-                <h3 className="font-display text-2xl font-extrabold tracking-tight text-white">{website.businessName}</h3>
-                <p className="font-sans text-xs text-white/80 max-w-md mt-1">
-                  Custom {website.template} website synthesized with Next.js 16 App Router, responsive modern layouts, high-conversion CTA booking triggers, and edge cache optimization.
-                </p>
-                {liveLink && (
-                  <a
-                    href={liveLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-5"
-                  >
-                    <Button size="sm" className="gap-1.5 text-xs font-sans rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-bold shadow-md">
-                      Open in Full Window <ExternalLink className="h-3.5 w-3.5" />
-                    </Button>
-                  </a>
-                )}
+              {/* Responsive Iframe Container */}
+              <div className="flex-1 relative flex items-center justify-center bg-slate-950/80 p-2 overflow-hidden">
+                <div
+                  className={cn(
+                    "h-full transition-all duration-300 ease-in-out bg-white overflow-hidden flex flex-col shadow-2xl",
+                    sandboxDevice === "desktop" && "w-full rounded-none",
+                    sandboxDevice === "tablet" && "w-[560px] max-w-full rounded-2xl border-4 border-slate-700",
+                    sandboxDevice === "mobile" && "w-[340px] max-w-full rounded-3xl border-4 border-slate-800"
+                  )}
+                >
+                  <iframe
+                    src={`/api/websites/${website.id}/html`}
+                    title={website.businessName}
+                    className="h-full w-full border-0 bg-stone-950"
+                  />
+                </div>
               </div>
             </div>
           </div>

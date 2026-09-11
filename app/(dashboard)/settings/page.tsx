@@ -71,7 +71,7 @@ export default function SettingsPage() {
         setSyncStatus({
           type: res.success ? "success" : "error",
           message: res.success
-            ? `Successfully exported ${res.rowsWritten} leads to sheet "${res.sheetName}"`
+            ? `Successfully exported ${res.rowsWritten} leads to sheet "${res.sheetName}" and downloaded ${res.filename || "file"}`
             : res.error || "Failed to export leads",
         });
       } else if (type === "websites") {
@@ -79,7 +79,7 @@ export default function SettingsPage() {
         setSyncStatus({
           type: res.success ? "success" : "error",
           message: res.success
-            ? `Successfully exported ${res.rowsWritten} websites to sheet "${res.sheetName}"`
+            ? `Successfully exported ${res.rowsWritten} websites to sheet "${res.sheetName}" and downloaded ${res.filename || "file"}`
             : res.error || "Failed to export websites",
         });
       } else if (type === "messages") {
@@ -87,7 +87,7 @@ export default function SettingsPage() {
         setSyncStatus({
           type: res.success ? "success" : "error",
           message: res.success
-            ? `Successfully exported ${res.rowsWritten} outreach messages to sheet "${res.sheetName}"`
+            ? `Successfully exported ${res.rowsWritten} outreach messages to sheet "${res.sheetName}" and downloaded ${res.filename || "file"}`
             : res.error || "Failed to export messages",
         });
       } else if (type === "campaigns") {
@@ -95,7 +95,7 @@ export default function SettingsPage() {
         setSyncStatus({
           type: res.success ? "success" : "error",
           message: res.success
-            ? `Successfully exported ${res.rowsWritten} campaigns to sheet "${res.sheetName}"`
+            ? `Successfully exported ${res.rowsWritten} campaigns to sheet "${res.sheetName}" and downloaded ${res.filename || "file"}`
             : res.error || "Failed to export campaigns",
         });
       } else if (type === "all") {

@@ -236,6 +236,9 @@ export async function executeWorkflow(
       result.leadResults.push({
         leadId: lead.id,
         businessName: lead.businessName,
+        city: lead.city,
+        location: lead.campaignLocation || lead.normalizedLocation,
+        sourceMode: lead.source_mode,
         phone: lead.phone,
         qualified: isQualified,
         websiteEligible: isWebsiteEligible,

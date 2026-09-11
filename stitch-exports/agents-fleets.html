@@ -1,0 +1,563 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>VASAW AI - Autonomous Agent Fleet</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts: Inter & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary": "#ffffff",
+            "tertiary-container": "#7d4ce7",
+            "dark-primary": "#00f0ff",
+            "tertiary": "#632ecd",
+            "primary-container": "#2563eb",
+            "secondary-fixed-dim": "#4edea3",
+            "inverse-on-surface": "#eef0ff",
+            "signal-warning": "#f59e0b",
+            "on-tertiary-container": "#f6edff",
+            "surface-dim": "#d4d9f2",
+            "on-tertiary-fixed-variant": "#5516be",
+            "text-body": "#334155",
+            "on-primary-fixed": "#00174b",
+            "secondary-fixed": "#6ffbbe",
+            "on-tertiary-fixed": "#23005c",
+            "text-secondary": "#64748b",
+            "on-primary-container": "#eeefff",
+            "on-surface-variant": "#434655",
+            "on-secondary": "#ffffff",
+            "surface-container-high": "#e3e7ff",
+            "surface-container-highest": "#dce1fb",
+            "on-primary": "#ffffff",
+            "on-primary-fixed-variant": "#003ea8",
+            "surface-tint": "#0053db",
+            "tertiary-fixed": "#e9ddff",
+            "primary-fixed-dim": "#b4c5ff",
+            "surface-container-low": "#f2f3ff",
+            "text-ghost": "#94a3b8",
+            "on-error": "#ffffff",
+            "surface-bright": "#faf8ff",
+            "on-secondary-container": "#00714d",
+            "surface-canvas": "#f8fafc",
+            "tertiary-fixed-dim": "#d0bcff",
+            "surface-container": "#eaedff",
+            "dark-card": "#0e0e12",
+            "on-secondary-fixed": "#002113",
+            "on-error-container": "#93000a",
+            "secondary-container": "#6cf8bb",
+            "dark-canvas": "#09090b",
+            "outline": "#737686",
+            "on-surface": "#151b2d",
+            "surface-inset": "#f1f5f9",
+            "on-secondary-fixed-variant": "#005236",
+            "text-carbon": "#020617",
+            "surface-container-lowest": "#ffffff",
+            "secondary": "#006c49",
+            "error-container": "#ffdad6",
+            "inverse-primary": "#b4c5ff",
+            "background": "#faf8ff",
+            "surface-card": "#ffffff",
+            "surface-stroke": "#e2e8f0",
+            "outline-variant": "#c3c6d7",
+            "primary-fixed": "#dbe1ff",
+            "dark-text": "#f4f4f5",
+            "on-background": "#151b2d",
+            "dark-secondary": "#00ff88",
+            "inverse-surface": "#2a3043",
+            "surface-variant": "#dce1fb",
+            "signal-destructive": "#f43f5e",
+            "error": "#ba1a1a",
+            "surface": "#faf8ff",
+            "dark-stroke": "#232329",
+            "primary": "#004ac6"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xs": "0.25rem",
+            "margin": "2rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2rem",
+            "gutter": "1.5rem",
+            "space-md": "1rem",
+            "gutter-mobile": "1rem",
+            "margin-mobile": "1rem"
+          },
+          "fontFamily": {
+            "display-hero": ["Inter"],
+            "body-base": ["Inter"],
+            "headline-sm": ["Inter"],
+            "display-hero-mobile": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-md": ["Inter"],
+            "label-caps": ["Inter"],
+            "headline-lg": ["Inter"],
+            "label-mono": ["JetBrains Mono"],
+            "headline-xl": ["Inter"]
+          },
+          "fontSize": {
+            "display-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "700" }],
+            "body-base": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "headline-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "display-hero-mobile": ["26px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+            "headline-md": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "headline-lg": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "label-mono": ["12px", { "lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "headline-xl": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-surface-canvas text-text-carbon font-body-base antialiased min-h-screen">
+<!-- SideNavBar Anchor Component -->
+<aside class="flex flex-col justify-between h-screen w-64 p-4 border-r border-surface-stroke fixed left-0 top-0 bg-surface-canvas z-30">
+<div class="space-y-6">
+<!-- Header / Logo -->
+<div class="flex items-center gap-3 px-2 py-1">
+<div aria-label="VASAW Monogram Logo V" class="w-8 h-8 rounded-lg bg-text-carbon flex items-center justify-center text-surface-canvas font-headline-sm tracking-tight shadow-sm">
+          V
+        </div>
+<div>
+<div class="text-headline-sm font-headline-sm text-text-carbon tracking-tight">VASAW</div>
+<div class="text-body-sm font-body-sm text-text-secondary">Autonomous Platform</div>
+</div>
+</div>
+<!-- Action Button inside sidebar -->
+<button class="w-full h-10 px-4 rounded-lg bg-text-carbon hover:bg-slate-800 text-on-primary font-headline-sm text-headline-sm shadow-sm transition-all duration-150 active:scale-[0.98] flex items-center justify-center gap-2">
+<span class="">+ New Campaign</span>
+</button>
+<!-- Main Rail Navigation items (Agents Active) -->
+<nav class="space-y-1">
+<!-- Dashboard -->
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary hover:bg-surface-inset hover:text-text-carbon rounded-lg font-headline-sm text-headline-sm transition-colors duration-150 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="dashboard">dashboard</span>
+<span class="">Dashboard</span>
+</a>
+<!-- Campaigns -->
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary hover:bg-surface-inset hover:text-text-carbon rounded-lg font-headline-sm text-headline-sm transition-colors duration-150 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="campaign">campaign</span>
+<span class="">Campaigns</span>
+</a>
+<!-- Leads -->
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary hover:bg-surface-inset hover:text-text-carbon rounded-lg font-headline-sm text-headline-sm transition-colors duration-150 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="group">group</span>
+<span class="">Leads</span>
+</a>
+<!-- Messages -->
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary hover:bg-surface-inset hover:text-text-carbon rounded-lg font-headline-sm text-headline-sm transition-colors duration-150 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="chat">chat</span>
+<span class="">Messages</span>
+</a>
+<!-- Agents (ACTIVE) -->
+<a class="flex items-center gap-3 px-3 py-2 text-primary bg-primary-fixed/20 rounded-lg font-headline-sm text-headline-sm border-l-2 border-primary active:scale-[0.98] transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="smart_toy" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+<span class="">Agents</span>
+</a>
+<!-- Automation -->
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary hover:bg-surface-inset hover:text-text-carbon rounded-lg font-headline-sm text-headline-sm transition-colors duration-150 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="auto_mode">auto_mode</span>
+<span class="">Automation</span>
+</a>
+</nav>
+</div>
+<!-- Footer Rail Items -->
+<div class="border-t border-surface-stroke pt-3">
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary hover:bg-surface-inset hover:text-text-carbon rounded-lg font-headline-sm text-headline-sm transition-colors duration-150 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings">settings</span>
+<span class="">Settings</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar Anchor Component (offset by 256px for sidebar) -->
+<header class="fixed top-0 right-0 left-64 z-20 h-16 border-b border-surface-stroke bg-surface-canvas/85 backdrop-blur-md flex justify-between items-center px-8">
+<!-- Left: Omni Search Bar -->
+<div class="flex items-center gap-3 w-96">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-text-ghost text-[18px]" data-icon="search">search</span>
+<input class="w-full h-9 pl-9 pr-12 rounded-lg bg-surface-card border border-surface-stroke text-body-base font-body-base text-text-carbon placeholder:text-text-ghost focus:outline-none focus:ring-1 focus:ring-primary-container text-[13px] transition-all" placeholder="Search agents, model tags, pipelines..." type="text">
+
+</div>
+</div>
+<!-- Right Actions: Autopilot, Notifications, Profile -->
+<div class="flex items-center gap-4"><!-- Autopilot status indicator -->
+
+<!-- Dark/Light Theme Toggle -->
+<button aria-label="Toggle Light / Dark Mode" class="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:bg-surface-inset hover:text-text-carbon border border-surface-stroke bg-surface-card transition-colors duration-150" id="theme-toggle" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-symbols-outlined text-[18px]" data-icon="dark_mode">dark_mode</span>
+</button>
+<!-- Icon Actions -->
+<button aria-label="Notifications" class="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:bg-surface-inset hover:text-text-carbon transition-colors duration-150">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications">notifications</span>
+</button>
+<!-- Primary Action -->
+<button class="h-9 px-3.5 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm hover:bg-primary transition-all duration-150 active:scale-[0.98] flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+<span class="">Deploy New Agent</span>
+</button>
+<!-- Profile Avatar -->
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="ml-64 pt-24 pb-16 px-8 max-w-7xl mx-auto">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between pb-6 mb-6 border-b border-surface-stroke gap-4"><div>
+<div class="flex items-center gap-3 mb-1">
+<h1 class="text-headline-xl font-headline-xl text-text-carbon tracking-tight">Agents &amp; Fleets</h1>
+
+</div>
+</div></div>
+<!-- Filter and Categorization Row -->
+<div class="flex items-center justify-between gap-4 mb-6">
+<!-- Filter Chips -->
+<div class="flex items-center gap-1.5 p-1 bg-surface-card border border-surface-stroke rounded-lg">
+<button class="px-3 py-1 rounded-md text-headline-sm font-headline-sm text-text-carbon bg-surface-inset shadow-2xs">All Agents <span class="ml-1 text-label-mono font-label-mono text-text-secondary text-[11px]">4</span></button>
+<button class="px-3 py-1 rounded-md text-headline-sm font-headline-sm text-text-secondary hover:text-text-carbon hover:bg-surface-inset transition-colors">Enrichment <span class="ml-1 text-label-mono font-label-mono text-text-ghost text-[11px]">1</span></button>
+<button class="px-3 py-1 rounded-md text-headline-sm font-headline-sm text-text-secondary hover:text-text-carbon hover:bg-surface-inset transition-colors">Outreach <span class="ml-1 text-label-mono font-label-mono text-text-ghost text-[11px]">1</span></button>
+<button class="px-3 py-1 rounded-md text-headline-sm font-headline-sm text-text-secondary hover:text-text-carbon hover:bg-surface-inset transition-colors">Research <span class="ml-1 text-label-mono font-label-mono text-text-ghost text-[11px]">1</span></button>
+<button class="px-3 py-1 rounded-md text-headline-sm font-headline-sm text-text-secondary hover:text-text-carbon hover:bg-surface-inset transition-colors">Inactive <span class="ml-1 text-label-mono font-label-mono text-text-ghost text-[11px]">1</span></button>
+</div>
+<!-- Quick Sorting / Views -->
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1 text-label-mono font-label-mono text-body-sm text-text-secondary">
+<span class="">Sort:</span>
+<span class="text-text-carbon font-headline-sm cursor-pointer hover:underline">Highest Throughput</span>
+</div>
+<button class="p-1.5 text-text-secondary hover:text-text-carbon hover:bg-surface-card border border-surface-stroke rounded-lg">
+<span class="material-symbols-outlined text-[18px]" data-icon="refresh">refresh</span>
+</button>
+</div>
+</div>
+<!-- Main Grid: 2-Column Spacious High-End Cards -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-10">
+<!-- Card 1: Lead Enricher Alpha -->
+<div class="bg-surface-card border border-surface-stroke rounded-xl p-5 hover:border-slate-300 transition-all duration-200 relative group flex flex-col justify-between">
+<!-- Top Row -->
+<div>
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[22px]" data-icon="hub">hub</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="text-headline-md font-headline-md text-text-carbon">Lead Enricher Alpha</h3>
+
+</div>
+<div class="text-body-sm font-body-sm text-text-secondary mt-0.5">High-cadence verification &amp; CRM sync pipeline</div>
+</div>
+</div>
+<!-- More menu -->
+<button class="text-text-ghost hover:text-text-carbon p-1 rounded hover:bg-surface-inset">
+<span class="material-symbols-outlined text-[20px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Specs & Telemetry -->
+<div class="grid grid-cols-3 gap-3 py-3 border-y border-surface-stroke mb-4 bg-surface-canvas/50 rounded-lg px-3">
+<div>
+<div class="text-label-mono font-label-mono text-[11px] text-text-secondary uppercase">Base Model</div>
+<div class="text-body-base font-headline-sm text-text-carbon mt-0.5">Claude 3.5 Sonnet</div>
+</div>
+<div>
+<div class="text-label-mono font-label-mono text-[11px] text-text-secondary uppercase">Throughput</div>
+<div class="text-body-base font-headline-sm text-text-carbon mt-0.5">42 records/min</div>
+</div>
+<div>
+<div class="text-label-mono font-label-mono text-[11px] text-text-secondary uppercase">Success Rate</div>
+<div class="text-body-base font-headline-sm text-emerald-600 mt-0.5">99.4%</div>
+</div>
+</div>
+<!-- Current task snippet -->
+<div class="flex items-center gap-2 text-body-sm font-body-sm text-text-secondary mb-4">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="sync">sync</span>
+<span class="">Current task: <strong class="text-text-carbon font-headline-sm font-medium">B2B SaaS Director dataset (Row 1,482/3,000)</strong></span>
+</div>
+</div>
+<!-- Quick Controls Footer -->
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-lg border border-surface-stroke text-headline-sm font-headline-sm text-text-body hover:bg-surface-inset hover:text-text-carbon text-[13px] transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="tune">tune</span>
+<span class="">Configure</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg border border-surface-stroke text-headline-sm font-headline-sm text-text-body hover:bg-surface-inset hover:text-text-carbon text-[13px] transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="pause">pause</span>
+<span class="">Pause</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg border border-surface-stroke text-headline-sm font-headline-sm text-text-body hover:bg-surface-inset hover:text-text-carbon text-[13px] transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="receipt_long">receipt_long</span>
+<span class="">Logs</span>
+</button>
+</div>
+
+</div>
+</div>
+<!-- Card 2: Outreach Synthesizer Beta -->
+<div class="bg-surface-card border border-surface-stroke rounded-xl p-5 hover:border-slate-300 transition-all duration-200 relative group flex flex-col justify-between">
+<!-- Top Row -->
+<div>
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-lg bg-purple-50 border border-purple-100 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[22px]" data-icon="mark_email_unread">mark_email_unread</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="text-headline-md font-headline-md text-text-carbon">Outreach Synthesizer Beta</h3>
+
+</div>
+<div class="text-body-sm font-body-sm text-text-secondary mt-0.5">Contextual sequence generation &amp; tailored copy</div>
+</div>
+</div>
+<!-- More menu -->
+<button class="text-text-ghost hover:text-text-carbon p-1 rounded hover:bg-surface-inset">
+<span class="material-symbols-outlined text-[20px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Specs & Telemetry -->
+<div class="grid grid-cols-3 gap-3 py-3 border-y border-surface-stroke mb-4 bg-surface-canvas/50 rounded-lg px-3">
+<div>
+<div class="text-label-mono font-label-mono text-[11px] text-text-secondary uppercase">Base Model</div>
+<div class="text-body-base font-headline-sm text-text-carbon mt-0.5">GPT-4o</div>
+</div>
+<div>
+<div class="text-label-mono font-label-mono text-[11px] text-text-secondary uppercase">Primary Task</div>
+<div class="text-body-base font-headline-sm text-text-carbon mt-0.5">Drafting emails</div>
+</div>
+<div>
+<div class="text-label-mono font-label-mono text-[11px] text-text-secondary uppercase">Avg Confidence</div>
+<div class="text-body-base font-headline-sm text-primary mt-0.5">97.2%</div>
+</div>
+</div>
+<!-- Current task snippet -->
+<div class="flex items-center gap-2 text-body-sm font-body-sm text-text-secondary mb-4">
+<span class="material-symbols-outlined text-[16px] text-tertiary" data-icon="edit_note">edit_note</span>
+<span class="">Current task: <strong class="text-text-carbon font-headline-sm font-medium">Drafting personalized cold emails (Enterprise tier)</strong></span>
+</div>
+</div>
+<!-- Quick Controls Footer -->
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-lg border border-surface-stroke text-headline-sm font-headline-sm text-text-body hover:bg-surface-inset hover:text-text-carbon text-[13px] transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="tune">tune</span>
+<span class="">Configure</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg border border-surface-stroke text-headline-sm font-headline-sm text-text-body hover:bg-surface-inset hover:text-text-carbon text-[13px] transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="pause">pause</span>
+<span class="">Pause</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg border border-surface-stroke text-headline-sm font-headline-sm text-text-body hover:bg-surface-inset hover:text-text-carbon text-[13px] transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="receipt_long">receipt_long</span>
+<span class="">Logs</span>
+</button>
+</div>
+
+</div>
+</div>
+<!-- Card 3: Website Auditor Delta -->
+<div class="bg-surface-card border border-surface-stroke rounded-xl p-5 hover:border-slate-300 transition-all duration-200 relative group flex flex-col justify-between">
+<!-- Top Row -->
+<div>
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
+<span class="material-symbols-outlined text-[22px]" data-icon="travel_explore">travel_explore</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="text-headline-md font-headline-md text-text-carbon">Website Auditor Delta</h3>
+
+</div>
+<div class="text-body-sm font-body-sm text-text-secondary mt-0.5">Deep inspection of infrastructure, telemetry &amp; stacks</div>
+</div>
+</div>
+<!-- More menu -->
+<button class="text-text-ghost hover:text-text-carbon p-1 rounded hover:bg-surface-inset">
+<span class="material-symbols-outlined text-[20px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Specs & Telemetry -->
+<div class="grid grid-cols-3 gap-3 py-3 border-y border-surface-stroke mb-4 bg-surface-canvas/50 rounded-lg px-3">
+<div>
+<div class="text-label-mono font-label-mono text-[11px] text-text-secondary uppercase">Base Model</div>
+<div class="text-body-base font-headline-sm text-text-carbon mt-0.5">Gemini 1.5 Pro</div>
+</div>
+<div>
+<div class="text-label-mono font-label-mono text-[11px] text-text-secondary uppercase">Pending Queue</div>
+<div class="text-body-base font-headline-sm text-text-carbon mt-0.5">14 domains</div>
+</div>
+<div>
+<div class="text-label-mono font-label-mono text-[11px] text-text-secondary uppercase">Depth Score</div>
+<div class="text-body-base font-headline-sm text-amber-600 mt-0.5">99.8% accurate</div>
+</div>
+</div>
+<!-- Current task snippet -->
+<div class="flex items-center gap-2 text-body-sm font-body-sm text-text-secondary mb-4">
+<span class="material-symbols-outlined text-[16px] text-amber-600" data-icon="lan">lan</span>
+<span class="">Current task: <strong class="text-text-carbon font-headline-sm font-medium">Scraping domain tech stacks (DNS, Cloud, CMS)</strong></span>
+</div>
+</div>
+<!-- Quick Controls Footer -->
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-lg border border-surface-stroke text-headline-sm font-headline-sm text-text-body hover:bg-surface-inset hover:text-text-carbon text-[13px] transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="tune">tune</span>
+<span class="">Configure</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg border border-surface-stroke text-headline-sm font-headline-sm text-text-body hover:bg-surface-inset hover:text-text-carbon text-[13px] transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="pause">pause</span>
+<span class="">Pause</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg border border-surface-stroke text-headline-sm font-headline-sm text-text-body hover:bg-surface-inset hover:text-text-carbon text-[13px] transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="receipt_long">receipt_long</span>
+<span class="">Logs</span>
+</button>
+</div>
+
+</div>
+</div>
+<!-- Card 4: Intent Qualifier Epsilon (PAUSED) -->
+<div class="bg-surface-card/60 border border-dashed border-surface-stroke rounded-xl p-5 hover:border-slate-400 transition-all duration-200 relative group flex flex-col justify-between">
+<!-- Top Row -->
+<div>
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-inset border border-surface-stroke flex items-center justify-center text-text-ghost">
+<span class="material-symbols-outlined text-[22px]" data-icon="query_stats">query_stats</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="text-headline-md font-headline-md text-text-secondary">Intent Qualifier Epsilon</h3>
+
+</div>
+<div class="text-body-sm font-body-sm text-text-ghost mt-0.5">High-threshold buying signal classification worker</div>
+</div>
+</div>
+<!-- More menu -->
+<button class="text-text-ghost hover:text-text-carbon p-1 rounded hover:bg-surface-inset">
+<span class="material-symbols-outlined text-[20px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Specs & Telemetry (Muted) -->
+<div class="grid grid-cols-3 gap-3 py-3 border-y border-surface-stroke mb-4 bg-surface-inset/40 rounded-lg px-3">
+<div>
+<div class="text-label-mono font-label-mono text-[11px] text-text-ghost uppercase">Base Model</div>
+<div class="text-body-base font-headline-sm text-text-secondary mt-0.5">Mistral Large</div>
+</div>
+<div>
+<div class="text-label-mono font-label-mono text-[11px] text-text-ghost uppercase">Standby Queue</div>
+<div class="text-body-base font-headline-sm text-text-secondary mt-0.5">0 records</div>
+</div>
+<div>
+<div class="text-label-mono font-label-mono text-[11px] text-text-ghost uppercase">Last Run</div>
+<div class="text-body-base font-headline-sm text-text-secondary mt-0.5">2 days ago</div>
+</div>
+</div>
+<!-- Current task snippet -->
+<div class="flex items-center gap-2 text-body-sm font-body-sm text-text-ghost mb-4">
+<span class="material-symbols-outlined text-[16px]" data-icon="power_settings_new">power_settings_new</span>
+<span class="">Worker is offline. Click deploy to initialize execution loop.</span>
+</div>
+</div>
+<!-- Quick Controls Footer -->
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-2">
+<button class="px-3.5 py-1.5 rounded-lg bg-text-carbon hover:bg-slate-800 text-on-primary font-headline-sm text-[13px] transition-all flex items-center gap-1.5 shadow-sm active:scale-[0.98]">
+<span class="material-symbols-outlined text-[16px]" data-icon="play_arrow">play_arrow</span>
+<span class="">Deploy Agent</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg border border-surface-stroke text-headline-sm font-headline-sm text-text-body hover:bg-surface-inset hover:text-text-carbon text-[13px] transition-colors">
+<span class="">Settings</span>
+</button>
+</div>
+
+</div>
+</div>
+</div>
+<!-- Bottom Section: Fleet Performance & Guardrails Summary -->
+<div class="border border-surface-stroke bg-surface-card rounded-xl p-6">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-surface-stroke">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-inset flex items-center justify-center text-text-carbon">
+<span class="material-symbols-outlined text-[20px]" data-icon="shield">shield</span>
+</div>
+<div>
+<h2 class="text-headline-md font-headline-md text-text-carbon">Fleet Performance &amp; Guardrails Summary</h2>
+<p class="text-body-sm font-body-sm text-text-secondary">Real-time autonomous pipeline integrity and synthesis telemetry</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+
+<button class="text-label-mono font-label-mono text-body-sm text-text-secondary hover:text-text-carbon flex items-center gap-1">
+<span class="">Audit Log</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- 3 Key Metric Columns -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Metric 1: Latency -->
+<div class="p-4 rounded-lg bg-surface-canvas border border-surface-stroke">
+<div class="flex items-center justify-between mb-1">
+<span class="text-label-mono font-label-mono text-body-sm text-text-secondary">Average Latency</span>
+<span class="material-symbols-outlined text-text-ghost text-[18px]" data-icon="speed">speed</span>
+</div>
+<div class="flex items-baseline gap-2">
+<div class="text-headline-xl font-headline-xl text-text-carbon">18ms</div>
+
+</div>
+<p class="text-body-sm font-body-sm text-text-ghost mt-2">Zero throttling across distributed agent cluster</p>
+</div>
+<!-- Metric 2: Token Cost -->
+<div class="p-4 rounded-lg bg-surface-canvas border border-surface-stroke">
+<div class="flex items-center justify-between mb-1">
+<span class="text-label-mono font-label-mono text-body-sm text-text-secondary">Token Cost Optimization</span>
+<span class="material-symbols-outlined text-text-ghost text-[18px]" data-icon="savings">savings</span>
+</div>
+<div class="flex items-baseline gap-2">
+<div class="text-headline-xl font-headline-xl text-emerald-600">32% reduced</div>
+
+</div>
+<p class="text-body-sm font-body-sm text-text-ghost mt-2">Saved $412.80 in compute this operational cycle</p>
+</div>
+<!-- Metric 3: Error Rate -->
+<div class="p-4 rounded-lg bg-surface-canvas border border-surface-stroke">
+<div class="flex items-center justify-between mb-1">
+<span class="text-label-mono font-label-mono text-body-sm text-text-secondary">Autonomous Error Rate</span>
+<span class="material-symbols-outlined text-text-ghost text-[18px]" data-icon="check_circle">check_circle</span>
+</div>
+<div class="flex items-baseline gap-2">
+<div class="text-headline-xl font-headline-xl text-text-carbon">0.02%</div>
+
+</div>
+<p class="text-body-sm font-body-sm text-text-ghost mt-2">1 self-healed exception in 5,200 orchestrations</p>
+</div>
+</div>
+</div>
+</main>
+
+
+
+
+
+
+</body></html>

@@ -22,6 +22,7 @@ import {
   ArrowUpRight,
   ShieldCheck,
   Zap,
+  FileSpreadsheet,
 } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -39,79 +40,42 @@ import { websiteStatusMeta } from "@/lib/status";
 import { formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import type { Website, WebsiteStatus } from "@/lib/types";
+import { exportWebsitesToSheets } from "@/lib/api/sheets";
 
 function MockPreview({ website, device }: { website: WebsiteApi; device: "desktop" | "tablet" | "mobile" }) {
-  const gradient =
-    website.category === "Restaurant" || website.category === "Cafe"
-      ? "from-orange-500 via-amber-500 to-rose-600"
-      : website.category === "Salon" || website.category === "Fitness"
-        ? "from-fuchsia-600 via-purple-600 to-pink-600"
-        : website.category === "Healthcare" || website.category === "Wellness"
-          ? "from-emerald-500 via-teal-600 to-cyan-600"
-          : website.category === "Education"
-            ? "from-sky-500 via-blue-600 to-indigo-600"
-            : "from-blue-600 via-indigo-600 to-violet-700";
-
   const deviceWidthClass =
     device === "mobile"
-      ? "max-w-[320px] mx-auto"
+      ? "max-w-[360px] mx-auto h-[480px]"
       : device === "tablet"
-        ? "max-w-[480px] mx-auto"
-        : "w-full";
+        ? "max-w-[640px] mx-auto h-[500px]"
+        : "w-full h-[540px]";
 
-  const displayUrl = website.liveUrl || website.previewUrl || "https://preview.vasaw.app/";
+  const displayUrl = `/preview/${website.id}`;
 
   return (
-    <div className={cn("overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl transition-all duration-300", deviceWidthClass)}>
+    <div className={cn("overflow-hidden rounded-2xl border border-slate-200 bg-slate-900 shadow-xl transition-all duration-300 flex flex-col", deviceWidthClass)}>
       {/* Browser address bar */}
-      <div className="flex items-center justify-between border-b border-slate-200 bg-slate-100/80 px-4 py-2.5">
+      <div className="flex items-center justify-between border-b border-slate-800 bg-slate-950 px-4 py-2.5">
         <div className="flex items-center gap-1.5">
-          <div className="h-2.5 w-2.5 rounded-full bg-rose-400" />
-          <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-          <div className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+          <div className="h-2.5 w-2.5 rounded-full bg-rose-500" />
+          <div className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+          <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
         </div>
-        <div className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1 font-mono text-[11px] text-slate-500 max-w-sm truncate">
-          <ShieldCheck className="h-3 w-3 text-emerald-500 shrink-0" />
+        <div className="flex items-center gap-1.5 rounded-md border border-slate-800 bg-slate-900 px-3 py-1 font-mono text-[11px] text-slate-300 max-w-sm truncate">
+          <ShieldCheck className="h-3 w-3 text-emerald-400 shrink-0" />
           <span className="truncate">{displayUrl}</span>
         </div>
-        <div className="w-10" />
+        <a href={displayUrl} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white" title="Open in new tab">
+          <ExternalLink className="h-3.5 w-3.5" />
+        </a>
       </div>
 
-      {/* Hero preview */}
-      <div className={`flex min-h-[160px] flex-col items-center justify-center bg-gradient-to-br ${gradient} p-8 text-white`}>
-        <span className="rounded-full bg-white/20 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider backdrop-blur-md">
-          {website.category} · {website.location}
-        </span>
-        <h3 className="mt-3 text-center font-display text-2xl font-extrabold tracking-tight text-white drop-shadow-sm">
-          {website.businessName}
-        </h3>
-        <p className="mt-1 text-center font-sans text-xs text-white/80 max-w-sm">
-          Experience premium hospitality, craftsmanship, and verified local expertise.
-        </p>
-        <button className="mt-4 rounded-xl bg-white px-4 py-1.5 font-sans text-xs font-bold text-slate-900 shadow-md">
-          Book Appointment / Order Now
-        </button>
-      </div>
-
-      {/* Synthetic Section Previews */}
-      <div className="space-y-4 p-5">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <div className="h-3 w-32 rounded-full bg-slate-200" />
-            <div className="h-2 w-20 rounded-full bg-slate-100" />
-          </div>
-          <span className="font-mono text-[10px] font-bold text-slate-400 uppercase">AST SYNTHESIZED</span>
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="flex flex-col items-center justify-center rounded-xl border border-slate-100 bg-slate-50 p-3 text-center">
-              <div className="h-6 w-6 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold font-mono">
-                0{i}
-              </div>
-              <div className="mt-2 h-2 w-12 rounded-full bg-slate-200" />
-            </div>
-          ))}
-        </div>
+      <div className="flex-1 bg-white relative overflow-hidden">
+        <iframe
+          src={`/api/websites/${website.id}/html`}
+          title={website.businessName}
+          className="h-full w-full border-0 bg-stone-950"
+        />
       </div>
     </div>
   );
@@ -147,6 +111,7 @@ export default function WebsitesPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [filterStatus, setFilterStatus] = React.useState<"all" | "deployed" | "building" | "failed">("all");
+  const [isExportingSheets, setIsExportingSheets] = React.useState(false);
 
   const fetchData = React.useCallback(async () => {
     try {
@@ -327,6 +292,32 @@ export default function WebsitesPage() {
     return true;
   });
 
+  const handleExportSheets = async () => {
+    setIsExportingSheets(true);
+    setNotification(null);
+    try {
+      const res = await exportWebsitesToSheets("mock-spreadsheet-vasaw");
+      if (res.success) {
+        setNotification({
+          type: "success",
+          text: `Successfully exported ${res.rowsWritten} websites to Google Sheets (${res.filename || "file downloaded"}).`,
+        });
+      } else {
+        setNotification({
+          type: "error",
+          text: res.error || "Failed to export websites.",
+        });
+      }
+    } catch (err) {
+      setNotification({
+        type: "error",
+        text: err instanceof Error ? err.message : "Export network error",
+      });
+    } finally {
+      setIsExportingSheets(false);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 space-y-6">
       <PageHeader
@@ -334,6 +325,20 @@ export default function WebsitesPage() {
         description="Autonomous Next.js 16 Edge synthesis, AST generation, and Vercel production deployment."
       >
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 font-sans border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+            onClick={handleExportSheets}
+            disabled={isExportingSheets || (websiteList?.length ?? 0) === 0}
+          >
+            {isExportingSheets ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-600" />
+            ) : (
+              <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" />
+            )}
+            Export to Sheets
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -549,20 +554,26 @@ export default function WebsitesPage() {
                   <div className="mt-4 space-y-1.5 font-mono text-[11px]">
                     {website.liveUrl ? (
                       <a
-                        href={website.liveUrl}
+                        href={website.liveUrl.includes("vasaw.app") ? `/preview/${website.id}` : website.liveUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group flex items-center gap-1.5 text-blue-600 hover:text-blue-700 hover:underline"
                       >
                         <ExternalLink className="h-3.5 w-3.5 shrink-0" />
-                        <span className="truncate">{website.liveUrl.replace("https://", "")}</span>
+                        <span className="truncate">{website.liveUrl.includes("vasaw.app") ? `/preview/${website.id}` : website.liveUrl.replace("https://", "")}</span>
                         <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </a>
                     ) : (
-                      <p className="flex items-center gap-1.5 text-slate-400">
+                      <a
+                        href={`/preview/${website.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex items-center gap-1.5 text-blue-600 hover:text-blue-700 hover:underline"
+                      >
                         <ExternalLink className="h-3.5 w-3.5 shrink-0" />
-                        Awaiting Edge Provisioning
-                      </p>
+                        <span className="truncate">View Preview Site</span>
+                        <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </a>
                     )}
                     {website.repoUrl ? (
                       <a
@@ -701,11 +712,11 @@ export default function WebsitesPage() {
                 <X className="h-4 w-4 mr-1" />
                 Close
               </Button>
-              {preview?.liveUrl && (
+              {preview && (
                 <Button asChild className="bg-blue-600 text-white font-sans text-xs hover:bg-blue-700">
-                  <a href={preview.liveUrl} target="_blank" rel="noopener noreferrer">
+                  <a href={`/preview/${preview.id}`} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="h-4 w-4 mr-1.5" />
-                    Open Live Production
+                    Open Live Preview
                   </a>
                 </Button>
               )}

@@ -42,6 +42,9 @@ export interface CampaignWorkflowRequest {
 export interface LeadWorkflowResult {
   leadId: string;
   businessName: string;
+  city?: string;
+  location?: string;
+  sourceMode?: string;
   phone: string;
   qualified: boolean;
   websiteEligible: boolean;

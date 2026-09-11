@@ -1,0 +1,514 @@
+<!DOCTYPE html><html class="light" lang="en" style="width: 1280px; height: 1147px; overflow: hidden; position: relative;"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>VASAW AI — Command Center</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            "sans": ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      letter-spacing: -0.011em;
+    }
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.2);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-[#060c16] text-slate-700 dark:text-slate-200 antialiased min-h-screen flex flex-col selection:bg-blue-600 selection:text-white transition-colors duration-200">
+<!-- TOP APP BAR -->
+<header class="flex items-center justify-between px-6 w-full h-14 z-40 sticky top-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
+<div class="flex items-center space-x-6">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+          V
+        </div>
+<span class="text-base font-semibold tracking-tight text-slate-900 dark:text-white">VASAW AI</span>
+</div>
+</div>
+<!-- Search bar -->
+<div class="flex-1 max-w-md mx-6 hidden sm:block">
+<div class="relative flex items-center w-full">
+<span class="absolute left-3 text-slate-400 dark:text-slate-500 material-symbols-outlined text-[18px]" data-icon="search">search</span>
+<input class="w-full h-9 pl-9 pr-12 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-lg text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all shadow-xs" placeholder="Search agents, sequences, pipeline..." type="text">
+<kbd class="absolute right-2.5 px-1.5 py-0.5 text-[11px] font-medium bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 rounded border border-slate-200 dark:border-slate-600 font-mono">⌘K</kbd>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center space-x-2.5">
+<!-- Dark/Light Theme Preview Toggle -->
+<button aria-label="Switch to dark mode" class="relative flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-slate-300 dark:hover:border-slate-600 transition-all shadow-xs" id="theme-toggle" title="Switch to dark mode">
+<span class="material-symbols-outlined text-[19px] dark:hidden block" data-icon="light_mode">light_mode</span>
+<span class="material-symbols-outlined text-[19px] hidden dark:block text-amber-400" data-icon="dark_mode">dark_mode</span>
+</button>
+<!-- Notifications -->
+<button class="relative p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" title="Notifications">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-600 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
+</button>
+<!-- Primary Action -->
+<button class="flex items-center space-x-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors shadow-xs">
+<span class="material-symbols-outlined text-[16px]" data-icon="add">add</span>
+<span>New Campaign</span>
+</button>
+<!-- Profile avatar -->
+<div class="w-8 h-8 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 cursor-pointer ml-1">
+<img class="w-full h-full object-cover" data-alt="User Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADA43LzxAEH2Kcz5lihzm-qzjU3zaTm0Gherdj7OycpElaC4mdfqLmPZeaTfp_kHageHVchxeGJn5X63s65t06wY5YWLgoW3vWWw7jQ2WyPwHcjr2I0Th53kGK8iQo8e_wfA-76ckoqIcujw_BtUvcQCjBcHDkHhx0SZ78L15Zc7jjm6r04ASpU8yH1JkGAdIWOCFexD0fwueHulvcDRLZlo8s4gAeCwKST0HzAomUI4se-fD-pMo">
+</div>
+</div>
+</header>
+<!-- MAIN BODY LAYOUT -->
+<div class="flex flex-1 relative">
+<!-- SIDE NAVIGATION RAIL -->
+<aside class="fixed top-0 left-0 h-full w-60 z-30 flex flex-col justify-between py-4 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-colors duration-200">
+<!-- Rail Header -->
+<div class="flex flex-col">
+<div class="flex items-center space-x-3 px-6 h-14 border-b border-slate-200 dark:border-slate-800 -mt-4 mb-3">
+<div class="w-6 h-6 rounded bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
+            V
+          </div>
+<div>
+<div class="text-sm font-semibold text-slate-900 dark:text-white tracking-tight leading-tight">VASAW</div>
+<div class="text-[11px] text-slate-500 dark:text-slate-400 font-normal">Autonomous Workspace</div>
+</div>
+</div>
+<!-- Rail Navigation List -->
+<nav class="flex flex-col space-y-1 px-3 mt-2">
+<!-- Active: Dashboard -->
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 font-medium text-xs border-l-2 border-blue-600 transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-blue-600 dark:text-blue-400" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<!-- Inactive: Campaigns -->
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-medium text-xs transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px]" data-icon="campaign">campaign</span>
+<span>Campaigns</span>
+</a>
+<!-- Inactive: Leads -->
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-medium text-xs transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px]" data-icon="group">group</span>
+<span>Leads</span>
+</a>
+<!-- Inactive: Messages -->
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-medium text-xs transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px]" data-icon="chat">chat</span>
+<span>Messages</span>
+<span class="ml-auto px-1.5 py-0.2 text-[10px] rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium border border-slate-200 dark:border-slate-700">4</span>
+</a>
+<!-- Inactive: Agents -->
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-medium text-xs transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px]" data-icon="smart_toy">smart_toy</span>
+<span>Agents</span>
+</a>
+<!-- Inactive: Settings -->
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-medium text-xs transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px]" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- Rail Footer -->
+<div class="px-3">
+<div class="space-y-1 pt-3 border-t border-slate-200 dark:border-slate-800">
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 text-xs transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="help_outline">help_outline</span>
+<span>Documentation</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- MAIN CONTENT VIEWPORT -->
+<main class="ml-60 flex-1 p-8 max-w-[1500px] w-full mx-auto space-y-6">
+<!-- Header Row -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
+<div>
+<div class="flex items-center space-x-3">
+<h1 class="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">Command Center</h1>
+
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5">Autonomous outreach fleet management and execution pipeline</p>
+</div>
+<!-- Range Filters -->
+<div class="flex items-center space-x-2">
+<div class="inline-flex rounded-lg border border-slate-200 dark:border-slate-800 p-0.5 bg-white dark:bg-slate-900 shadow-xs">
+<button class="px-2.5 py-1 text-xs font-medium rounded bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs">24h</button>
+<button class="px-2.5 py-1 text-xs font-medium rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">7d</button>
+<button class="px-2.5 py-1 text-xs font-medium rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">30d</button>
+</div>
+<button class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors shadow-xs" title="Filters">
+<span class="material-symbols-outlined text-[18px]" data-icon="tune">tune</span>
+</button>
+</div>
+</div>
+<!-- TOP KPI BAR -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Card 1 -->
+<div class="p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between transition-colors duration-200">
+<div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
+<span class="text-xs font-medium">Active Fleet</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="smart_toy">smart_toy</span>
+</div>
+<div class="mt-4">
+<div class="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">18 of 20</div>
+<div class="flex items-center space-x-1.5 text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
+
+
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between transition-colors duration-200">
+<div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
+<span class="text-xs font-medium">Leads Ingested</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="filter_alt">filter_alt</span>
+</div>
+<div class="mt-4">
+<div class="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">1,429</div>
+<div class="flex items-center space-x-1.5 text-xs text-slate-500 dark:text-slate-400 mt-1">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between transition-colors duration-200">
+<div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
+<span class="text-xs font-medium">Pipeline Value</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="attach_money">attach_money</span>
+</div>
+<div class="mt-4">
+<div class="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">$284,500</div>
+<div class="flex items-center space-x-1.5 text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium">
+<span class="material-symbols-outlined text-[14px]" data-icon="bolt">bolt</span>
+
+</div>
+</div>
+</div>
+<!-- Card 4: Active Campaigns -->
+<div class="p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between transition-colors duration-200">
+<div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
+<span class="text-xs font-medium">Active Campaigns</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="rocket_launch">rocket_launch</span>
+</div>
+<div class="mt-4">
+<div class="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">6 Sequences</div>
+<div class="flex items-center space-x-1.5 text-xs text-slate-500 dark:text-slate-400 mt-1">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+
+</div>
+</div>
+</div>
+</div>
+<!-- MAIN 2-COLUMN GRID (8 cols / 4 cols) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- LEFT COLUMN -->
+<div class="lg:col-span-8 space-y-6">
+<!-- Active Agent Fleet Panel -->
+<div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden transition-colors duration-200">
+<div class="p-4 px-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 transition-colors duration-200">
+<div class="flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[20px]" data-icon="precision_manufacturing">precision_manufacturing</span>
+<h2 class="text-sm font-semibold text-slate-900 dark:text-white">Active Agent Fleet</h2>
+</div>
+<div class="flex items-center space-x-2">
+<button class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">Deploy Agent</button>
+</div>
+</div>
+<!-- Agent List -->
+<div class="divide-y divide-slate-200 dark:divide-slate-800">
+<!-- Agent 1 -->
+<div class="p-4 px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+<div class="flex items-center space-x-3.5">
+<div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+<div>
+<div class="flex items-center space-x-2">
+<span class="text-sm font-semibold text-slate-900 dark:text-white leading-normal">Lead Enricher</span>
+
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Scrapes verified headcount, funding &amp; executive contact domains</p>
+</div>
+</div>
+<div class="flex items-center space-x-2">
+<button class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors shadow-xs">Pause</button>
+<button class="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xs" title="Settings">
+<span class="material-symbols-outlined text-[18px]" data-icon="settings">settings</span>
+</button>
+</div>
+</div>
+<!-- Agent 2 -->
+<div class="p-4 px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+<div class="flex items-center space-x-3.5">
+<div class="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
+<div>
+<div class="flex items-center space-x-2">
+<span class="text-sm font-semibold text-slate-900 dark:text-white leading-normal">Outreach Synthesizer</span>
+
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Dynamic value-prop generation via tailored multi-channel personalization</p>
+</div>
+</div>
+<div class="flex items-center space-x-2">
+<button class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors shadow-xs">Pause</button>
+<button class="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xs" title="Settings">
+<span class="material-symbols-outlined text-[18px]" data-icon="settings">settings</span>
+</button>
+</div>
+</div>
+<!-- Agent 3 -->
+<div class="p-4 px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+<div class="flex items-center space-x-3.5">
+<div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+<div>
+<div class="flex items-center space-x-2">
+<span class="text-sm font-semibold text-slate-900 dark:text-white leading-normal">Website Auditor</span>
+
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Inspects target technology stacks, conversion pixels, and hiring patterns</p>
+</div>
+</div>
+<div class="flex items-center space-x-2">
+<button class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors shadow-xs">Pause</button>
+<button class="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xs" title="Settings">
+<span class="material-symbols-outlined text-[18px]" data-icon="settings">settings</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Realtime Stream Panel -->
+<div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden transition-colors duration-200">
+<div class="p-4 px-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 transition-colors duration-200">
+<div class="flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[20px]" data-icon="stream">stream</span>
+<h2 class="text-sm font-semibold text-slate-900 dark:text-white">Activity Stream</h2>
+</div>
+<span class="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+<span>Live Feed</span>
+</span>
+</div>
+<!-- Activity Events -->
+<div class="p-5 divide-y divide-slate-200 dark:divide-slate-800">
+<!-- Event 1 -->
+<div class="py-3.5 first:pt-0 last:pb-0 flex items-start space-x-3.5">
+<div class="mt-1 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-slate-900 dark:text-white leading-snug">
+                Lead Enriched: <span class="text-blue-600 dark:text-blue-400 font-semibold">Stripe Inc.</span>
+</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                Identified 4 direct VP decision makers and verified direct dials and corporate email formats.
+              </p>
+</div>
+</div>
+<!-- Event 2 -->
+<div class="py-3.5 first:pt-0 last:pb-0 flex items-start space-x-3.5">
+<div class="mt-1 w-2 h-2 rounded-full bg-blue-600 dark:text-blue-400 flex-shrink-0"></div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-slate-900 dark:text-white leading-snug">
+                Tailored Pitch Dispatched to <span class="text-slate-900 dark:text-white font-semibold">David Vance</span>
+</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                Hyper-personalized outbound message generated and dispatched via Outreach Synthesizer.
+              </p>
+</div>
+</div>
+<!-- Event 3 -->
+<div class="py-3.5 first:pt-0 last:pb-0 flex items-start space-x-3.5">
+<div class="mt-1 w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-600 flex-shrink-0"></div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-slate-900 dark:text-white leading-snug">
+                Contextual Vector Index Rebalanced
+</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                Updated market signals and company hiring intent embeddings for active target accounts.
+              </p>
+</div>
+</div>
+<!-- Event 4 -->
+<div class="py-3.5 first:pt-0 last:pb-0 flex items-start space-x-3.5">
+<div class="mt-1 w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-slate-900 dark:text-white leading-snug">
+                Deal Auto-Routed: <span class="text-blue-600 dark:text-blue-400 font-semibold">Ramp Financial</span>
+</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                Positive intent detected: 'Schedule meeting'. Priority lead transferred directly to executive inbox.
+              </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN -->
+<div class="lg:col-span-4 space-y-6">
+<!-- High Priority Leads Card -->
+<div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden transition-colors duration-200">
+<div class="p-4 px-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 transition-colors duration-200">
+<div class="flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[20px]" data-icon="verified">verified</span>
+<h2 class="text-sm font-semibold text-slate-900 dark:text-white">High Priority Leads</h2>
+</div>
+
+</div>
+<div class="p-5 space-y-4">
+<!-- Lead 1 -->
+<div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60 space-y-3 transition-colors">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="text-sm font-semibold text-slate-900 dark:text-white">David Vance</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">VP Growth · LinearScale</p>
+</div>
+
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                Expressed interest in autonomous pipeline routing. Opened sequence cadence link multiple times.
+              </p>
+<div class="flex items-center space-x-2 pt-1">
+<button class="flex-1 py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors shadow-xs">
+                  Handover
+                </button>
+<button class="py-1.5 px-3 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium transition-colors shadow-xs">
+                  Inspect
+                </button>
+</div>
+</div>
+<!-- Lead 2 -->
+<div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60 space-y-3 transition-colors">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="text-sm font-semibold text-slate-900 dark:text-white">Elena Rostova</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Head of RevOps · CloudNative</p>
+</div>
+
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                Recently upgraded CRM to Salesforce Enterprise. Actively expanding sales development team.
+              </p>
+<div class="flex items-center space-x-2 pt-1">
+<button class="flex-1 py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors shadow-xs">
+                  Handover
+                </button>
+<button class="py-1.5 px-3 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium transition-colors shadow-xs">
+                  Inspect
+                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- System Guardrails -->
+<div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs p-5 space-y-5 transition-colors duration-200">
+<div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3.5">
+<div class="flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-slate-500 dark:text-slate-400 text-[20px]" data-icon="shield">shield</span>
+<h2 class="text-sm font-semibold text-slate-900 dark:text-white">Safety Guardrails</h2>
+</div>
+<span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[18px]" data-icon="lock">lock</span>
+</div>
+<!-- Autopilot Dispatch toggle -->
+<div class="flex items-center justify-between gap-3">
+<div>
+<span class="text-xs font-semibold text-slate-900 dark:text-white block">Autopilot Dispatch</span>
+<span class="text-xs text-slate-500 dark:text-slate-400 block mt-0.5">Permit agents to dispatch emails automatically upon high validation</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+<input checked="" class="sr-only peer" type="checkbox">
+<div class="w-10 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+</label>
+</div>
+<!-- Approval Threshold Slider -->
+<div class="space-y-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center justify-between">
+<span class="text-xs font-medium text-slate-900 dark:text-white">Approval Threshold</span>
+<span class="text-xs text-blue-600 dark:text-blue-400 font-semibold" id="sliderVal">95%</span>
+</div>
+<input class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600" id="confidenceSlider" max="99" min="80" type="range" value="95">
+<p class="text-[11px] text-slate-500 dark:text-slate-400 leading-normal">
+              Prospecting and outreach actions below this certainty rate require manual human sign-off.
+            </p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Interactive Client-side Script -->
+<script>
+    // Theme Toggle Functionality
+    const themeBtn = document.getElementById('theme-toggle');
+    const htmlRoot = document.documentElement;
+
+    function updateThemeUI() {
+      const isDark = htmlRoot.classList.contains('dark');
+      themeBtn.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+      themeBtn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        htmlRoot.classList.toggle('dark');
+        updateThemeUI();
+      });
+      updateThemeUI();
+    }
+
+    // Confidence Slider Update
+    const slider = document.getElementById('confidenceSlider');
+    const sliderVal = document.getElementById('sliderVal');
+
+    if (slider && sliderVal) {
+      slider.addEventListener('input', (e) => {
+        sliderVal.textContent = e.target.value + '%';
+      });
+    }
+  </script>
+
+
+</body></html>

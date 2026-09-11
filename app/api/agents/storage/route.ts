@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
 // POST /api/agents/storage/leads - Save leads
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const action = body.action;
 
     switch (action) {

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "63015dd03744404ea788866ee0ecb4f0",
+    "slug": "automation",
+    "title": "VASAW AI — Automation (Interactive Light/Dark)",
+    "imageFile": "automation.png",
+    "htmlFile": "automation.html"
+  },
+  {
+    "id": "8f503bccdb254ff8b8c877944a49139c",
+    "slug": "agents-fleets",
+    "title": "VASAW AI — Agents & Fleets (Interactive Light/Dark)",
+    "imageFile": "agents-fleets.png",
+    "htmlFile": "agents-fleets.html"
+  },
+  {
+    "id": "cf7253490bb54708aa69c4503e99cdb6",
+    "slug": "messages-inbox",
+    "title": "VASAW AI — Messages & Inbox (Interactive Light/Dark)",
+    "imageFile": "messages-inbox.png",
+    "htmlFile": "messages-inbox.html"
+  },
+  {
+    "id": "23a7db2644614d3ea1c5406252c77f31",
+    "slug": "command-center",
+    "title": "VASAW AI — Command Center (Interactive Light/Dark)",
+    "imageFile": "command-center.png",
+    "htmlFile": "command-center.html"
+  },
+  {
+    "id": "e619518cd628467c92f51ee5c1b344fb",
+    "slug": "campaigns",
+    "title": "VASAW AI — Campaigns (Interactive Light/Dark)",
+    "imageFile": "campaigns.png",
+    "htmlFile": "campaigns.html"
+  },
+  {
+    "id": "8530a32f6dc24bafbc8426f0a854a56d",
+    "slug": "leads-pipeline",
+    "title": "VASAW AI — Leads & Pipeline (Clean & Aligned)",
+    "imageFile": "leads-pipeline.png",
+    "htmlFile": "leads-pipeline.html"
+  }
+]

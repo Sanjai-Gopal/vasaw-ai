@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { navGroups } from "@/lib/nav";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Sparkles, Radio } from "lucide-react";
+import { Sparkles, Radio, Plus } from "lucide-react";
 
 export function SidebarContent({
   onNavigate,
@@ -19,7 +19,7 @@ export function SidebarContent({
 
   return (
     <div className="flex h-full flex-col justify-between select-none">
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Workspace Brand Header */}
         <Link
           href="/"
@@ -33,9 +33,21 @@ export function SidebarContent({
             <p className="text-[14.5px] font-display font-extrabold tracking-tight text-slate-950 group-hover:text-blue-600 transition-colors">
               VASAW AI
             </p>
-            <p className="text-[11px] font-mono text-slate-400 font-medium">Global Cluster • v4.8</p>
+            <p className="text-[11px] font-mono text-slate-400 font-medium">Autonomous Workspace</p>
           </div>
         </Link>
+
+        {/* Quick Action CTA — Aligned with Stitch */}
+        <div className="px-1">
+          <Link
+            href="/campaigns"
+            onClick={onNavigate}
+            className="w-full h-9 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-sm shadow-blue-500/20"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="whitespace-nowrap font-sans font-semibold">New Campaign</span>
+          </Link>
+        </div>
 
         {/* Navigation Menu */}
         <nav className="flex flex-1 flex-col gap-5 overflow-y-auto px-1">

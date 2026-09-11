@@ -20,6 +20,7 @@ export interface SheetExportResult {
   error?: string;
   syncedAt: string;
   mode: "mock" | "real";
+  filename?: string;
 }
 
 export interface SheetSyncRequest {

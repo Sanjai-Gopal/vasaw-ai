@@ -3,11 +3,11 @@ import { classifyError, isAbortError } from "../errors";
 
 const TIMEOUT_MS = 60_000;
 
-const models = {
-  general: "gemini-flash-lite-latest",
-  reasoning: "gemini-flash-lite-latest",
-  coding: "gemini-flash-lite-latest",
-};
+const getModels = () => ({
+  general: process.env.GEMINI_GENERAL_MODEL || "gemini-flash-latest",
+  reasoning: process.env.GEMINI_REASONING_MODEL || "gemini-flash-latest",
+  coding: process.env.GEMINI_CODING_MODEL || "gemini-flash-latest",
+});
 
 function mapRole(role: ChatMessage["role"]): "user" | "model" {
   return role === "assistant" ? "model" : "user";
@@ -23,7 +23,8 @@ export function getGeminiProvider(apiKey: string): ProviderAdapter {
   const baseUrl = "https://generativelanguage.googleapis.com/v1beta";
 
   async function chat(request: AIRequest, modelOverride?: string): Promise<AIResponse> {
-    const model = modelOverride ?? models[request.task] ?? models.general;
+    const currentModels = getModels();
+    const model = modelOverride ?? currentModels[request.task] ?? currentModels.general;
     const contents = request.messages
       .filter((m) => m.role !== "system")
       .map((m) => ({ role: mapRole(m.role), parts: [{ text: m.content }] }));
@@ -134,8 +135,9 @@ export function getGeminiProvider(apiKey: string): ProviderAdapter {
   async function test(): Promise<boolean> {
     if (!apiKey) return false;
     try {
+      const currentModels = getModels();
       const res = await fetch(
-        `${baseUrl}/models/${models.general}:generateContent?key=${apiKey}`,
+        `${baseUrl}/models/${currentModels.general}:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: {

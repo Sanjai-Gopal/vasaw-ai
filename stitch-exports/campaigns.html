@@ -1,0 +1,612 @@
+<!DOCTYPE html><html lang="en" style="width: 1280px; height: 1197px; overflow: hidden; position: relative;"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>VASAW AI - Campaigns &amp; Outreach</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind Script -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary": "#ffffff",
+            "tertiary-container": "#7d4ce7",
+            "dark-primary": "#00f0ff",
+            "tertiary": "#632ecd",
+            "primary-container": "#2563eb",
+            "secondary-fixed-dim": "#4edea3",
+            "inverse-on-surface": "#eef0ff",
+            "signal-warning": "#f59e0b",
+            "on-tertiary-container": "#f6edff",
+            "surface-dim": "#d4d9f2",
+            "on-tertiary-fixed-variant": "#5516be",
+            "text-body": "#334155",
+            "on-primary-fixed": "#00174b",
+            "secondary-fixed": "#6ffbbe",
+            "on-tertiary-fixed": "#23005c",
+            "text-secondary": "#64748b",
+            "on-primary-container": "#eeefff",
+            "on-surface-variant": "#434655",
+            "on-secondary": "#ffffff",
+            "surface-container-high": "#e3e7ff",
+            "surface-container-highest": "#dce1fb",
+            "on-primary": "#ffffff",
+            "on-primary-fixed-variant": "#003ea8",
+            "surface-tint": "#0053db",
+            "tertiary-fixed": "#e9ddff",
+            "primary-fixed-dim": "#b4c5ff",
+            "surface-container-low": "#f2f3ff",
+            "text-ghost": "#94a3b8",
+            "on-error": "#ffffff",
+            "surface-bright": "#faf8ff",
+            "on-secondary-container": "#00714d",
+            "surface-canvas": "#f8fafc",
+            "tertiary-fixed-dim": "#d0bcff",
+            "surface-container": "#eaedff",
+            "dark-card": "#0e0e12",
+            "on-secondary-fixed": "#002113",
+            "on-error-container": "#93000a",
+            "secondary-container": "#6cf8bb",
+            "dark-canvas": "#09090b",
+            "outline": "#737686",
+            "on-surface": "#151b2d",
+            "surface-inset": "#f1f5f9",
+            "on-secondary-fixed-variant": "#005236",
+            "text-carbon": "#020617",
+            "surface-container-lowest": "#ffffff",
+            "secondary": "#006c49",
+            "error-container": "#ffdad6",
+            "inverse-primary": "#b4c5ff",
+            "background": "#faf8ff",
+            "surface-card": "#ffffff",
+            "surface-stroke": "#e2e8f0",
+            "outline-variant": "#c3c6d7",
+            "primary-fixed": "#dbe1ff",
+            "dark-text": "#f4f4f5",
+            "on-background": "#151b2d",
+            "dark-secondary": "#00ff88",
+            "inverse-surface": "#2a3043",
+            "surface-variant": "#dce1fb",
+            "signal-destructive": "#f43f5e",
+            "error": "#ba1a1a",
+            "surface": "#faf8ff",
+            "dark-stroke": "#232329",
+            "primary": "#004ac6"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xs": "0.25rem",
+            "margin": "2rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2rem",
+            "gutter": "1.5rem",
+            "space-md": "1rem",
+            "gutter-mobile": "1rem",
+            "margin-mobile": "1rem"
+          },
+          "fontFamily": {
+            "display-hero": ["Inter"],
+            "body-base": ["Inter"],
+            "headline-sm": ["Inter"],
+            "display-hero-mobile": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-md": ["Inter"],
+            "label-caps": ["Inter"],
+            "headline-lg": ["Inter"],
+            "label-mono": ["JetBrains Mono"],
+            "headline-xl": ["Inter"]
+          },
+          "fontSize": {
+            "display-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "700" }],
+            "body-base": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "headline-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "display-hero-mobile": ["26px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+            "headline-md": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "headline-lg": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "label-mono": ["12px", { "lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "headline-xl": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-size: 20px;
+      line-height: 1;
+      display: inline-block;
+    }
+  </style>
+<script>
+function toggleTheme() {
+  document.documentElement.classList.toggle('dark');
+  const isDark = document.documentElement.classList.contains('dark');
+  localStorage.setItem('vasaw_theme', isDark ? 'dark' : 'light');
+  const icon = document.getElementById('theme-toggle-icon');
+  if (icon) icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+}
+</script>
+<style>
+.dark body, .dark .bg-surface-canvas { background-color: #0b0f17 !important; color: #f3f4f6 !important; }
+.dark aside, .dark header, .dark .bg-surface-card { background-color: #111827 !important; border-color: #1f2937 !important; color: #f3f4f6 !important; }
+.dark .text-text-carbon { color: #f9fafb !important; }
+.dark .text-text-secondary { color: #9ca3af !important; }
+.dark .text-text-body { color: #d1d5db !important; }
+.dark .bg-surface-inset { background-color: #1f2937 !important; border-color: #374151 !important; }
+.dark .border-surface-stroke { border-color: #1f2937 !important; }
+.dark .hover\:bg-surface-inset:hover { background-color: #1f2937 !important; }
+.dark input { background-color: #1f2937 !important; color: #f9fafb !important; border-color: #374151 !important; }
+</style></head>
+<body class="bg-surface-canvas text-text-carbon font-body-base antialiased min-h-screen flex selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- ======================= SIDEBAR (COMMAND RAIL) ======================= -->
+<!-- Implements SideNavBar Shared Component with active tab 'Campaigns' -->
+<aside class="flex flex-col justify-between h-screen w-64 p-4 border-r border-surface-stroke fixed left-0 top-0 bg-surface-canvas z-30">
+<div class="flex flex-col gap-6">
+<!-- Header / Logo -->
+<div class="flex items-center gap-3 px-2 pt-2">
+<div class="w-8 h-8 rounded-lg bg-text-carbon flex items-center justify-center text-on-primary font-headline-sm font-semibold tracking-tight shadow-sm">
+          V
+        </div>
+<div class="flex flex-col">
+<span class="text-headline-sm font-headline-sm text-text-carbon tracking-wider uppercase font-semibold">VASAW</span>
+<span class="text-body-sm font-body-sm text-text-secondary">Autonomous Platform</span>
+</div>
+</div>
+<!-- Quick Action CTA -->
+<button class="w-full bg-text-carbon hover:bg-text-body active:scale-[0.98] transition-all duration-150 text-on-primary rounded-lg h-10 px-4 text-headline-sm font-headline-sm flex items-center justify-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span class="">+ New Campaign</span>
+</button>
+<!-- Nav Links -->
+<nav class="flex flex-col gap-1">
+<!-- Dashboard (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary rounded-lg font-headline-sm hover:bg-surface-inset hover:text-text-carbon transition-colors duration-150 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="">Dashboard</span>
+</a>
+<!-- Campaigns (ACTIVE as requested) -->
+<a class="flex items-center gap-3 px-3 py-2 text-primary bg-primary-fixed/20 rounded-lg font-headline-sm border-l-2 border-primary active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">campaign</span>
+<span class="">Campaigns</span>
+</a>
+<!-- Leads (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary rounded-lg font-headline-sm hover:bg-surface-inset hover:text-text-carbon transition-colors duration-150 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="">Leads</span>
+</a>
+<!-- Messages (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary rounded-lg font-headline-sm hover:bg-surface-inset hover:text-text-carbon transition-colors duration-150 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">chat</span>
+<span class="">Messages</span>
+</a>
+<!-- Agents (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary rounded-lg font-headline-sm hover:bg-surface-inset hover:text-text-carbon transition-colors duration-150 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">smart_toy</span>
+<span class="">Agents</span>
+</a>
+<!-- Automation (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary rounded-lg font-headline-sm hover:bg-surface-inset hover:text-text-carbon transition-colors duration-150 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">auto_mode</span>
+<span class="">Automation</span>
+</a>
+</nav>
+</div>
+<!-- Sidebar Footer / Settings -->
+<div class="border-t border-surface-stroke pt-3 flex flex-col gap-1"><a class="flex items-center gap-3 px-3 py-2 text-text-secondary rounded-lg font-headline-sm hover:bg-surface-inset hover:text-text-carbon transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="">Settings</span>
+</a>
+</div>
+</aside>
+<!-- ======================= MAIN CONTENT WRAPPER ======================= -->
+<div class="pl-64 flex flex-col flex-1 min-w-0">
+<!-- ======================= TOP BAR ======================= -->
+<!-- TopNavBar component implementation adhering to JSON & Layout specifications -->
+<header class="docked full-width top-0 sticky z-40 flex justify-between items-center w-full px-8 h-16 border-b border-surface-stroke bg-surface-canvas/85 backdrop-blur-md"><div class="flex items-center gap-3 w-80">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-ghost text-[18px]">search</span>
+<input class="w-full bg-surface-inset hover:bg-surface-card focus:bg-surface-card border border-surface-stroke rounded-lg pl-9 pr-8 py-1.5 text-body-sm text-text-carbon focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all duration-150 placeholder:text-text-ghost" placeholder="Search campaigns or audiences... (⌘K)" type="text">
+
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-text-secondary hover:text-text-carbon hover:bg-surface-inset rounded-lg transition-colors duration-150" onclick="toggleTheme()" title="Toggle light/dark theme">
+<span class="material-symbols-outlined text-[20px]" id="theme-toggle-icon">dark_mode</span>
+</button>
+<button class="p-2 text-text-secondary hover:text-text-carbon hover:bg-surface-inset rounded-lg transition-colors duration-150 relative" title="Notifications">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<button class="p-2 text-text-secondary hover:text-text-carbon hover:bg-surface-inset rounded-lg transition-colors duration-150" title="Help &amp; Documentation">
+<span class="material-symbols-outlined text-[20px]">help_outline</span>
+</button>
+<div class="h-5 w-px bg-surface-stroke mx-1"></div>
+<button class="bg-primary hover:bg-primary-container text-on-primary active:scale-[0.98] transition-transform duration-100 ease-out font-headline-sm text-body-sm h-9 px-4 rounded-lg flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span class="">New Campaign</span>
+</button>
+<div class="flex items-center gap-2 pl-2">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-headline-sm text-body-sm border border-surface-stroke font-semibold ring-1 ring-white/10" title="Sarah Connor">
+SC
+</div>
+</div>
+</div></header>
+<!-- ======================= MAIN CONTENT CANVAS ======================= -->
+<main class="p-8 max-w-7xl mx-auto w-full space-y-8">
+<!-- Page Title & Header Block -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4"><div>
+<h1 class="text-headline-xl font-semibold text-text-carbon tracking-tight">Campaigns</h1>
+<p class="text-body-base text-text-secondary mt-1">Create, schedule, and track personalized multi-channel outreach at scale.</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 text-body-sm font-medium text-text-body bg-surface-card border border-surface-stroke rounded-lg hover:bg-surface-inset transition-colors flex items-center gap-2 shadow-xs">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span class="">All Channels</span>
+</button>
+<button class="px-3 py-1.5 text-body-sm font-medium text-text-body bg-surface-card border border-surface-stroke rounded-lg hover:bg-surface-inset transition-colors flex items-center gap-2 shadow-xs">
+<span class="material-symbols-outlined text-[16px]">calendar_today</span>
+<span class="">Past 30 Days</span>
+</button>
+</div></div>
+<!-- KPI Summary Row (Precision Bento Metric Bar) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"><div class="bg-surface-card border border-surface-stroke rounded-xl p-5 shadow-xs flex flex-col justify-between">
+<div class="flex items-center justify-between text-text-secondary mb-3">
+<span class="text-[13px] font-medium">Active Campaigns</span>
+<span class="material-symbols-outlined text-text-ghost text-[18px]">campaign</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-headline-xl font-bold text-text-carbon">4</span>
+
+</div>
+</div>
+<div class="bg-surface-card border border-surface-stroke rounded-xl p-5 shadow-xs flex flex-col justify-between">
+<div class="flex items-center justify-between text-text-secondary mb-3">
+<span class="text-[13px] font-medium">Sent Today</span>
+<span class="material-symbols-outlined text-text-ghost text-[18px]">send</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-headline-xl font-bold text-text-carbon">842</span>
+
+</div>
+</div>
+<div class="bg-surface-card border border-surface-stroke rounded-xl p-5 shadow-xs flex flex-col justify-between">
+<div class="flex items-center justify-between text-text-secondary mb-3">
+<span class="text-[13px] font-medium">Reply Rate</span>
+<span class="material-symbols-outlined text-text-ghost text-[18px]">mark_email_read</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-headline-xl font-bold text-text-carbon">14.8%</span>
+
+</div>
+</div>
+<div class="bg-surface-card border border-surface-stroke rounded-xl p-5 shadow-xs flex flex-col justify-between">
+<div class="flex items-center justify-between text-text-secondary mb-3">
+<span class="text-[13px] font-medium">Meetings Booked</span>
+<span class="material-symbols-outlined text-text-ghost text-[18px]">event_available</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-headline-xl font-bold text-text-carbon">28</span>
+
+</div>
+</div></div>
+<!-- Tab Controls & List Toolbar -->
+<div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-surface-stroke pb-3">
+<!-- Segmented Tab Controls -->
+<div class="flex items-center gap-1 bg-surface-inset p-1 rounded-lg">
+<button class="px-3.5 py-1.5 text-body-sm font-headline-sm rounded-md bg-surface-card text-text-carbon shadow-sm transition-all">
+            All Campaigns <span class="ml-1 text-label-mono font-label-mono text-text-secondary text-[11px]">4</span>
+</button>
+<button class="px-3.5 py-1.5 text-body-sm font-headline-sm rounded-md text-text-secondary hover:text-text-carbon transition-colors">
+            Active <span class="ml-1 text-label-mono font-label-mono text-text-ghost text-[11px]">3</span>
+</button>
+<button class="px-3.5 py-1.5 text-body-sm font-headline-sm rounded-md text-text-secondary hover:text-text-carbon transition-colors">
+            Completed <span class="ml-1 text-label-mono font-label-mono text-text-ghost text-[11px]">6</span>
+</button>
+<button class="px-3.5 py-1.5 text-body-sm font-headline-sm rounded-md text-text-secondary hover:text-text-carbon transition-colors">
+            Drafts <span class="ml-1 text-label-mono font-label-mono text-text-ghost text-[11px]">2</span>
+</button>
+</div>
+<!-- Action tools -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1 text-label-mono font-label-mono text-[12px] text-text-secondary">
+<span class="">Sorting by:</span>
+<button class="font-semibold text-text-carbon flex items-center hover:underline">
+              Performance Index <span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+</div>
+<div class="h-4 w-px bg-surface-stroke"></div>
+<div class="flex items-center gap-1">
+<button class="p-1.5 text-text-carbon bg-surface-card border border-surface-stroke rounded-md shadow-sm" title="Grid View">
+<span class="material-symbols-outlined text-[18px]">grid_view</span>
+</button>
+<button class="p-1.5 text-text-secondary hover:text-text-carbon hover:bg-surface-inset rounded-md" title="List View">
+<span class="material-symbols-outlined text-[18px]">view_agenda</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Campaign Cards Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><!-- Card 1: Q3 Enterprise FinTech Outreach -->
+<div class="bg-surface-card border border-surface-stroke rounded-xl p-6 shadow-xs hover:border-surface-stroke/80 transition-all duration-200 flex flex-col justify-between group">
+<div>
+<div class="flex items-start justify-between gap-3 mb-4">
+<div>
+<div class="flex items-center gap-2 mb-1.5">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] bg-secondary-fixed/30 text-on-secondary-container font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+Active
+</span>
+<span class="text-[11px] text-text-secondary border border-surface-stroke rounded px-2 py-0.5 bg-surface-inset">
+Email &amp; LinkedIn
+</span>
+</div>
+<h3 class="text-headline-md font-semibold text-text-carbon tracking-tight group-hover:text-primary transition-colors">
+Q3 Enterprise FinTech Outreach
+</h3>
+</div>
+<button class="text-text-ghost hover:text-text-carbon p-1 rounded transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+<div class="grid grid-cols-4 gap-3 border-y border-surface-stroke/70 py-4 mb-5">
+<div>
+<span class="text-[11px] uppercase tracking-wider text-text-secondary font-medium">Sent</span>
+<div class="text-headline-md font-semibold text-text-carbon mt-1">1,240</div>
+<span class="text-[11px] text-text-secondary">Contacts</span>
+</div>
+<div>
+<span class="text-[11px] uppercase tracking-wider text-text-secondary font-medium">Open Rate</span>
+<div class="text-headline-md font-semibold text-text-carbon mt-1">68.4%</div>
+<span class="text-[11px] text-secondary font-medium">Above avg</span>
+</div>
+<div>
+<span class="text-[11px] uppercase tracking-wider text-text-secondary font-medium">Reply</span>
+<div class="text-headline-md font-semibold text-primary mt-1">18.2%</div>
+<span class="text-[11px] text-text-secondary">226 replies</span>
+</div>
+<div>
+<span class="text-[11px] uppercase tracking-wider text-text-secondary font-medium">Deals</span>
+<div class="text-headline-md font-semibold text-secondary mt-1">14</div>
+<span class="text-[11px] text-secondary font-medium">$420k pipe</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-2">
+<button class="h-8 px-3 bg-surface-inset hover:bg-surface-stroke text-text-carbon rounded-lg text-body-sm font-medium transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px]">edit</span>
+<span class="">Edit Sequence</span>
+</button>
+<button class="h-8 px-3 bg-surface-inset hover:bg-surface-stroke text-text-carbon rounded-lg text-body-sm font-medium transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px]">insights</span>
+<span class="">Analytics</span>
+</button>
+</div>
+<button class="h-8 px-3 text-text-secondary hover:text-signal-destructive hover:bg-error-container/20 rounded-lg text-body-sm font-medium transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">pause</span>
+<span class="">Pause</span>
+</button>
+</div>
+</div>
+<!-- Card 2: Series A Founder Sourcing -->
+<div class="bg-surface-card border border-surface-stroke rounded-xl p-6 shadow-xs hover:border-surface-stroke/80 transition-all duration-200 flex flex-col justify-between group">
+<div>
+<div class="flex items-start justify-between gap-3 mb-4">
+<div>
+<div class="flex items-center gap-2 mb-1.5">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] bg-secondary-fixed/30 text-on-secondary-container font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+Active
+</span>
+<span class="text-[11px] text-text-secondary border border-surface-stroke rounded px-2 py-0.5 bg-surface-inset">
+Warm Introductions
+</span>
+</div>
+<h3 class="text-headline-md font-semibold text-text-carbon tracking-tight group-hover:text-primary transition-colors">
+Series A Founder Sourcing
+</h3>
+</div>
+<button class="text-text-ghost hover:text-text-carbon p-1 rounded transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+<div class="grid grid-cols-4 gap-3 border-y border-surface-stroke/70 py-4 mb-5">
+<div>
+<span class="text-[11px] uppercase tracking-wider text-text-secondary font-medium">Sent</span>
+<div class="text-headline-md font-semibold text-text-carbon mt-1">450</div>
+<span class="text-[11px] text-text-secondary">Accounts</span>
+</div>
+<div>
+<span class="text-[11px] uppercase tracking-wider text-text-secondary font-medium">Open Rate</span>
+<div class="text-headline-md font-semibold text-text-carbon mt-1">82.1%</div>
+<span class="text-[11px] text-secondary font-medium">Verified</span>
+</div>
+<div>
+<span class="text-[11px] uppercase tracking-wider text-text-secondary font-medium">Reply</span>
+<div class="text-headline-md font-semibold text-primary mt-1">24.5%</div>
+<span class="text-[11px] text-text-secondary">110 replies</span>
+</div>
+<div>
+<span class="text-[11px] uppercase tracking-wider text-text-secondary font-medium">Deals</span>
+<div class="text-headline-md font-semibold text-secondary mt-1">9</div>
+<span class="text-[11px] text-secondary font-medium">In Review</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-2">
+<button class="h-8 px-3 bg-surface-inset hover:bg-surface-stroke text-text-carbon rounded-lg text-body-sm font-medium transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px]">edit</span>
+<span class="">Edit Sequence</span>
+</button>
+<button class="h-8 px-3 bg-surface-inset hover:bg-surface-stroke text-text-carbon rounded-lg text-body-sm font-medium transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px]">insights</span>
+<span class="">Analytics</span>
+</button>
+</div>
+<button class="h-8 px-3 text-text-secondary hover:text-signal-destructive hover:bg-error-container/20 rounded-lg text-body-sm font-medium transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">pause</span>
+<span class="">Pause</span>
+</button>
+</div>
+</div>
+<!-- Card 3: Product Hunt Inbound Nurture -->
+<div class="bg-surface-card border border-surface-stroke rounded-xl p-6 shadow-xs hover:border-surface-stroke/80 transition-all duration-200 flex flex-col justify-between group">
+<div>
+<div class="flex items-start justify-between gap-3 mb-4">
+<div>
+<div class="flex items-center gap-2 mb-1.5">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] bg-secondary-fixed/30 text-on-secondary-container font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+Active
+</span>
+<span class="text-[11px] text-text-secondary border border-surface-stroke rounded px-2 py-0.5 bg-surface-inset">
+Drip Campaign
+</span>
+</div>
+<h3 class="text-headline-md font-semibold text-text-carbon tracking-tight group-hover:text-primary transition-colors">
+Product Hunt Inbound Nurture
+</h3>
+</div>
+<button class="text-text-ghost hover:text-text-carbon p-1 rounded transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+<div class="grid grid-cols-4 gap-3 border-y border-surface-stroke/70 py-4 mb-5">
+<div>
+<span class="text-[11px] uppercase tracking-wider text-text-secondary font-medium">Sent</span>
+<div class="text-headline-md font-semibold text-text-carbon mt-1">890</div>
+<span class="text-[11px] text-text-secondary">Subscribers</span>
+</div>
+<div>
+<span class="text-[11px] uppercase tracking-wider text-text-secondary font-medium">Open Rate</span>
+<div class="text-headline-md font-semibold text-text-carbon mt-1">54.2%</div>
+<span class="text-[11px] text-text-secondary">Normal</span>
+</div>
+<div>
+<span class="text-[11px] uppercase tracking-wider text-text-secondary font-medium">Reply</span>
+<div class="text-headline-md font-semibold text-primary mt-1">12.1%</div>
+<span class="text-[11px] text-text-secondary">108 replies</span>
+</div>
+<div>
+<span class="text-[11px] uppercase tracking-wider text-text-secondary font-medium">Conversions</span>
+<div class="text-headline-md font-semibold text-secondary mt-1">5</div>
+<span class="text-[11px] text-secondary font-medium">Self-serve</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-2">
+<button class="h-8 px-3 bg-surface-inset hover:bg-surface-stroke text-text-carbon rounded-lg text-body-sm font-medium transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px]">edit</span>
+<span class="">Edit Sequence</span>
+</button>
+<button class="h-8 px-3 bg-surface-inset hover:bg-surface-stroke text-text-carbon rounded-lg text-body-sm font-medium transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px]">insights</span>
+<span class="">Analytics</span>
+</button>
+</div>
+<button class="h-8 px-3 text-text-secondary hover:text-signal-destructive hover:bg-error-container/20 rounded-lg text-body-sm font-medium transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">pause</span>
+<span class="">Pause</span>
+</button>
+</div>
+</div>
+<!-- Card 4: EMEA Expansion Outbound -->
+<div class="bg-surface-card border border-surface-stroke rounded-xl p-6 shadow-xs hover:border-surface-stroke/80 transition-all duration-200 flex flex-col justify-between group">
+<div>
+<div class="flex items-start justify-between gap-3 mb-4">
+<div>
+<div class="flex items-center gap-2 mb-1.5">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] bg-surface-container-high text-primary font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+Scheduled
+</span>
+<span class="text-[11px] text-text-secondary border border-surface-stroke rounded px-2 py-0.5 bg-surface-inset">
+Multilingual
+</span>
+</div>
+<h3 class="text-headline-md font-semibold text-text-carbon tracking-tight group-hover:text-primary transition-colors">
+EMEA Expansion Outbound
+</h3>
+</div>
+<button class="text-text-ghost hover:text-text-carbon p-1 rounded transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+<div class="flex items-center gap-3 my-4 p-3 bg-surface-inset rounded-lg border border-surface-stroke">
+<span class="material-symbols-outlined text-primary text-[20px]">schedule</span>
+<div class="flex flex-col">
+<span class="text-[13px] font-medium text-text-carbon">Scheduled to launch tomorrow at 09:00 CET</span>
+<span class="text-[12px] text-text-secondary">3,400 verified recipients ready</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-3 border-y border-surface-stroke/70 py-4 mb-5">
+<div>
+<span class="text-[11px] uppercase tracking-wider text-text-secondary font-medium">Recipients</span>
+<div class="text-headline-md font-semibold text-text-carbon mt-1">3,400</div>
+<span class="text-[11px] text-text-secondary">EU Enterprise</span>
+</div>
+<div>
+<span class="text-[11px] uppercase tracking-wider text-text-secondary font-medium">Deliverability</span>
+<div class="text-headline-md font-semibold text-secondary mt-1">99.4%</div>
+<span class="text-[11px] text-secondary font-medium">SPF / DKIM Ready</span>
+</div>
+<div>
+<span class="text-[11px] uppercase tracking-wider text-text-secondary font-medium">Languages</span>
+<div class="text-headline-md font-semibold text-text-carbon mt-1">DE, FR, EN</div>
+<span class="text-[11px] text-text-secondary">Localized</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-2">
+<button class="h-8 px-3 bg-surface-inset hover:bg-surface-stroke text-text-carbon rounded-lg text-body-sm font-medium transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px]">edit</span>
+<span class="">Edit Sequence</span>
+</button>
+<button class="h-8 px-3 bg-primary hover:bg-primary-container text-on-primary rounded-lg text-body-sm font-medium transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px]">play_arrow</span>
+<span class="">Launch Now</span>
+</button>
+</div>
+<button class="h-8 px-3 text-text-secondary hover:text-text-carbon rounded-lg text-body-sm font-medium transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span class="">Settings</span>
+</button>
+</div>
+</div></div>
+<!-- Footer Quick Status / Activity Ribbon -->
+<div class="p-4 bg-surface-card border border-surface-stroke rounded-xl flex flex-col md:flex-row items-center justify-between gap-4 text-body-sm text-text-secondary shadow-xs"><div class="flex items-center gap-2.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+
+</div>
+<div class="flex items-center gap-4 text-[12px] text-text-secondary">
+
+<span class="h-3 w-px bg-surface-stroke"></span>
+<a class="text-primary hover:underline font-medium" href="#">Export Activity Report →</a>
+</div></div>
+</main>
+</div>
+
+
+</body></html>

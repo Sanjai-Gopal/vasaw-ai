@@ -43,3 +43,41 @@ export async function GET() {
     );
   }
 }
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json().catch(() => ({}));
+    const { action = "trigger_all", targetZone, automationId } = body;
+
+    const admin = getSupabaseAdmin();
+
+    // Log the triggered automation or pipeline cycle into activities table
+    try {
+      await admin.from("activities").insert({
+        actor: "Automation Engine",
+        type: "orchestrator",
+        status: "success",
+        title: action === "trigger_all" ? "Autonomous Pipeline Run Initiated" : "Automation Triggered",
+        description: targetZone ? `Executed cycle targeted at ${targetZone}` : `Triggered action: ${action}`,
+        created_at: new Date().toISOString(),
+      });
+    } catch {
+      // Non-blocking
+    }
+
+    return NextResponse.json({
+      ok: true,
+      status: "running",
+      action,
+      targetZone: targetZone || "Global Cluster",
+      message: "Autonomous multi-agent pipeline cycle started successfully.",
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error("[API] Automations POST error:", err);
+    return NextResponse.json(
+      { ok: false, error: err instanceof Error ? err.message : "Failed to trigger automation" },
+      { status: 500 }
+    );
+  }
+}

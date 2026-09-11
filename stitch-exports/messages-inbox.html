@@ -1,0 +1,146 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>VASAW AI - Messages &amp; Intelligence Inbox</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary": "#ffffff",
+            "tertiary-container": "#7d4ce7",
+            "dark-primary": "#00f0ff",
+            "tertiary": "#632ecd",
+            "primary-container": "#2563eb",
+            "secondary-fixed-dim": "#4edea3",
+            "inverse-on-surface": "#eef0ff",
+            "signal-warning": "#f59e0b",
+            "on-tertiary-container": "#f6edff",
+            "surface-dim": "#d4d9f2",
+            "on-tertiary-fixed-variant": "#5516be",
+            "text-body": "#334155",
+            "on-primary-fixed": "#00174b",
+            "secondary-fixed": "#6ffbbe",
+            "on-tertiary-fixed": "#23005c",
+            "text-secondary": "#64748b",
+            "on-primary-container": "#eeefff",
+            "on-surface-variant": "#434655",
+            "on-secondary": "#ffffff",
+            "surface-container-high": "#e3e7ff",
+            "surface-container-highest": "#dce1fb",
+            "on-primary": "#ffffff",
+            "on-primary-fixed-variant": "#003ea8",
+            "surface-tint": "#0053db",
+            "tertiary-fixed": "#e9ddff",
+            "primary-fixed-dim": "#b4c5ff",
+            "surface-container-low": "#f2f3ff",
+            "text-ghost": "#94a3b8",
+            "on-error": "#ffffff",
+            "surface-bright": "#faf8ff",
+            "on-secondary-container": "#00714d",
+            "surface-canvas": "#f8fafc",
+            "tertiary-fixed-dim": "#d0bcff",
+            "surface-container": "#eaedff",
+            "dark-card": "#0e0e12",
+            "on-secondary-fixed": "#002113",
+            "on-error-container": "#93000a",
+            "secondary-container": "#6cf8bb",
+            "dark-canvas": "#09090b",
+            "outline": "#737686",
+            "on-surface": "#151b2d",
+            "surface-inset": "#f1f5f9",
+            "on-secondary-fixed-variant": "#005236",
+            "text-carbon": "#020617",
+            "surface-container-lowest": "#ffffff",
+            "secondary": "#006c49",
+            "error-container": "#ffdad6",
+            "inverse-primary": "#b4c5ff",
+            "background": "#faf8ff",
+            "surface-card": "#ffffff",
+            "surface-stroke": "#e2e8f0",
+            "outline-variant": "#c3c6d7",
+            "primary-fixed": "#dbe1ff",
+            "dark-text": "#f4f4f5",
+            "on-background": "#151b2d",
+            "dark-secondary": "#00ff88",
+            "inverse-surface": "#2a3043",
+            "surface-variant": "#dce1fb",
+            "signal-destructive": "#f43f5e",
+            "error": "#ba1a1a",
+            "surface": "#faf8ff",
+            "dark-stroke": "#232329",
+            "primary": "#004ac6"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xs": "0.25rem",
+            "margin": "2rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2rem",
+            "gutter": "1.5rem",
+            "space-md": "1rem",
+            "gutter-mobile": "1rem",
+            "margin-mobile": "1rem"
+          },
+          "fontFamily": {
+            "display-hero": ["Inter"],
+            "body-base": ["Inter"],
+            "headline-sm": ["Inter"],
+            "display-hero-mobile": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-md": ["Inter"],
+            "label-caps": ["Inter"],
+            "headline-lg": ["Inter"],
+            "label-mono": ["JetBrains Mono"],
+            "headline-xl": ["Inter"]
+          },
+          "fontSize": {
+            "display-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "700" }],
+            "body-base": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "headline-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "display-hero-mobile": ["26px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+            "headline-md": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "headline-lg": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "label-mono": ["12px", { "lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "headline-xl": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-slate-50 dark:bg-[#0B0F17] text-slate-900 dark:text-slate-100 antialiased min-h-screen selection:bg-blue-100 selection:text-blue-900 flex overflow-hidden font-body-base">
+<!-- SideNavBar Component -->
+<aside class="flex flex-col justify-between h-screen w-64 p-4 border-r border-slate-200 dark:border-slate-800 fixed left-0 top-0 bg-white dark:bg-[#111827] z-30 select-none transition-colors duration-200"><div class="flex flex-col gap-5"><div class="flex items-center gap-3 px-2 pt-1"><div class="w-9 h-9 rounded-xl bg-slate-900 dark:bg-blue-600 flex items-center justify-center text-white font-headline-md tracking-tight shadow-sm font-bold"><span class="">V</span></div><div class="flex flex-col"><div class="flex items-center gap-1.5"><span class="text-headline-sm font-bold text-slate-900 dark:text-white tracking-tight">VASAW</span><span class="px-1.5 py-0.2 rounded text-[10px] font-medium bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/40">AI</span></div><span class="text-[11px] text-slate-500 dark:text-slate-400">Autonomous Outreach</span></div></div><button class="w-full flex items-center justify-center gap-2 h-9 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white text-[13px] font-medium transition-all shadow-sm active:scale-[0.98]"><span class="material-symbols-outlined text-[16px]">add</span><span class="">New Campaign</span></button><nav class="flex flex-col gap-1"><a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 rounded-lg text-[13px] font-medium hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white transition-colors" href="#"><span class="material-symbols-outlined text-[18px]">dashboard</span><span class="">Dashboard</span></a><a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 rounded-lg text-[13px] font-medium hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white transition-colors" href="#"><span class="material-symbols-outlined text-[18px]">campaign</span><span class="">Campaigns</span></a><a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 rounded-lg text-[13px] font-medium hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white transition-colors" href="#"><span class="material-symbols-outlined text-[18px]">group</span><span class="">Leads</span></a><a class="flex items-center gap-3 px-3 py-2 text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 rounded-lg text-[13px] font-medium border-l-2 border-blue-600 dark:border-blue-500" href="#"><span class="material-symbols-outlined text-[18px] text-blue-600 dark:text-blue-400" style="font-variation-settings: 'FILL' 1;">chat_bubble</span><span class="flex-1">Messages</span><span class="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-300 text-[11px] font-semibold">4 unread</span></a><a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 rounded-lg text-[13px] font-medium hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white transition-colors" href="#"><span class="material-symbols-outlined text-[18px]">smart_toy</span><span class="">AI Agents</span></a><a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 rounded-lg text-[13px] font-medium hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white transition-colors" href="#"><span class="material-symbols-outlined text-[18px]">workflow</span><span class="">Automation</span></a></nav></div><div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-2"><a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 rounded-lg text-[13px] font-medium hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white transition-colors" href="#"><span class="material-symbols-outlined text-[18px]">settings</span><span class="">Settings</span></a><div class="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-800/80"><div class="flex items-center gap-2"><span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span><span class="text-[11px] text-slate-600 dark:text-slate-400 font-medium">Live Assistant</span></div><span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">Active</span></div></div></aside>
+<!-- Main Shell Wrapper (offset by left rail 256px) -->
+<div class="flex-1 ml-64 flex flex-col h-screen overflow-hidden">
+<!-- TopNavBar Component -->
+<header class="flex justify-between items-center w-full px-6 h-16 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-[#111827]/95 backdrop-blur-md sticky top-0 z-20 transition-colors duration-200"><div class="flex items-center gap-3 w-80"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span><input class="w-full h-9 pl-9 pr-8 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-lg text-[13px] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Search messages, leads, keywords..." type="text"></div></div><div class="flex items-center gap-2.5"><div class="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1"></div><button class="flex items-center gap-1.5 h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 text-[12px] font-medium transition-all shadow-xs" id="theme-toggle-btn" onclick="document.documentElement.classList.toggle('dark'); const icon = this.querySelector('.theme-icon'); if (document.documentElement.classList.contains('dark')) { icon.textContent = 'light_mode'; } else { icon.textContent = 'dark_mode'; }"><span class="material-symbols-outlined theme-icon text-[18px]">dark_mode</span><span class="theme-text text-[12px]">Theme</span></button><button class="w-9 h-9 flex items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-100 transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span></button><button class="w-9 h-9 flex items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-100 transition-colors"><span class="material-symbols-outlined text-[20px]">help_outline</span></button><div class="flex items-center gap-2 pl-1 cursor-pointer"><div class="w-8 h-8 rounded-full bg-blue-600 text-white font-semibold text-[13px] flex items-center justify-center shadow-xs"><span class="">S</span></div></div></div></header>
+<!-- Split Pane Inbox Area -->
+<div class="flex-1 flex overflow-hidden">
+<!-- LEFT PANE: Message Threads List -->
+<section class="w-96 flex flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] overflow-hidden shrink-0 transition-colors duration-200"><div class="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-col gap-3"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><h1 class="font-bold text-[18px] text-slate-900 dark:text-white tracking-tight">Inbox</h1><span class="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-medium">28 Conversations</span></div><button class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Filter settings"><span class="material-symbols-outlined text-[18px]">tune</span></button></div><div class="relative"><span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[16px]">search</span><input class="w-full h-8 pl-8 pr-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-lg text-[12px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" placeholder="Filter by sender, company or tag..." type="text"></div><div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar"><button class="px-2.5 py-1 rounded-md text-[11px] font-medium bg-slate-900 text-white dark:bg-white dark:text-slate-900 whitespace-nowrap">All</button><button class="px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap">Needs Reply (4)</button><button class="px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap">High Intent</button><button class="px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap">Automated</button></div></div><div class="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/70"><div class="p-3.5 bg-blue-50/60 dark:bg-blue-950/20 border-l-2 border-blue-600 dark:border-blue-500 cursor-pointer transition-colors duration-150 hover:bg-blue-50 dark:hover:bg-blue-950/40"><div class="flex items-start justify-between gap-2 mb-1"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-600 ring-2 ring-blue-200 dark:ring-blue-900"></span><span class="font-semibold text-[13px] text-slate-900 dark:text-white">David Vance</span><span class="text-[12px] text-slate-500 dark:text-slate-400">· CloudMatrix</span></div><span class="text-[11px] text-slate-400">2m ago</span></div><p class="text-[13px] text-slate-700 dark:text-slate-300 line-clamp-1 mb-2 font-normal">Requested team pricing breakdown and SLA terms for our Q3 expansion...</p><div class="flex items-center justify-between"><span class="text-[11px] text-blue-600 dark:text-blue-400 flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-[13px]">bolt</span>Smart Draft Ready</span></div></div><div class="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors duration-150"><div class="flex items-start justify-between gap-2 mb-1"><div class="flex items-center gap-2"><span class="font-medium text-[13px] text-slate-900 dark:text-white">Elena Rostova</span><span class="text-[12px] text-slate-500 dark:text-slate-400">· HyperScale</span></div><span class="text-[11px] text-slate-400">14m ago</span></div><p class="text-[13px] text-slate-600 dark:text-slate-400 line-clamp-1 mb-2">Booked a 30-min discovery call on Thursday via Calendar sync.</p><div class="flex items-center justify-between"><span class="text-[11px] text-slate-400">Calendar sync</span></div></div><div class="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors duration-150"><div class="flex items-start justify-between gap-2 mb-1"><div class="flex items-center gap-2"><span class="font-medium text-[13px] text-slate-900 dark:text-white">Marcus Sterling</span><span class="text-[12px] text-slate-500 dark:text-slate-400">· NexusLogic</span></div><span class="text-[11px] text-slate-400">1h ago</span></div><p class="text-[13px] text-slate-600 dark:text-slate-400 line-clamp-1 mb-2">Can you send over API documentation regarding webhook schemas?</p><div class="flex items-center justify-between"><span class="text-[11px] text-slate-400">Replied</span></div></div><div class="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors duration-150"><div class="flex items-start justify-between gap-2 mb-1"><div class="flex items-center gap-2"><span class="font-medium text-[13px] text-slate-900 dark:text-white">Sarah Chen</span><span class="text-[12px] text-slate-500 dark:text-slate-400">· FinTech Flow</span></div><span class="text-[11px] text-slate-400">3h ago</span></div><p class="text-[13px] text-slate-600 dark:text-slate-400 line-clamp-1 mb-2">Thanks for reaching out, let's connect next week after our board meeting.</p><div class="flex items-center justify-between"><div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-800/40 text-[11px] text-amber-700 dark:text-amber-300"></div><span class="text-[11px] text-slate-400">Scheduled 4d</span></div></div></div></section>
+<!-- RIGHT PANE: Active Conversation & AI Copilot Workspace -->
+<section class="flex-1 flex flex-col bg-slate-50 dark:bg-[#0B0F17] overflow-hidden transition-colors duration-200"><div class="px-6 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-[#111827]/90 backdrop-blur-sm flex items-center justify-between"><div class="flex items-center gap-3"><div><div class="flex items-center gap-2"><h2 class="font-bold text-[16px] text-slate-900 dark:text-white tracking-tight">David Vance</h2><div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/80 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-300 text-[11px] font-semibold"></div></div><div class="flex items-center gap-2.5 text-[12px] text-slate-500 dark:text-slate-400 mt-0.5"><span class="flex items-center gap-1 text-slate-700 dark:text-slate-300 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Active conversation</span><span class="">·</span><span class="">2,400+ Employees</span><span class="">·</span><span class="">San Francisco, CA</span></div></div></div><div class="flex items-center gap-2"><button class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[12px] font-medium flex items-center gap-1.5 shadow-xs transition-colors"><span class="material-symbols-outlined text-[15px]">person</span><span class="">CRM&nbsp;</span></button><button class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[12px] font-medium flex items-center gap-1.5 shadow-xs transition-colors"><span class="material-symbols-outlined text-[15px]">tune</span><span class="">Preferences</span></button><button class="h-8 w-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center justify-center shadow-xs transition-colors"><span class="material-symbols-outlined text-[16px]">more_horiz</span></button></div></div><div class="px-6 py-2 bg-slate-100/70 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-[12px] text-slate-600 dark:text-slate-400"><div class="flex items-center gap-3"><span class=""><strong class="font-medium text-slate-800 dark:text-slate-200">Campaign:</strong> Q3 Inbound Growth</span><span class="">·</span><span class=""><strong class="font-medium text-slate-800 dark:text-slate-200">Stage:</strong> Discovery &amp; Evaluation</span><span class="">·</span><span class=""><strong class="font-medium text-slate-800 dark:text-slate-200">Lead Owner:</strong> Sarah Jenkins</span></div><div class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium"></div></div><div class="flex-1 overflow-y-auto p-6 space-y-5"><div class="flex items-start gap-3 max-w-2xl"><div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-[12px] flex items-center justify-center shrink-0">DV</div><div class="flex flex-col gap-1"><div class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400"><span class="font-semibold text-slate-800 dark:text-slate-200">David Vance</span><span class="">·</span><span class="">Today at 10:14 AM</span></div><div class="p-4 rounded-2xl rounded-tl-sm bg-white dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700/80 shadow-xs text-[14px] leading-relaxed text-slate-800 dark:text-slate-200">Hi VASAW Team, we reviewed the initial product walkthrough. Our sales engineering team wants to understand the multi-seat pricing breakdown for 40+ SDRs and what dedicated SLA tiers exist for production failover. Could you share details?</div></div></div><div class="flex items-start gap-3 max-w-2xl ml-auto flex-row-reverse"><div class="w-8 h-8 rounded-full bg-blue-600 text-white font-semibold text-[12px] flex items-center justify-center shrink-0 shadow-xs"><span class="material-symbols-outlined text-[15px]">smart_toy</span></div><div class="flex flex-col gap-1 items-end"><div class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400"><span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-medium border border-blue-200/60 dark:border-blue-800/40"><span class="material-symbols-outlined text-[11px]">check_circle</span>Assistant Response</span><span class="">·</span><span class="">10:15 AM</span></div><div class="p-4 rounded-2xl rounded-tr-sm bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/50 text-[14px] leading-relaxed text-slate-800 dark:text-slate-200">Hello David, thanks for the quick follow-up! For 40+ seats on our Enterprise plan, we provision dedicated throughput queues with 99.99% uptime guarantees, seamless workflow orchestration, and bespoke SOC2 Type II compliance logging. I’ve compiled a tailored seat schedule with volume discounting.</div><span class="text-[11px] text-slate-400">Delivered · Opened 2m ago</span></div></div><div class="flex items-start gap-3 max-w-2xl"><div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-[12px] flex items-center justify-center shrink-0">DV</div><div class="flex flex-col gap-1"><div class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400"><span class="font-semibold text-slate-800 dark:text-slate-200">David Vance</span><span class="">·</span><span class="">Just now (2m ago)</span></div><div class="p-4 rounded-2xl rounded-tl-sm bg-white dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700/80 shadow-xs text-[14px] leading-relaxed text-slate-800 dark:text-slate-200">That matches our timeline well. Could you send over the formal Enterprise breakdown with custom SLA options and procurement-ready invoicing terms? We have our budget sign-off call at 3 PM PST.</div></div></div><div class="flex items-center justify-center my-3"><div class="flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] text-slate-600 dark:text-slate-300 shadow-xs"><span class="material-symbols-outlined text-amber-500 text-[14px]">flag</span><span class="">Urgent Request: <strong>Budget decision scheduled for 3:00 PM PST today</strong></span></div></div></div><div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827]"><div class="rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/40 dark:bg-blue-950/20 p-4 shadow-xs"><div class="flex items-center justify-between mb-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[18px]">auto_fix_high</span><span class="font-semibold text-[13px] text-slate-900 dark:text-white">AI Suggested Reply</span></div><div class="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400"><span class="material-symbols-outlined text-[13px]">history</span></div></div><div class="p-3 rounded-lg bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-800 dark:text-slate-200 leading-relaxed"><p class="mb-1 text-[11px] font-medium text-slate-400 dark:text-slate-500">Proposed message:</p>"Here is our Enterprise tier breakdown with custom SLA options and standard 30-day net billing. I’ve attached the full security packet and our master services schedule configured for 45 seats at $110/seat/month ($4,950/mo total), including 24/7 dedicated support engineering. Let me know if you need any adjustments before your 3 PM PST budget call."</div><div class="flex items-center justify-between mt-3"><div class="flex items-center gap-2"><button class="h-8 px-3.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-medium flex items-center gap-1.5 shadow-sm transition-all active:scale-[0.98]"><span class="material-symbols-outlined text-[15px]">send</span><span class="">Send Reply</span></button><button class="h-8 px-3 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-[12px] font-medium flex items-center gap-1.5 transition-all"><span class="material-symbols-outlined text-[15px]">edit</span><span class="">Edit Text</span></button><button class="h-8 px-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 text-[12px] font-medium flex items-center gap-1 transition-colors"><span class="material-symbols-outlined text-[15px]">tune</span><span class="">Shorten</span></button></div><div class="flex items-center gap-2"><span class="text-[11px] text-slate-400">Press ⌘ + Enter to send</span><button class="text-slate-400 hover:text-rose-500 p-1 rounded transition-colors" title="Discard suggestion"><span class="material-symbols-outlined text-[17px]">delete_outline</span></button></div></div></div></div></section>
+</div>
+</div>
+
+
+</body></html>

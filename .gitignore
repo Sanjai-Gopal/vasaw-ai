@@ -46,3 +46,7 @@ next-env.d.ts
 /generated-websites/
 /scratch/
 
+# agents & local tool configs
+.agents/
+
+

@@ -161,6 +161,12 @@ export async function GET() {
       description: a.description ?? undefined,
     }));
 
+    const agentSummary = Object.keys(agentDescriptions).map((id) => ({
+      id,
+      name: agentDescriptions[id],
+      status: getAgentStatus(id, false),
+    }));
+
     return NextResponse.json({
       ok: true,
       stats: {
@@ -176,10 +182,26 @@ export async function GET() {
         campaigns: campaigns?.length ?? 0,
         activeCampaigns: campaigns?.filter((c) => c.status === "active").length ?? 0,
       },
+      pipeline: pipelineStages,
+      agents: agentSummary,
       recentActivity: formattedActivities,
     });
   } catch (err) {
     console.warn("[API] Dashboard stats offline/fallback notice:", err);
+    const fallbackPipeline = [
+      { stage: "Discovered", count: 0, percentage: 0 },
+      { stage: "Qualified", count: 0, percentage: 0 },
+      { stage: "Website Ready", count: 0, percentage: 0 },
+      { stage: "Deployed", count: 0, percentage: 0 },
+      { stage: "Outreached", count: 0, percentage: 0 },
+      { stage: "Interested", count: 0, percentage: 0 },
+    ];
+    const fallbackAgents = Object.keys(agentDescriptions).map((id) => ({
+      id,
+      name: agentDescriptions[id],
+      status: agentStatusMap[id] || "idle",
+    }));
+
     return NextResponse.json({
       ok: true,
       stats: {
@@ -199,17 +221,12 @@ export async function GET() {
           { day: "Sun", leads: 0 },
         ],
         categoryDistribution: [],
-        pipeline: [
-          { stage: "Discovered", count: 0, percentage: 0 },
-          { stage: "Qualified", count: 0, percentage: 0 },
-          { stage: "Website Ready", count: 0, percentage: 0 },
-          { stage: "Deployed", count: 0, percentage: 0 },
-          { stage: "Outreached", count: 0, percentage: 0 },
-          { stage: "Interested", count: 0, percentage: 0 },
-        ],
+        pipeline: fallbackPipeline,
         campaigns: 6,
         activeCampaigns: 2,
       },
+      pipeline: fallbackPipeline,
+      agents: fallbackAgents,
       recentActivity: [],
     });
   }
