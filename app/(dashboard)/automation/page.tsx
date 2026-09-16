@@ -621,7 +621,7 @@ export default function AutomationPage() {
                   </label>
                   <select
                     value={newWorkflowCategory}
-                    onChange={(e) => setNewWorkflowCategory(e.target.value as any)}
+                    onChange={(e) => setNewWorkflowCategory(e.target.value as "outreach" | "enrichment" | "crm")}
                     className="w-full h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs"
                   >
                     <option value="enrichment">Enrichment & Scoring</option>

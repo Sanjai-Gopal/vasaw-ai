@@ -952,7 +952,7 @@ export function CommandCenterView({ stats, activities, onRefresh }: CommandCente
                       Deal Auto-Routed: <span className="text-blue-600 dark:text-blue-400 font-semibold">Ramp Financial</span>
                     </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                      Positive intent detected: 'Schedule meeting'. Priority lead transferred directly to executive inbox.
+                      Positive intent detected: &apos;Schedule meeting&apos;. Priority lead transferred directly to executive inbox.
                     </p>
                   </div>
                 </div>

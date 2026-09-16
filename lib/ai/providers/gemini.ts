@@ -4,9 +4,9 @@ import { classifyError, isAbortError } from "../errors";
 const TIMEOUT_MS = 60_000;
 
 const getModels = () => ({
-  general: process.env.GEMINI_GENERAL_MODEL || "gemini-flash-latest",
-  reasoning: process.env.GEMINI_REASONING_MODEL || "gemini-flash-latest",
-  coding: process.env.GEMINI_CODING_MODEL || "gemini-flash-latest",
+  general: process.env.GEMINI_GENERAL_MODEL || "gemini-3.6-flash",
+  reasoning: process.env.GEMINI_REASONING_MODEL || "gemini-3.6-flash",
+  coding: process.env.GEMINI_CODING_MODEL || "gemini-3.6-flash",
 });
 
 function mapRole(role: ChatMessage["role"]): "user" | "model" {
