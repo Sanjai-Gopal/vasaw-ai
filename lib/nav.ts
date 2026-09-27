@@ -1,13 +1,17 @@
 import {
+  Workflow,
+  Sparkles,
+  KeyRound,
+  Activity,
+  Sliders,
+  Settings,
   LayoutDashboard,
   Target,
   Users,
   Globe,
   MessageSquare,
   Bot,
-  Timer,
-  Settings,
-  Sparkles,
+  Layers,
   type LucideIcon,
 } from "lucide-react";
 
@@ -25,30 +29,28 @@ export interface NavGroup {
 
 export const navGroups: NavGroup[] = [
   {
-    label: "Overview",
+    label: "n8n Studio",
     items: [
-      { title: "Dashboard", href: "/", icon: LayoutDashboard },
-      { title: "Quick Start", href: "/onboarding", icon: Sparkles, badge: "demo" },
+      { title: "Workflows", href: "/automation", icon: Workflow, badge: "canvas" },
+      { title: "Templates", href: "/templates", icon: Sparkles, badge: "new" },
+      { title: "Credentials", href: "/credentials", icon: KeyRound },
+      { title: "Executions", href: "/executions", icon: Activity },
+      { title: "Variables", href: "/variables", icon: Sliders },
     ],
   },
   {
-    label: "Acquisition",
+    label: "VASAW Suite",
     items: [
+      { title: "Command Center", href: "/", icon: LayoutDashboard },
       { title: "Campaigns", href: "/campaigns", icon: Target },
-      { title: "Leads", href: "/leads", icon: Users, badge: "new" },
-      { title: "Websites", href: "/websites", icon: Globe },
-      { title: "Messages", href: "/messages", icon: MessageSquare },
+      { title: "Leads Engine", href: "/leads", icon: Users },
+      { title: "Websites Studio", href: "/websites", icon: Globe },
+      { title: "Messages & Outreach", href: "/messages", icon: MessageSquare },
+      { title: "Agent Fleet", href: "/agents", icon: Bot },
     ],
   },
   {
-    label: "Intelligence",
-    items: [
-      { title: "Agents", href: "/agents", icon: Bot },
-      { title: "Automation", href: "/automation", icon: Timer },
-    ],
+    label: "Settings",
+    items: [{ title: "Instance Config", href: "/settings", icon: Settings }],
   },
-  {
-    label: "Configuration",
-    items: [{ title: "Settings", href: "/settings", icon: Settings }],
-  },
-];
+];

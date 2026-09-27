@@ -194,4 +194,33 @@
     vertical-align: middle;
     animation: blink 1s infinite steps(2, start);
   }
-}
+
+  /* n8n Canvas & UI Utilities */
+  .bg-n8n-dots {
+    background-image: radial-gradient(#313540 1.2px, transparent 1.2px);
+    background-size: 20px 20px;
+  }
+  .bg-n8n-dots-dark {
+    background-color: #131418;
+    background-image: radial-gradient(#2d313b 1.2px, transparent 1.2px);
+    background-size: 20px 20px;
+  }
+  .bg-n8n-coral {
+    background-color: #ff6d5a;
+  }
+  .text-n8n-coral {
+    color: #ff6d5a;
+  }
+  .border-n8n-coral {
+    border-color: #ff6d5a;
+  }
+  @keyframes flowDash {
+    to {
+      stroke-dashoffset: -24;
+    }
+  }
+  .animate-flow-dash {
+    stroke-dasharray: 6 6;
+    animation: flowDash 0.8s linear infinite;
+  }
+}

@@ -22,41 +22,51 @@ export function SidebarContent({
       <div className="space-y-4">
         {/* Workspace Brand Header */}
         <Link
-          href="/"
+          href="/automation"
           onClick={onNavigate}
           className="flex items-center gap-3 px-2 py-1 group"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white font-display font-extrabold text-sm tracking-tight shadow-md shadow-blue-500/25 transition-transform group-hover:scale-105">
-            V
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#ff6d5a] text-white font-extrabold text-sm tracking-tight shadow-md shadow-[#ff6d5a]/30 transition-transform group-hover:scale-105">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="6" r="3" />
+              <circle cx="18" cy="18" r="3" />
+              <path d="M8.7 10.7l6.6-3.4M8.7 13.3l6.6 3.4" />
+            </svg>
           </div>
           <div className="leading-tight">
-            <p className="text-[14.5px] font-display font-extrabold tracking-tight text-slate-950 group-hover:text-blue-600 transition-colors">
-              VASAW AI
-            </p>
-            <p className="text-[11px] font-mono text-slate-400 font-medium">Autonomous Workspace</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[15px] font-black tracking-tight text-slate-900 group-hover:text-[#ff6d5a] transition-colors">
+                n8n
+              </p>
+              <span className="text-[10px] font-mono px-1 rounded bg-[#ff6d5a]/10 text-[#ff6d5a] font-bold">
+                VASAW
+              </span>
+            </div>
+            <p className="text-[10.5px] font-mono text-slate-400 font-medium">Autonomous Automation</p>
           </div>
         </Link>
 
-        {/* Quick Action CTA — Aligned with Stitch */}
+        {/* Primary Action CTA: New Workflow */}
         <div className="px-1">
           <Link
-            href="/campaigns"
+            href="/automation"
             onClick={onNavigate}
-            className="w-full h-9 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-sm shadow-blue-500/20"
+            className="w-full h-9 px-3 rounded-xl bg-[#ff6d5a] hover:bg-[#ea4b35] text-white text-[13px] font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-sm shadow-[#ff6d5a]/25"
           >
             <Plus className="h-4 w-4" />
-            <span className="whitespace-nowrap font-sans font-semibold">New Campaign</span>
+            <span className="whitespace-nowrap font-sans font-bold">New Workflow</span>
           </Link>
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex flex-1 flex-col gap-5 overflow-y-auto px-1">
+        <nav className="flex flex-1 flex-col gap-4 overflow-y-auto px-1">
           {navGroups.map((group) => (
             <div key={group.label}>
-              <p className="mb-1.5 px-2.5 text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
+              <p className="mb-1.5 px-2.5 text-[9.5px] font-mono font-bold uppercase tracking-widest text-slate-400">
                 {group.label}
               </p>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-0.5">
                 {group.items.map((item) => {
                   const active = isActive(item.href);
                   const Icon = item.icon;
@@ -66,10 +76,10 @@ export function SidebarContent({
                       href={item.href}
                       onClick={onNavigate}
                       className={cn(
-                        "group relative flex items-center justify-between rounded-xl px-3 py-2 text-[13px] font-medium transition-all",
+                        "group relative flex items-center justify-between rounded-xl px-3 py-2 text-[12.5px] font-medium transition-all",
                         active
-                          ? "bg-blue-50 text-blue-700 font-semibold border border-blue-200/70 shadow-xs"
-                          : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-950 border border-transparent"
+                          ? "bg-[#ff6d5a]/10 text-[#ea4b35] font-bold border border-[#ff6d5a]/30 shadow-xs"
+                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 border border-transparent"
                       )}
                     >
                       <div className="flex items-center gap-2.5">
@@ -77,7 +87,7 @@ export function SidebarContent({
                           className={cn(
                             "h-4 w-4 transition-colors",
                             active
-                              ? "text-blue-600"
+                              ? "text-[#ff6d5a]"
                               : "text-slate-400 group-hover:text-slate-700"
                           )}
                         />
@@ -87,17 +97,17 @@ export function SidebarContent({
                         {item.badge && (
                           <span
                             className={cn(
-                              "rounded-md px-1.5 py-0.5 text-[10px] font-mono font-bold",
+                              "rounded-md px-1.5 py-0.5 text-[9px] font-mono font-bold uppercase",
                               active
-                                ? "bg-blue-100/80 text-blue-800"
-                                : "bg-slate-100 text-slate-500 group-hover:bg-slate-200/80"
+                                ? "bg-[#ff6d5a]/20 text-[#ea4b35]"
+                                : "bg-slate-100 text-slate-500 group-hover:bg-slate-200"
                             )}
                           >
                             {item.badge}
                           </span>
                         )}
                         {active && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#ff6d5a] animate-pulse" />
                         )}
                       </div>
                     </Link>
@@ -109,28 +119,33 @@ export function SidebarContent({
         </nav>
       </div>
 
-      {/* Operator Status & Profile */}
-      <div className="pt-4 space-y-3 border-t border-slate-200/80">
-        <div className="flex items-center justify-between px-2.5 py-1 text-[11px] text-slate-500 font-mono">
+      {/* Operator Status & Shortcuts Footer */}
+      <div className="pt-3 space-y-2.5 border-t border-slate-200/80">
+        <div className="flex items-center justify-between px-2.5 text-[10.5px] text-slate-400 font-mono">
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            us-east-1
+            n8n core v1.78.2
           </span>
-          <span className="text-slate-400 font-semibold">18ms</span>
+          <span className="text-slate-400 font-semibold">Active</span>
         </div>
 
-        <div className="rounded-xl border border-slate-200/90 bg-slate-50/80 p-2.5 flex items-center gap-3">
-          <Avatar className="h-8 w-8 rounded-lg">
-            <AvatarFallback className="bg-gradient-to-br from-blue-600 to-cyan-500 text-white font-mono font-bold text-xs">
-              S
-            </AvatarFallback>
-          </Avatar>
-          <div className="min-w-0 leading-tight">
-            <p className="truncate text-[12.5px] font-bold text-slate-900">Sanjai</p>
-            <p className="truncate text-[11px] text-slate-500 font-mono">Operator • VASAW</p>
+        <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-2 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Avatar className="h-7 w-7 rounded-lg border border-slate-200">
+              <AvatarFallback className="bg-[#ff6d5a] text-white font-mono font-bold text-xs">
+                S
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0 leading-tight">
+              <p className="truncate text-[12px] font-bold text-slate-900">Sanjai Gopal</p>
+              <p className="truncate text-[10px] text-slate-500 font-mono">Workspace Admin</p>
+            </div>
           </div>
+          <span className="px-1.5 py-0.5 rounded bg-slate-200/60 text-[9px] font-mono text-slate-600 font-bold" title="Press ? for shortcuts">
+            ⌘/
+          </span>
         </div>
       </div>
     </div>
   );
-}
+}

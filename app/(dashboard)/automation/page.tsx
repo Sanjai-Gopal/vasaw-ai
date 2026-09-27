@@ -1,658 +1,885 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Clock,
   Play,
-  RefreshCw,
-  RotateCcw,
-  Timer,
-  XCircle,
-  ArrowRight,
-  Search,
-  CheckCircle2,
-  Globe,
-  Rocket,
-  Send,
-  Zap,
-  Calendar,
+  Plus,
+  Sparkles,
+  Download,
+  Upload,
   Layers,
   Activity,
-  Filter,
-  Download,
-  Plus,
-  MoreVertical,
-  ChevronDown,
-  Sparkles,
+  CheckCircle2,
+  Zap,
+  RotateCcw,
+  Maximize2,
+  Minimize2,
+  StickyNote,
+  Save,
+  Check,
+  Tag,
+  ExternalLink,
+  KeyRound,
   Sliders,
-  Database,
-  Building2,
-  Mail,
-  X,
+  ChevronDown,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { jobs as initialJobs } from "@/lib/data/automation";
-import { formatDateTime, cn } from "@/lib/utils";
-import type { ScheduledJob, JobRun } from "@/lib/types";
-
-interface WorkflowItem {
-  id: string;
-  name: string;
-  description: string;
-  category: "outreach" | "enrichment" | "crm";
-  runsCount: number;
-  active: boolean;
-  steps: string[];
-  icon: React.ElementType;
-  iconBg: string;
-  iconBorder: string;
-  iconColor: string;
-  jobId?: string;
-}
-
-const DEFAULT_WORKFLOWS: WorkflowItem[] = [
-  {
-    id: "wf-1",
-    name: "High-Fit Prospect Fast-Track",
-    description: "When a lead score exceeds 90% and company headcount is 250+, automatically draft a hyper-tailored email and notify assigned SDR via Slack.",
-    category: "enrichment",
-    runsCount: 4812,
-    active: true,
-    steps: ["Trigger: Fit > 90%", "Enrich LinkedIn & GitHub", "Generate Personalized Draft", "Slack Notification"],
-    icon: Sparkles,
-    iconBg: "bg-blue-50 dark:bg-blue-950/60",
-    iconBorder: "border-blue-100 dark:border-blue-900/50",
-    iconColor: "text-blue-600 dark:text-blue-400",
-    jobId: "J-602",
-  },
-  {
-    id: "wf-2",
-    name: "Multi-CRM Bi-directional Sync",
-    description: "Instantly sync conversation stages, SDR notes, and qualification tags directly into your core CRM accounts with deduplication checks.",
-    category: "crm",
-    runsCount: 12650,
-    active: true,
-    steps: ["Trigger: Message Replied", "Parse Sentiment & Next Steps", "Update HubSpot Deal Stage"],
-    icon: Database,
-    iconBg: "bg-purple-50 dark:bg-purple-950/60",
-    iconBorder: "border-purple-100 dark:border-purple-900/50",
-    iconColor: "text-purple-600 dark:text-purple-400",
-    jobId: "J-603",
-  },
-  {
-    id: "wf-3",
-    name: "Smart Inactivity Re-engagement",
-    description: "If an initial touch receives no engagement after 4 business days, cross-reference latest company press releases or hiring signals to trigger a fresh conversational angle.",
-    category: "outreach",
-    runsCount: 3124,
-    active: true,
-    steps: ["Trigger: 4 Days Inactive", "Scan News & Open Roles", "Contextual Follow-up"],
-    icon: Mail,
-    iconBg: "bg-amber-50 dark:bg-amber-950/60",
-    iconBorder: "border-amber-100 dark:border-amber-900/50",
-    iconColor: "text-amber-600 dark:text-amber-400",
-    jobId: "J-606",
-  },
-  {
-    id: "wf-4",
-    name: "Webhook Signal Ingestion",
-    description: "Direct API endpoint ingestion for event signals from Segment, Clearbit, and custom product telemetry events.",
-    category: "enrichment",
-    runsCount: 3594,
-    active: false,
-    steps: ["POST /api/v1/telemetry", "Filter Intent Events", "Assign Pipeline"],
-    icon: Layers,
-    iconBg: "bg-slate-100 dark:bg-slate-800",
-    iconBorder: "border-slate-200 dark:border-slate-700",
-    iconColor: "text-slate-600 dark:text-slate-300",
-    jobId: "J-601",
-  },
-];
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import type {
+  FlowWorkflow,
+  FlowNode,
+  FlowConnection,
+  NodeTypeDefinition,
+  ExecutionLog,
+  CanvasStickyNote,
+} from "@/lib/types/automation-flow";
+import {
+  DEFAULT_FLOW_WORKFLOWS,
+  NODE_TYPE_REGISTRY,
+  simulateNodeExecution,
+} from "@/lib/data/automation-registry";
+import { FlowCanvas } from "@/components/automation/flow-canvas";
+import { N8nNodeModal } from "@/components/automation/n8n-node-modal";
+import { N8nNodeCreatorDrawer } from "@/components/automation/n8n-node-creator-drawer";
+import { TemplateLibraryModal } from "@/components/automation/template-library-modal";
+import { ExecutionConsole } from "@/components/automation/execution-console";
+import { ExecutionsTableView } from "@/components/automation/executions-table-view";
 
 export default function AutomationPage() {
-  const [jobs, setJobs] = React.useState<ScheduledJob[]>(initialJobs);
-  const [workflows, setWorkflows] = React.useState<WorkflowItem[]>(DEFAULT_WORKFLOWS);
-  const [activeTab, setActiveTab] = React.useState<string>("all");
-  const [expandedId, setExpandedId] = React.useState<string | null>(null);
-  const [runningJobId, setRunningJobId] = React.useState<string | null>(null);
-  const [showCreateModal, setShowCreateModal] = React.useState(false);
-  const [newWorkflowName, setNewWorkflowName] = React.useState("");
-  const [newWorkflowCategory, setNewWorkflowCategory] = React.useState<"outreach" | "enrichment" | "crm">("outreach");
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const toggleWorkflow = (id: string) => {
-    setWorkflows((prev) =>
-      prev.map((w) => (w.id === id ? { ...w, active: !w.active } : w))
-    );
-  };
-
-  const runWorkflowNow = (id: string, jobId?: string) => {
-    if (runningJobId) return;
-    setRunningJobId(id);
-    window.setTimeout(() => {
-      setRunningJobId(null);
-      setWorkflows((prev) =>
-        prev.map((w) => (w.id === id ? { ...w, runsCount: w.runsCount + 1 } : w))
-      );
-    }, 1500);
-  };
-
-  const handleCreateWorkflow = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newWorkflowName.trim()) return;
-
-    const newWf: WorkflowItem = {
-      id: `wf-${Date.now()}`,
-      name: newWorkflowName,
-      description: "Custom automated sequence trigger created via Control Center.",
-      category: newWorkflowCategory,
-      runsCount: 0,
-      active: true,
-      steps: ["Trigger: Custom Event", "Filter Criteria", "Execute Action"],
-      icon: Sparkles,
-      iconBg: "bg-blue-50 dark:bg-blue-950/60",
-      iconBorder: "border-blue-100 dark:border-blue-900/50",
-      iconColor: "text-blue-600 dark:text-blue-400",
-    };
-
-    setWorkflows([newWf, ...workflows]);
-    setNewWorkflowName("");
-    setShowCreateModal(false);
-  };
-
-  const handleUseTemplate = (title: string, category: "outreach" | "enrichment" | "crm", steps: string[]) => {
-    const templateWf: WorkflowItem = {
-      id: `wf-template-${Date.now()}`,
-      name: title,
-      description: `Pre-built operational recipe deployed directly from template library.`,
-      category,
-      runsCount: 1,
-      active: true,
-      steps,
-      icon: category === "crm" ? Database : category === "outreach" ? Mail : Sparkles,
-      iconBg: category === "crm" ? "bg-purple-50 dark:bg-purple-950/60" : "bg-blue-50 dark:bg-blue-950/60",
-      iconBorder: "border-slate-200 dark:border-slate-800",
-      iconColor: category === "crm" ? "text-purple-600" : "text-blue-600",
-    };
-    setWorkflows([templateWf, ...workflows]);
-  };
-
-  const filteredWorkflows = workflows.filter((w) => {
-    if (activeTab === "all") return true;
-    if (activeTab === "outreach") return w.category === "outreach";
-    if (activeTab === "enrichment") return w.category === "enrichment";
-    if (activeTab === "crm") return w.category === "crm";
-    return true;
+  // All workflows in state
+  const [workflows, setWorkflows] = React.useState<FlowWorkflow[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("vasaw_automation_workflows");
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          // fallback
+        }
+      }
+    }
+    return DEFAULT_FLOW_WORKFLOWS;
   });
 
-  const activeCount = workflows.filter((w) => w.active).length;
+  // Current active workflow ID (support query param e.g. ?workflowId=...)
+  const [activeWorkflowId, setActiveWorkflowId] = React.useState<string>(() => {
+    return searchParams.get("workflowId") || workflows[0]?.id || "wf-autonomous-email";
+  });
+
+  // Sync if query param changes
+  React.useEffect(() => {
+    const qId = searchParams.get("workflowId");
+    if (qId && workflows.some((w) => w.id === qId)) {
+      setActiveWorkflowId(qId);
+    }
+  }, [searchParams, workflows]);
+
+  // Active workflow object
+  const currentWorkflow =
+    workflows.find((w) => w.id === activeWorkflowId) || workflows[0];
+
+  // View mode: Visual n8n Canvas vs Executions Table
+  const [viewMode, setViewMode] = React.useState<"canvas" | "executions">("canvas");
+
+  // Selected node for selection outline
+  const [selectedNodeId, setSelectedNodeId] = React.useState<string | null>(null);
+
+  // 3-Pane Node Configuration Editor Modal state
+  const [configNodeId, setConfigNodeId] = React.useState<string | null>(null);
+
+  // Node Creator Drawer state
+  const [isCreatorDrawerOpen, setIsCreatorDrawerOpen] = React.useState(false);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = React.useState(false);
+  const [isFullScreen, setIsFullScreen] = React.useState(false);
+
+  // Save workflow feedback state
+  const [isSavedRecently, setIsSavedRecently] = React.useState(false);
+
+  // Execution state
+  const [isExecuting, setIsExecuting] = React.useState(false);
+  const [executionLogs, setExecutionLogs] = React.useState<ExecutionLog[]>([]);
+  const [totalDurationMs, setTotalDurationMs] = React.useState(0);
+  const [completedNodesCount, setCompletedNodesCount] = React.useState(0);
+
+  // Persist workflows to localStorage
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("vasaw_automation_workflows", JSON.stringify(workflows));
+    }
+  }, [workflows]);
+
+  // Update current workflow helper
+  const updateCurrentWorkflow = React.useCallback(
+    (updater: (prev: FlowWorkflow) => FlowWorkflow) => {
+      setWorkflows((prev) =>
+        prev.map((wf) => (wf.id === activeWorkflowId ? updater(wf) : wf))
+      );
+    },
+    [activeWorkflowId]
+  );
+
+  // Toggle workflow active status
+  const handleToggleActive = () => {
+    updateCurrentWorkflow((wf) => ({ ...wf, active: !wf.active }));
+  };
+
+  // Inline rename workflow
+  const handleRenameWorkflow = (newName: string) => {
+    updateCurrentWorkflow((wf) => ({ ...wf, name: newName }));
+  };
+
+  // Save workflow manually
+  const handleSaveWorkflow = () => {
+    setIsSavedRecently(true);
+    setTimeout(() => setIsSavedRecently(false), 2000);
+  };
+
+  // Global Keyboard Shortcuts (Ctrl+S to save, Ctrl+Enter to test, Tab for palette)
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault();
+        handleSaveWorkflow();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        handleRunWorkflow();
+      }
+      if (e.key === "Tab" && !configNodeId && !isCreatorDrawerOpen) {
+        e.preventDefault();
+        setIsCreatorDrawerOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  });
+
+  // Node position change
+  const handleUpdateNodePosition = React.useCallback(
+    (nodeId: string, position: { x: number; y: number }) => {
+      updateCurrentWorkflow((wf) => ({
+        ...wf,
+        nodes: wf.nodes.map((n) => (n.id === nodeId ? { ...n, position } : n)),
+      }));
+    },
+    [updateCurrentWorkflow]
+  );
+
+  // Add new node from drawer
+  const handleAddNodeType = (nodeType: NodeTypeDefinition) => {
+    const newNodeId = `node-${Date.now()}`;
+    const xPos = 220 + Math.floor(Math.random() * 80);
+    const yPos = 180 + Math.floor(Math.random() * 80);
+
+    const newNode: FlowNode = {
+      id: newNodeId,
+      type: nodeType.type,
+      name: nodeType.name,
+      position: { x: xPos, y: yPos },
+      parameters: { ...nodeType.defaultData.parameters },
+      status: "idle",
+      outputData: nodeType.defaultData.defaultOutput,
+    };
+
+    updateCurrentWorkflow((wf) => ({
+      ...wf,
+      nodes: [...wf.nodes, newNode],
+    }));
+
+    setSelectedNodeId(newNodeId);
+    setConfigNodeId(newNodeId);
+  };
+
+  // Delete node
+  const handleDeleteNode = React.useCallback(
+    (nodeId: string) => {
+      updateCurrentWorkflow((wf) => ({
+        ...wf,
+        nodes: wf.nodes.filter((n) => n.id !== nodeId),
+        connections: wf.connections.filter(
+          (c) => c.fromNodeId !== nodeId && c.toNodeId !== nodeId
+        ),
+      }));
+      if (selectedNodeId === nodeId) setSelectedNodeId(null);
+      if (configNodeId === nodeId) setConfigNodeId(null);
+    },
+    [selectedNodeId, configNodeId, updateCurrentWorkflow]
+  );
+
+  // Duplicate node
+  const handleDuplicateNode = React.useCallback(
+    (nodeId: string) => {
+      const target = currentWorkflow?.nodes.find((n) => n.id === nodeId);
+      if (!target) return;
+
+      const newNodeId = `node-${Date.now()}`;
+      const duplicateNode: FlowNode = {
+        ...target,
+        id: newNodeId,
+        name: `${target.name} (Copy)`,
+        position: { x: target.position.x + 40, y: target.position.y + 40 },
+        status: "idle",
+      };
+
+      updateCurrentWorkflow((wf) => ({
+        ...wf,
+        nodes: [...wf.nodes, duplicateNode],
+      }));
+
+      setSelectedNodeId(newNodeId);
+    },
+    [currentWorkflow, updateCurrentWorkflow]
+  );
+
+  // Connections
+  const handleAddConnection = React.useCallback(
+    (connection: FlowConnection) => {
+      updateCurrentWorkflow((wf) => ({
+        ...wf,
+        connections: [...wf.connections, connection],
+      }));
+    },
+    [updateCurrentWorkflow]
+  );
+
+  const handleDeleteConnection = React.useCallback(
+    (connectionId: string) => {
+      updateCurrentWorkflow((wf) => ({
+        ...wf,
+        connections: wf.connections.filter((c) => c.id !== connectionId),
+      }));
+    },
+    [updateCurrentWorkflow]
+  );
+
+  // Parameters and properties
+  const handleUpdateNodeParameters = React.useCallback(
+    (nodeId: string, parameters: Record<string, any>) => {
+      updateCurrentWorkflow((wf) => ({
+        ...wf,
+        nodes: wf.nodes.map((n) => (n.id === nodeId ? { ...n, parameters } : n)),
+      }));
+    },
+    [updateCurrentWorkflow]
+  );
+
+  const handleUpdateNodeName = React.useCallback(
+    (nodeId: string, name: string) => {
+      updateCurrentWorkflow((wf) => ({
+        ...wf,
+        nodes: wf.nodes.map((n) => (n.id === nodeId ? { ...n, name } : n)),
+      }));
+    },
+    [updateCurrentWorkflow]
+  );
+
+  const handleToggleDisable = React.useCallback(
+    (nodeId: string) => {
+      updateCurrentWorkflow((wf) => ({
+        ...wf,
+        nodes: wf.nodes.map((n) =>
+          n.id === nodeId ? { ...n, disabled: !n.disabled } : n
+        ),
+      }));
+    },
+    [updateCurrentWorkflow]
+  );
+
+  // Sticky Notes Handlers
+  const handleAddStickyNote = () => {
+    const newNote: CanvasStickyNote = {
+      id: `note-${Date.now()}`,
+      text: "Document workflow logic or notes here...",
+      position: { x: 240, y: 160 },
+      width: 250,
+      height: 160,
+      color: "yellow",
+    };
+    updateCurrentWorkflow((wf) => ({
+      ...wf,
+      stickyNotes: [...(wf.stickyNotes || []), newNote],
+    }));
+  };
+
+  const handleUpdateStickyNote = (noteId: string, updates: Partial<CanvasStickyNote>) => {
+    updateCurrentWorkflow((wf) => ({
+      ...wf,
+      stickyNotes: (wf.stickyNotes || []).map((n) => (n.id === noteId ? { ...n, ...updates } : n)),
+    }));
+  };
+
+  const handleDeleteStickyNote = (noteId: string) => {
+    updateCurrentWorkflow((wf) => ({
+      ...wf,
+      stickyNotes: (wf.stickyNotes || []).filter((n) => n.id !== noteId),
+    }));
+  };
+
+  // Run single node step
+  const handleRunSingleStep = React.useCallback(
+    (nodeId: string) => {
+      const node = currentWorkflow?.nodes.find((n) => n.id === nodeId);
+      if (!node) return;
+
+      updateCurrentWorkflow((wf) => ({
+        ...wf,
+        nodes: wf.nodes.map((n) =>
+          n.id === nodeId ? { ...n, status: "running" } : n
+        ),
+      }));
+
+      window.setTimeout(async () => {
+        const { outputData, executionTimeMs, logs } = simulateNodeExecution(node);
+
+        if (node.type === "action_resend_email") {
+          try {
+            const emailRes = await fetch("/api/email/send", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                to: node.parameters.to || "founder@kovaibakery.com",
+                from: node.parameters.from,
+                subject: node.parameters.subject,
+                html: node.parameters.bodyHtml,
+                apiKey: node.parameters.apiKey,
+                businessName: "Kovai Artisanal Bakery",
+              }),
+            });
+            const emailData = await emailRes.json();
+            if (emailData.ok) {
+              logs.push({
+                id: `log-step-em-${Date.now()}`,
+                nodeId: node.id,
+                nodeName: node.name,
+                timestamp: new Date().toISOString(),
+                level: "success",
+                message: `Automated email dispatched via ${emailData.provider} to ${emailData.to}! Message ID: ${emailData.messageId}`,
+                durationMs: 140,
+              });
+              outputData.deliveryReceipt = emailData;
+            }
+          } catch {
+            // fallback
+          }
+        }
+
+        updateCurrentWorkflow((wf) => ({
+          ...wf,
+          nodes: wf.nodes.map((n) =>
+            n.id === nodeId
+              ? {
+                  ...n,
+                  status: "success",
+                  outputData,
+                  executionTimeMs,
+                  lastRunAt: new Date().toISOString(),
+                }
+              : n
+          ),
+        }));
+
+        setExecutionLogs((prev) => [...prev, ...logs]);
+      }, 500);
+    },
+    [currentWorkflow, updateCurrentWorkflow]
+  );
+
+  // Full Workflow Sequential Execution Runner
+  const handleRunWorkflow = async () => {
+    if (isExecuting || !currentWorkflow || currentWorkflow.nodes.length === 0) return;
+
+    setIsExecuting(true);
+    setExecutionLogs([]);
+    setTotalDurationMs(0);
+    setCompletedNodesCount(0);
+
+    const initialLog: ExecutionLog = {
+      id: `log-init-${Date.now()}`,
+      nodeId: "flow",
+      nodeName: currentWorkflow.name,
+      timestamp: new Date().toISOString(),
+      level: "info",
+      message: `Starting autonomous execution of ${currentWorkflow.nodes.length} nodes...`,
+    };
+    setExecutionLogs([initialLog]);
+
+    // Reset nodes to idle
+    updateCurrentWorkflow((wf) => ({
+      ...wf,
+      nodes: wf.nodes.map((n) => ({ ...n, status: "idle" })),
+    }));
+
+    let accumulatedTime = 0;
+    let currentPayload: Record<string, any> = {};
+
+    for (let i = 0; i < currentWorkflow.nodes.length; i++) {
+      const node = currentWorkflow.nodes[i];
+      if (node.disabled) continue;
+
+      updateCurrentWorkflow((wf) => ({
+        ...wf,
+        nodes: wf.nodes.map((n) => (n.id === node.id ? { ...n, status: "running" } : n)),
+      }));
+
+      const stepDuration = Math.floor(Math.random() * 180) + 180;
+      await new Promise((res) => setTimeout(res, stepDuration));
+
+      const { outputData, executionTimeMs, logs } = simulateNodeExecution(
+        node,
+        currentPayload
+      );
+
+      if (node.type === "action_resend_email") {
+        try {
+          const emailRes = await fetch("/api/email/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              to: node.parameters.to || "founder@kovaibakery.com",
+              from: node.parameters.from,
+              subject: node.parameters.subject,
+              html: node.parameters.bodyHtml,
+              apiKey: node.parameters.apiKey,
+              businessName: currentPayload?.lead?.businessName || "Kovai Artisanal Bakery",
+            }),
+          });
+          const emailData = await emailRes.json();
+          if (emailData.ok) {
+            logs.push({
+              id: `log-em-${Date.now()}`,
+              nodeId: node.id,
+              nodeName: node.name,
+              timestamp: new Date().toISOString(),
+              level: "success",
+              message: `Automated email dispatched via ${emailData.provider} to ${emailData.to}! Message ID: ${emailData.messageId}`,
+              durationMs: 140,
+            });
+            outputData.deliveryReceipt = emailData;
+          }
+        } catch {
+          // fallback
+        }
+      }
+
+      currentPayload = outputData;
+      accumulatedTime += executionTimeMs;
+
+      updateCurrentWorkflow((wf) => ({
+        ...wf,
+        nodes: wf.nodes.map((n) =>
+          n.id === node.id
+            ? {
+                ...n,
+                status: "success",
+                outputData,
+                inputData: currentPayload,
+                executionTimeMs,
+                itemsCount: (n.itemsCount || 1) + 1,
+                lastRunAt: new Date().toISOString(),
+              }
+            : n
+        ),
+      }));
+
+      setExecutionLogs((prev) => [...prev, ...logs]);
+      setCompletedNodesCount(i + 1);
+      setTotalDurationMs(accumulatedTime);
+    }
+
+    const finishLog: ExecutionLog = {
+      id: `log-finish-${Date.now()}`,
+      nodeId: "flow",
+      nodeName: currentWorkflow.name,
+      timestamp: new Date().toISOString(),
+      level: "success",
+      message: `Workflow completed successfully in ${accumulatedTime}ms across all active nodes.`,
+      durationMs: accumulatedTime,
+    };
+    setExecutionLogs((prev) => [...prev, finishLog]);
+
+    updateCurrentWorkflow((wf) => ({
+      ...wf,
+      runsCount: wf.runsCount + 1,
+      lastExecution: {
+        id: `exec-${Date.now()}`,
+        status: "success",
+        startedAt: new Date().toISOString(),
+        durationMs: accumulatedTime,
+        stepsCompleted: wf.nodes.length,
+      },
+    }));
+
+    setIsExecuting(false);
+  };
+
+  // Export Workflow to JSON
+  const handleExportWorkflowJson = () => {
+    const exportData = {
+      name: currentWorkflow.name,
+      nodes: currentWorkflow.nodes,
+      connections: currentWorkflow.connections,
+      stickyNotes: currentWorkflow.stickyNotes || [],
+      active: currentWorkflow.active,
+      settings: {
+        executionOrder: "v1",
+        timezone: "Asia/Kolkata",
+      },
+      meta: {
+        generator: "n8n Studio Clone v1.78.2",
+        exportedAt: new Date().toISOString(),
+      },
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${currentWorkflow.name.toLowerCase().replace(/\s+/g, "-")}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Import Workflow
+  const handleImportWorkflowJson = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        if (json.nodes && Array.isArray(json.nodes)) {
+          const newWf: FlowWorkflow = {
+            id: `wf-imported-${Date.now()}`,
+            name: json.name || "Imported n8n Workflow",
+            description: "Custom imported workflow schema.",
+            category: "ops",
+            active: Boolean(json.active),
+            runsCount: 0,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            nodes: json.nodes,
+            connections: json.connections || [],
+            stickyNotes: json.stickyNotes || [],
+          };
+
+          setWorkflows((prev) => [newWf, ...prev]);
+          setActiveWorkflowId(newWf.id);
+        }
+      } catch (err) {
+        alert("Failed to parse workflow JSON file. Please ensure it is valid JSON.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  const handleSelectTemplate = (template: FlowWorkflow) => {
+    const instantiated: FlowWorkflow = {
+      ...template,
+      id: `wf-${Date.now()}`,
+      name: `${template.name} (Instance)`,
+      runsCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setWorkflows((prev) => [instantiated, ...prev]);
+    setActiveWorkflowId(instantiated.id);
+  };
+
+  const configNode =
+    currentWorkflow?.nodes.find((n) => n.id === configNodeId) || null;
+
+  // Find upstream connected node for input data preview in modal
+  const upstreamConnection = currentWorkflow?.connections.find(
+    (c) => c.toNodeId === configNodeId
+  );
+  const upstreamNode = upstreamConnection
+    ? currentWorkflow?.nodes.find((n) => n.id === upstreamConnection.fromNodeId)
+    : null;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 space-y-8">
-      {/* Page Header with Subtitle & Actions matching Stitch */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Automation Workflows
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Multi-step autonomous triggers, audience routing, and sync rules.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="px-3.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-2 shadow-2xs"
-          >
-            <Filter className="w-3.5 h-3.5 text-slate-400" />
-            <span>Filter</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleUseTemplate("Instant Lead Verification", "enrichment", ["Trigger: Inbound", "Verify Mailbox", "Score Lead"])}
-            className="px-3.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-2 shadow-2xs"
-          >
-            <Download className="w-3.5 h-3.5 text-slate-400" />
-            <span>Import Template</span>
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => setShowCreateModal(true)}
-            className="h-9 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs flex items-center gap-2 shadow-xs transition-colors"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Create Workflow</span>
-          </Button>
-        </div>
-      </div>
-
-      {/* Top 3 Metric Summary Cards matching Stitch */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* Metric 1 */}
-        <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs transition-colors">
-          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
-            <span>Active Workflows</span>
-            <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-              <Zap className="w-4 h-4" />
+    <div
+      className={cn(
+        "space-y-4 font-sans text-slate-100",
+        isFullScreen ? "fixed inset-0 z-50 bg-[#131418] p-4 overflow-hidden" : ""
+      )}
+    >
+      {/* Studio Top Navigation & Control Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        {/* Left: Workflow Selector, Title & Active Switch */}
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#ff6d5a] text-white flex items-center justify-center font-bold shadow-lg shadow-[#ff6d5a]/25">
+              <Zap className="w-5 h-5" />
             </div>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-              {activeCount}
-            </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">
-              of {workflows.length} configured
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-            {workflows.length - activeCount} paused for seasonal adjustments
-          </p>
-        </div>
 
-        {/* Metric 2 */}
-        <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs transition-colors">
-          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
-            <span>Executions (This Month)</span>
-            <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center">
-              <Activity className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-              24,180
-            </span>
-            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
-              +14%
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-            Triggered across email, CRM, and LinkedIn
-          </p>
-        </div>
-
-        {/* Metric 3 */}
-        <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs transition-colors">
-          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
-            <span>Hours Saved</span>
-            <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-              <Clock className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-              168 hrs
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-            Estimated $12,400 team bandwidth reclaimed
-          </p>
-        </div>
-      </div>
-
-      {/* Main Interactive Workflows List Section matching Stitch */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden transition-colors">
-        {/* Filter Tabs & Actions */}
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto max-w-full">
-            {[
-              { id: "all", label: "All Workflows", count: workflows.length },
-              { id: "outreach", label: "Outreach & Follow-ups", count: workflows.filter((w) => w.category === "outreach").length },
-              { id: "enrichment", label: "Enrichment & Scoring", count: workflows.filter((w) => w.category === "enrichment").length },
-              { id: "crm", label: "CRM Sync", count: workflows.filter((w) => w.category === "crm").length },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
-                  activeTab === tab.id
-                    ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold shadow-2xs"
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                )}
-              >
-                {tab.label} ({tab.count})
-              </button>
-            ))}
-          </div>
-
-          <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Last run <span className="font-medium text-slate-700 dark:text-slate-300">4 minutes ago</span>
-          </div>
-        </div>
-
-        {/* Workflow Cards Stack */}
-        <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
-          {filteredWorkflows.map((workflow) => {
-            const Icon = workflow.icon;
-            const isRunning = runningJobId === workflow.id;
-            const isExpanded = expandedId === workflow.id;
-
-            return (
-              <div
-                key={workflow.id}
-                className={cn(
-                  "p-6 hover:bg-slate-50/70 dark:hover:bg-slate-800/30 transition-colors",
-                  !workflow.active && "opacity-75"
-                )}
-              >
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                  <div className="flex items-start gap-4">
-                    <div
-                      className={cn(
-                        "w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-medium mt-0.5 border shadow-2xs",
-                        workflow.iconBg,
-                        workflow.iconBorder,
-                        workflow.iconColor
-                      )}
-                    >
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-3">
-                        <h3 className="text-base font-semibold text-slate-900 dark:text-white">
-                          {workflow.name}
-                        </h3>
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "text-[10px] font-mono px-2 py-0.5",
-                            workflow.active
-                              ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 border-emerald-200 dark:border-emerald-900"
-                              : "bg-slate-100 dark:bg-slate-800 text-slate-500"
-                          )}
-                        >
-                          {workflow.active ? "Active" : "Paused"}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
-                        {workflow.description}
-                      </p>
-
-                      {/* Multi-Step Pipeline Preview */}
-                      <div className="flex flex-wrap items-center gap-2 mt-4 text-xs text-slate-600 dark:text-slate-400">
-                        {workflow.steps.map((step, idx) => (
-                          <React.Fragment key={idx}>
-                            <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-800 font-mono text-[11px] text-slate-700 dark:text-slate-300">
-                              {step}
-                            </span>
-                            {idx < workflow.steps.length - 1 && (
-                              <ArrowRight className="w-3.5 h-3.5 text-slate-400 dark:text-slate-600 shrink-0" />
-                            )}
-                          </React.Fragment>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right Controls */}
-                  <div className="flex items-center justify-between lg:justify-end gap-6 pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-800">
-                    <div className="text-right">
-                      <div className="text-xs font-semibold text-slate-900 dark:text-white">
-                        {workflow.runsCount.toLocaleString()} runs
-                      </div>
-                      <div className="text-[11px] text-slate-400">Autonomous execution</div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => runWorkflowNow(workflow.id, workflow.jobId)}
-                        disabled={!workflow.active || isRunning}
-                        className="h-8 px-2.5 rounded-lg text-xs gap-1 border-slate-200 dark:border-slate-800"
-                      >
-                        {isRunning ? (
-                          <RefreshCw className="h-3 w-3 animate-spin text-blue-600" />
-                        ) : (
-                          <Play className="h-3 w-3 text-slate-600" />
-                        )}
-                        <span>{isRunning ? "Triggering..." : "Run"}</span>
-                      </Button>
-
-                      {/* Toggle switch */}
-                      <Switch
-                        checked={workflow.active}
-                        onCheckedChange={() => toggleWorkflow(workflow.id)}
-                      />
-
-                      <button
-                        onClick={() => setExpandedId(isExpanded ? null : workflow.id)}
-                        className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                        title="Toggle Execution History"
-                      >
-                        <ChevronDown className={cn("w-4 h-4 transition-transform", isExpanded && "rotate-180")} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Expandable Execution History Log */}
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 overflow-hidden"
-                    >
-                      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200/80 dark:border-slate-800">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-mono text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                            Recent Telemetry Log
-                          </span>
-                          <span className="font-mono text-[11px] text-emerald-600">SLA: 100% Success</span>
-                        </div>
-                        <div className="space-y-1.5 text-xs font-mono">
-                          <div className="flex items-center justify-between py-1 px-2.5 rounded bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                            <span className="text-slate-600 dark:text-slate-400">Trigger evaluated: condition match (Fit 94%)</span>
-                            <span className="text-slate-400" suppressHydrationWarning>4 mins ago · 142ms</span>
-                          </div>
-                          <div className="flex items-center justify-between py-1 px-2.5 rounded bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                            <span className="text-slate-600 dark:text-slate-400">Payload generated and verified against guardrails</span>
-                            <span className="text-slate-400" suppressHydrationWarning>18 mins ago · 380ms</span>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Table Footer */}
-        <div className="px-6 py-3.5 bg-slate-50/50 dark:bg-slate-950/40 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-          <span>Showing {filteredWorkflows.length} of {workflows.length} automations</span>
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-slate-800 dark:text-slate-200">Page 1 of 1</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Recommended Workflow Templates Section matching Stitch */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-white">
-              Recommended Workflow Templates
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Pre-built revenue triggers ready to deploy in one click.
-            </p>
-          </div>
-          <button
-            onClick={() => handleUseTemplate("Account Tier Escalation", "crm", ["Trigger: High Usage", "Assign Exec Sponsor", "Schedule Review"])}
-            className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            Explore all templates →
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Template 1 */}
-          <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between shadow-xs">
             <div>
-              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center text-sm font-medium mb-3">
-                <Building2 className="w-4 h-4" />
-              </div>
-              <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
-                Executive Job Change Alerts
-              </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Triggers when a champion or buyer from your existing client list transitions to a new company.
-              </p>
-            </div>
-            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <span className="text-[11px] font-mono text-slate-400">Outreach & Follow-up</span>
-              <button
-                onClick={() => handleUseTemplate("Executive Job Change Alerts", "outreach", ["Trigger: Role Change Detected", "Enrich New Org Stack", "Dispatch Congratulatory Pitch"])}
-                className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700"
-              >
-                Use Template
-              </button>
-            </div>
-          </div>
-
-          {/* Template 2 */}
-          <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between shadow-xs">
-            <div>
-              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center text-sm font-medium mb-3">
-                <Globe className="w-4 h-4" />
-              </div>
-              <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
-                Conference & Event Geofence
-              </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Enriches prospective leads who attend key tech summits with custom localized opening lines.
-              </p>
-            </div>
-            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <span className="text-[11px] font-mono text-slate-400">Enrichment & Scoring</span>
-              <button
-                onClick={() => handleUseTemplate("Conference & Event Geofence", "enrichment", ["Trigger: Summit Attendee Signal", "Cross-ref Title", "Draft Localized Opener"])}
-                className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700"
-              >
-                Use Template
-              </button>
-            </div>
-          </div>
-
-          {/* Template 3 */}
-          <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between shadow-xs">
-            <div>
-              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center text-sm font-medium mb-3">
-                <CheckCircle2 className="w-4 h-4" />
-              </div>
-              <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
-                Zero-Bounce Verification
-              </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Pre-flight MX record and inbox ping verification before any outreach payload is dispatched.
-              </p>
-            </div>
-            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <span className="text-[11px] font-mono text-slate-400">Safety & Guardrail</span>
-              <button
-                onClick={() => handleUseTemplate("Zero-Bounce Verification", "enrichment", ["Trigger: Pre-flight Dispatch", "Check MX Records", "Validate Deliverability"])}
-                className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700"
-              >
-                Use Template
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Create Workflow Modal */}
-      <AnimatePresence>
-        {showCreateModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xl"
-            >
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                    <Plus className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-sm text-slate-900 dark:text-white">
-                      Create Automation Workflow
-                    </h3>
-                    <p className="text-xs text-slate-500">Autonomous multi-step trigger recipe</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              {/* Workflow Name (Inline Editable) */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={currentWorkflow.name}
+                  onChange={(e) => handleRenameWorkflow(e.target.value)}
+                  className="font-bold text-lg text-white tracking-tight bg-transparent hover:bg-slate-900 px-2 py-0.5 -ml-2 rounded-lg border border-transparent focus:border-slate-700 outline-none transition-colors"
+                />
+                <Badge
+                  variant="outline"
+                  className="text-[10px] font-mono border-[#ff6d5a]/40 bg-[#ff6d5a]/10 text-[#ff6d5a]"
                 >
-                  <X className="h-4 w-4" />
-                </button>
+                  n8n Canvas
+                </Badge>
               </div>
 
-              <form onSubmit={handleCreateWorkflow} className="py-4 space-y-4 text-xs">
-                <div>
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                    Workflow Title
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Lead Inbound Fast Track"
-                    value={newWorkflowName}
-                    onChange={(e) => setNewWorkflowName(e.target.value)}
-                    required
-                    className="w-full h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              {/* Workflow Selector Dropdown & Active Toggle */}
+              <div className="flex items-center gap-3 mt-1 text-xs text-slate-400">
+                <select
+                  value={activeWorkflowId}
+                  onChange={(e) => {
+                    setActiveWorkflowId(e.target.value);
+                    setSelectedNodeId(null);
+                    setConfigNodeId(null);
+                  }}
+                  className="bg-slate-900 border border-slate-800 text-slate-300 rounded-md px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-[#ff6d5a] cursor-pointer"
+                >
+                  {workflows.map((wf) => (
+                    <option key={wf.id} value={wf.id}>
+                      {wf.name} ({wf.nodes.length} nodes)
+                    </option>
+                  ))}
+                </select>
+
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={currentWorkflow.active}
+                    onCheckedChange={handleToggleActive}
                   />
+                  <span className={cn(currentWorkflow.active ? "text-emerald-400 font-bold" : "text-slate-500")}>
+                    {currentWorkflow.active ? "Active" : "Inactive"}
+                  </span>
                 </div>
-
-                <div>
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                    Category Type
-                  </label>
-                  <select
-                    value={newWorkflowCategory}
-                    onChange={(e) => setNewWorkflowCategory(e.target.value as "outreach" | "enrichment" | "crm")}
-                    className="w-full h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs"
-                  >
-                    <option value="enrichment">Enrichment & Scoring</option>
-                    <option value="outreach">Outreach & Follow-ups</option>
-                    <option value="crm">CRM Sync</option>
-                  </select>
-                </div>
-
-                <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowCreateModal(false)}
-                    className="text-xs"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    className="text-xs bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    Deploy Workflow
-                  </Button>
-                </div>
-              </form>
-            </motion.div>
+              </div>
+            </div>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+
+        {/* Right: Actions, View Switcher & Execute Button */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* View Mode Toggle: Canvas vs Executions */}
+          <div className="inline-flex rounded-lg bg-slate-900 p-0.5 border border-slate-800 text-xs">
+            <button
+              onClick={() => setViewMode("canvas")}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium transition-colors",
+                viewMode === "canvas"
+                  ? "bg-[#ff6d5a] text-white font-bold shadow-xs"
+                  : "text-slate-400 hover:text-white"
+              )}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Canvas Flow</span>
+            </button>
+            <button
+              onClick={() => setViewMode("executions")}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium transition-colors",
+                viewMode === "executions"
+                  ? "bg-[#ff6d5a] text-white font-bold shadow-xs"
+                  : "text-slate-400 hover:text-white"
+              )}
+            >
+              <Activity className="w-3.5 h-3.5" />
+              <span>Executions ({currentWorkflow.runsCount})</span>
+            </button>
+          </div>
+
+          {/* Add Node Button (Triggers Drawer) */}
+          <Button
+            size="sm"
+            onClick={() => setIsCreatorDrawerOpen(true)}
+            className="h-9 px-3.5 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-slate-200 transition-colors flex items-center gap-1.5 shadow-sm"
+          >
+            <Plus className="w-4 h-4 text-[#ff6d5a]" />
+            <span>Add Node (Tab)</span>
+          </Button>
+
+          {/* Add Sticky Note Button */}
+          <Button
+            size="sm"
+            onClick={handleAddStickyNote}
+            className="h-9 px-3 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs font-medium text-slate-300 hover:text-white transition-colors flex items-center gap-1.5"
+            title="Add floating sticky note"
+          >
+            <StickyNote className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">Sticky</span>
+          </Button>
+
+          {/* Save Workflow Button */}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleSaveWorkflow}
+            className="h-9 px-3 rounded-xl border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs font-medium text-slate-300 transition-colors flex items-center gap-1.5"
+            title="Save changes (Ctrl+S)"
+          >
+            {isSavedRecently ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-emerald-400 font-bold">Saved</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-3.5 h-3.5" />
+                <span>Save</span>
+              </>
+            )}
+          </Button>
+
+          {/* Templates Library Button */}
+          <Button
+            size="sm"
+            onClick={() => setIsTemplateModalOpen(true)}
+            className="h-9 px-3 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs font-medium text-slate-300 hover:text-white transition-colors flex items-center gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <span className="hidden sm:inline">Templates</span>
+          </Button>
+
+          {/* Export JSON Button */}
+          <Button
+            size="sm"
+            onClick={handleExportWorkflowJson}
+            className="h-9 px-3 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs font-medium text-slate-400 hover:text-slate-200 transition-colors hidden sm:flex items-center gap-1.5"
+            title="Export workflow schema to JSON"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Export</span>
+          </Button>
+
+          {/* Import JSON */}
+          <label className="h-9 px-3 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs font-medium text-slate-400 hover:text-slate-200 transition-colors cursor-pointer hidden sm:flex items-center gap-1.5">
+            <Upload className="w-3.5 h-3.5" />
+            <span>Import</span>
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleImportWorkflowJson}
+              className="hidden"
+            />
+          </label>
+
+          {/* Full Screen Toggle */}
+          <button
+            onClick={() => setIsFullScreen(!isFullScreen)}
+            className="p-2 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            title="Toggle Fullscreen"
+          >
+            {isFullScreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+
+          {/* Primary Action: Test Workflow (Iconic n8n Coral Button) */}
+          <Button
+            size="sm"
+            onClick={handleRunWorkflow}
+            disabled={isExecuting || !currentWorkflow.active}
+            className="h-9 px-4 rounded-xl bg-[#ff6d5a] hover:bg-[#ea4b35] text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-[#ff6d5a]/25 transition-all active:scale-95"
+          >
+            {isExecuting ? (
+              <>
+                <RotateCcw className="w-3.5 h-3.5 animate-spin" />
+                <span>Executing Flow...</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>Test workflow (⌘↵)</span>
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Studio Work Area */}
+      {viewMode === "canvas" ? (
+        <div className="relative w-full">
+          {/* Interactive Infinite Bézier Canvas */}
+          <FlowCanvas
+            nodes={currentWorkflow.nodes}
+            connections={currentWorkflow.connections}
+            stickyNotes={currentWorkflow.stickyNotes}
+            selectedNodeId={selectedNodeId}
+            isExecuting={isExecuting}
+            onSelectNode={setSelectedNodeId}
+            onOpenConfig={(nodeId) => setConfigNodeId(nodeId)}
+            onUpdateNodePosition={handleUpdateNodePosition}
+            onAddConnection={handleAddConnection}
+            onDeleteConnection={handleDeleteConnection}
+            onDeleteNode={handleDeleteNode}
+            onDuplicateNode={handleDuplicateNode}
+            onRunStep={handleRunSingleStep}
+            onQuickAddNode={(typeKey) => {
+              const def = NODE_TYPE_REGISTRY[typeKey];
+              if (def) handleAddNodeType(def);
+            }}
+            onOpenPalette={() => setIsCreatorDrawerOpen(true)}
+            onAddStickyNote={handleAddStickyNote}
+            onUpdateStickyNote={handleUpdateStickyNote}
+            onDeleteStickyNote={handleDeleteStickyNote}
+          />
+
+          {/* Execution Telemetry Console (Collapsible Bottom Drawer) */}
+          <ExecutionConsole
+            logs={executionLogs}
+            isExecuting={isExecuting}
+            totalDurationMs={totalDurationMs}
+            completedNodesCount={completedNodesCount}
+            totalNodesCount={currentWorkflow.nodes.length}
+            onClearLogs={() => setExecutionLogs([])}
+          />
+
+          {/* The Iconic n8n 3-Pane Node Configuration Editor */}
+          <N8nNodeModal
+            node={configNode}
+            upstreamNode={upstreamNode}
+            isOpen={Boolean(configNodeId)}
+            onClose={() => setConfigNodeId(null)}
+            onUpdateParameters={handleUpdateNodeParameters}
+            onUpdateName={handleUpdateNodeName}
+            onToggleDisable={handleToggleDisable}
+            onDeleteNode={handleDeleteNode}
+            onRunStep={handleRunSingleStep}
+          />
+        </div>
+      ) : (
+        /* Executions & Runs Table View */
+        <ExecutionsTableView
+          workflow={currentWorkflow}
+          onRunWorkflow={handleRunWorkflow}
+          isExecuting={isExecuting}
+        />
+      )}
+
+      {/* Slide-out Node Creator Drawer (Press Tab or '+' button) */}
+      <N8nNodeCreatorDrawer
+        isOpen={isCreatorDrawerOpen}
+        onClose={() => setIsCreatorDrawerOpen(false)}
+        onSelectNodeType={handleAddNodeType}
+      />
+
+      {/* Template Library Modal */}
+      <TemplateLibraryModal
+        isOpen={isTemplateModalOpen}
+        onClose={() => setIsTemplateModalOpen(false)}
+        onSelectTemplate={handleSelectTemplate}
+      />
     </div>
   );
 }

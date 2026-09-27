@@ -14,15 +14,20 @@ import type { Notification } from "@/lib/types";
 
 const routeTitles: Record<string, string> = {
   "/": "Command Center",
+  "/automation": "n8n Workflow Studio",
+  "/templates": "Template Marketplace",
+  "/credentials": "Credentials Manager",
+  "/executions": "Execution History",
+  "/variables": "Variables & Environment",
   "/onboarding": "Quick Start",
   "/campaigns": "Campaigns",
   "/leads": "Leads Engine",
   "/websites": "Websites Studio",
   "/messages": "Outreach & WhatsApp",
   "/agents": "Agent Fleet",
-  "/automation": "Autonomous Workflows",
   "/settings": "System Config",
 };
+
 
 function formatRelative(timestamp: string): string {
   const date = new Date(timestamp);
