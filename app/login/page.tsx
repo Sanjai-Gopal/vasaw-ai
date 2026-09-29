@@ -3,24 +3,37 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Sparkles, ArrowRight, ShieldCheck, Lock, Mail, Loader2 } from "lucide-react";
+import { Sparkles, ArrowRight, ShieldCheck, Lock, Mail, Loader2, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = React.useState("admin@vasaw.ai");
-  const [password, setPassword] = React.useState("••••••••");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     setLoading(true);
-    // Smooth demo sign-in redirect
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "Sign-in failed.");
       router.push("/");
-    }, 600);
+      router.refresh();
+    } catch (loginError) {
+      setError(loginError instanceof Error ? loginError.message : "Unable to sign in.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -63,6 +76,12 @@ export default function LoginPage() {
                 />
               </div>
 
+              {error && (
+                <p role="alert" className="flex items-start gap-2 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-xs text-rose-300">
+                  <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {error}
+                </p>
+              )}
+
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                   <Lock className="h-3.5 w-3.5" /> Password
@@ -93,7 +112,7 @@ export default function LoginPage() {
 
             <div className="mt-6 flex items-center justify-between border-t border-border pt-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
-                <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" /> Supabase Auth Ready
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" /> Secure Supabase sign-in
               </span>
               <Link href="/onboarding" className="text-primary hover:underline">
                 Quick Start Demo

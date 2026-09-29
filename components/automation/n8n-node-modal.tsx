@@ -35,7 +35,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import type { FlowNode, NodeTypeDefinition, WorkflowCredential } from "@/lib/types/automation-flow";
-import { NODE_TYPE_REGISTRY, simulateNodeExecution } from "@/lib/data/automation-registry";
+import { NODE_TYPE_REGISTRY } from "@/lib/data/automation-registry";
 
 interface N8nNodeModalProps {
   node: FlowNode | null;
@@ -69,8 +69,6 @@ export function N8nNodeModal({
   // Expression mode toggles per parameter
   const [expressionModes, setExpressionModes] = React.useState<Record<string, boolean>>({});
 
-  // Node running state in modal
-  const [isRunningSingle, setIsRunningSingle] = React.useState(false);
   const [liveOutput, setLiveOutput] = React.useState<Record<string, any> | null>(null);
 
   // Input search
@@ -133,16 +131,9 @@ export function N8nNodeModal({
   const inputPayload = upstreamNode?.outputData || def.defaultData.defaultOutput || {};
   const currentOutput = liveOutput || node.outputData || def.defaultData.defaultOutput;
 
-  // Execute this single step
-  const handleExecuteSingleStep = async () => {
-    setIsRunningSingle(true);
-    setTimeout(() => {
-      const { outputData } = simulateNodeExecution(node, inputPayload);
-      setLiveOutput(outputData);
-      onUpdateParameters(node.id, node.parameters);
-      setIsRunningSingle(false);
-      onRunStep(node.id);
-    }, 600);
+  // The page owns the single local simulation, so opening this editor cannot duplicate a run.
+  const handlePreviewStep = () => {
+    if (!node.disabled && node.status !== "running") onRunStep(node.id);
   };
 
   const handleCopyText = (text: string, isOutput = false) => {
@@ -195,7 +186,7 @@ export function N8nNodeModal({
               {node.status === "success" && (
                 <span className="text-emerald-400 flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  {node.executionTimeMs ? `${node.executionTimeMs}ms` : "Success"}
+                  {node.executionTimeMs ? `${node.executionTimeMs}ms · preview` : "Preview complete"}
                 </span>
               )}
               {node.status === "error" && (
@@ -206,22 +197,23 @@ export function N8nNodeModal({
               )}
             </div>
 
-            {/* Test Step / Execute Node Button */}
+            {/* Local sample preview button */}
             <Button
               size="sm"
-              onClick={handleExecuteSingleStep}
-              disabled={isRunningSingle}
+              onClick={handlePreviewStep}
+              disabled={node.disabled || node.status === "running"}
+              title="Preview with local sample data; no service is contacted"
               className="h-8 px-3.5 rounded-xl bg-[#ff6d5a] hover:bg-[#ea4b35] text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-[#ff6d5a]/25 active:scale-95"
             >
-              {isRunningSingle ? (
+              {node.status === "running" ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Executing...</span>
+                  <span>Previewing…</span>
                 </>
               ) : (
                 <>
                   <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>Test step</span>
+                  <span>Preview step</span>
                 </>
               )}
             </Button>
@@ -242,7 +234,7 @@ export function N8nNodeModal({
             <div className="h-10 border-b border-[#2d313c] px-3.5 flex items-center justify-between bg-[#191a21]">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-slate-300 font-mono uppercase tracking-wider">
-                  Input
+                  Sample input
                 </span>
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">
                   {Object.keys(inputPayload).length} keys
@@ -280,6 +272,9 @@ export function N8nNodeModal({
               </div>
             </div>
 
+            <div className="border-b border-blue-900/40 bg-blue-950/20 px-3 py-2 text-[10px] text-blue-200/70">
+              Connected preview data or the node&apos;s local example
+            </div>
             <div className="flex-1 p-3 overflow-y-auto font-mono text-xs">
               {inputViewMode === "json" ? (
                 <pre className="text-slate-300 text-[11px] leading-relaxed whitespace-pre-wrap select-text">
@@ -535,7 +530,7 @@ export function N8nNodeModal({
             <div className="h-10 border-b border-[#2d313c] px-3.5 flex items-center justify-between bg-[#191a21]">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-slate-300 font-mono uppercase tracking-wider">
-                  Output
+                  Sample output
                 </span>
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-950 border border-emerald-800 text-emerald-400">
                   {Object.keys(currentOutput).length} keys
@@ -573,6 +568,9 @@ export function N8nNodeModal({
               </div>
             </div>
 
+            <div className="border-b border-emerald-900/40 bg-emerald-950/20 px-3 py-2 text-[10px] text-emerald-300/80">
+              Local mock data · no integration request is sent
+            </div>
             <div className="flex-1 p-3 overflow-y-auto font-mono text-xs">
               {outputViewMode === "json" ? (
                 <pre className="text-emerald-300/90 text-[11px] leading-relaxed whitespace-pre-wrap select-text">

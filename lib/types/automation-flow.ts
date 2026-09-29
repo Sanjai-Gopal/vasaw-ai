@@ -1,6 +1,6 @@
 export type NodeCategory = "trigger" | "ai" | "integration" | "logic";
 
-export type NodeExecutionStatus = "idle" | "running" | "success" | "error" | "skipped";
+export type NodeExecutionStatus = "idle" | "running" | "success" | "preview" | "error" | "skipped";
 
 export interface NodePort {
   id: string;
@@ -83,6 +83,31 @@ export interface ExecutionLog {
   durationMs?: number;
 }
 
+export interface WorkflowExecutionRecord {
+  id: string;
+  workflowId: string;
+  triggerSource: "Manual dry run" | "Webhook dry run";
+  status: "success" | "error";
+  startedAt: string;
+  durationMs: number;
+  stepsCount: number;
+  mode: "local_mock" | "server_dry_run";
+  steps?: WorkflowExecutionStepRecord[];
+}
+
+export interface WorkflowExecutionStepRecord {
+  id: string;
+  nodeId: string;
+  nodeName: string;
+  status: "running" | "success" | "preview" | "skipped" | "error" | "cancelled";
+  startedAt: string;
+  completedAt?: string;
+  durationMs?: number;
+  message?: string;
+  error?: string;
+  outputData?: Record<string, unknown>;
+}
+
 export interface CanvasStickyNote {
   id: string;
   text: string;
@@ -124,6 +149,7 @@ export interface FlowWorkflow {
   stickyNotes?: CanvasStickyNote[];
   createdAt: string;
   updatedAt: string;
+  executionMode?: "dry_run" | "live";
   runsCount: number;
   lastExecution?: {
     id: string;

@@ -24,7 +24,6 @@ import {
   Filter,
   Timer,
   Play,
-  Settings,
   Trash2,
   Copy,
   CheckCircle2,
@@ -33,7 +32,7 @@ import {
   Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { FlowNode, NodeTypeDefinition, NodePort } from "@/lib/types/automation-flow";
+import type { FlowNode, NodeTypeDefinition } from "@/lib/types/automation-flow";
 import { NODE_TYPE_REGISTRY } from "@/lib/data/automation-registry";
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -111,6 +110,7 @@ export const FlowNodeCard = React.memo(function FlowNodeCard({
 
   const isRunning = node.status === "running";
   const isSuccess = node.status === "success";
+  const isPreview = node.status === "preview";
   const isError = node.status === "error";
 
   return (
@@ -263,7 +263,7 @@ export const FlowNodeCard = React.memo(function FlowNodeCard({
             }}
             disabled={isRunning}
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0"
-            title="Execute This Node Step"
+            title="Preview this step with local sample data"
           >
             {isRunning ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
@@ -306,8 +306,14 @@ export const FlowNodeCard = React.memo(function FlowNodeCard({
               <>
                 <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                 <span className="text-emerald-400 font-semibold">
-                  {node.executionTimeMs ? `${node.executionTimeMs}ms` : "Success"}
+                  {node.executionTimeMs ? `${node.executionTimeMs}ms · preview` : "Preview complete"}
                 </span>
+              </>
+            )}
+            {isPreview && (
+              <>
+                <CheckCircle2 className="w-3 h-3 text-amber-300" />
+                <span className="text-amber-300 font-semibold">Preview only · no action</span>
               </>
             )}
             {isError && (
@@ -315,6 +321,9 @@ export const FlowNodeCard = React.memo(function FlowNodeCard({
                 <AlertCircle className="w-3 h-3 text-rose-400" />
                 <span className="text-rose-400 font-semibold">Failed</span>
               </>
+            )}
+            {node.status === "skipped" && (
+              <span className="text-slate-500">Skipped</span>
             )}
             {node.status === "idle" && (
               <span className="text-slate-500">Standby</span>

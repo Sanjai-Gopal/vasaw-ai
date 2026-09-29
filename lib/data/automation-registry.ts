@@ -520,6 +520,105 @@ export const NODE_TYPE_REGISTRY: Record<string, NodeTypeDefinition> = {
     },
   },
 
+  ai_website_qa: {
+    type: "ai_website_qa",
+    name: "Website QA Agent",
+    category: "ai",
+    description: "Checks a business website for SEO, accessibility, performance, and custom criteria, returning a detailed quality report.",
+    iconName: "Search",
+    badgeText: "QA Agent",
+    colorScheme: {
+      bg: "bg-indigo-500/10",
+      border: "border-indigo-500/30",
+      text: "text-indigo-500",
+      accent: "#6366f1",
+      glow: "rgba(99, 102, 241, 0.25)",
+      headerBg: "bg-indigo-500/15",
+    },
+    inputs: [{ id: "in", name: "Input", type: "main", label: "URL and Config" }],
+    outputs: [{ id: "out", name: "Output", type: "main", label: "QA Report" }],
+    parameters: [
+      {
+        id: "url",
+        name: "url",
+        label: "Website URL",
+        type: "text",
+        defaultValue: "https://example.com",
+      },
+      {
+        id: "config",
+        name: "config",
+        label: "QA Configuration",
+        type: "json",
+        defaultValue: JSON.stringify({
+          viewport: "desktop",
+          checkAccessibility: true,
+          checkSEO: true,
+          checkPerformance: true,
+        }),
+      },
+    ],
+    defaultData: {
+      parameters: { url: "https://example.com", config: JSON.stringify({ viewport: "desktop", checkAccessibility: true, checkSEO: true, checkPerformance: true }) },
+      defaultOutput: {
+        report: {
+          url: "https://example.com",
+          timestamp: "2026-01-01T00:00:00.000Z",
+          viewport: "desktop",
+          passed: true,
+          summary: { critical: 0, warning: 0, info: 0, total: 0 },
+          issues: [],
+        },
+      },
+    },
+  },
+
+  ai_website_analysis: {
+    type: "ai_website_analysis",
+    name: "QA Report Analyzer",
+    category: "ai",
+    description: "Analyzes a website QA report and determines pass/fail/warning status with recommendations.",
+    iconName: "CheckCircle",
+    badgeText: "Analyzer",
+    colorScheme: {
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/30",
+      text: "text-emerald-500",
+      accent: "#10b981",
+      glow: "rgba(16, 185, 129, 0.25)",
+      headerBg: "bg-emerald-500/15",
+    },
+    inputs: [{ id: "in", name: "Input", type: "main", label: "QA Report" }],
+    outputs: [{ id: "out", name: "Output", type: "main", label: "Analysis Result" }],
+    parameters: [
+      {
+        id: "report",
+        name: "report",
+        label: "QA Report to Analyze",
+        type: "json",
+        defaultValue: JSON.stringify({
+          url: "",
+          timestamp: "",
+          viewport: "desktop",
+          passed: true,
+          summary: { critical: 0, warning: 0, info: 0, total: 0 },
+          issues: [],
+        }),
+      },
+    ],
+    defaultData: {
+      parameters: { report: JSON.stringify({ url: "", timestamp: "", viewport: "desktop", passed: true, summary: { critical: 0, warning: 0, info: 0, total: 0 }, issues: [] }) },
+      defaultOutput: {
+        analysis: {
+          result: "pass" as const,
+          score: 100,
+          summary: "Report passed all checks",
+          recommendations: [],
+        },
+      },
+    },
+  },
+
   ai_classifier: {
     type: "ai_classifier",
     name: "AI Intent & Objection Classifier",
@@ -1581,23 +1680,79 @@ export const DEFAULT_FLOW_WORKFLOWS: FlowWorkflow[] = [
 ];
 
 // Helper to simulate single node execution or test runs
+type SimulatedNodeOutput = Record<string, unknown> & {
+  _meta: {
+    executedAt: string;
+    durationMs: number;
+    nodeId: string;
+    nodeType: string;
+    mode: "local_mock";
+  };
+};
+
 export function simulateNodeExecution(
   node: FlowNode,
-  inputData?: Record<string, any>
-): { outputData: Record<string, any>; executionTimeMs: number; logs: ExecutionLog[] } {
+  inputData?: Record<string, unknown>
+): { outputData: SimulatedNodeOutput; executionTimeMs: number; logs: ExecutionLog[] } {
   const def = NODE_TYPE_REGISTRY[node.type];
-  const startTime = Date.now();
   const executionTimeMs = Math.floor(Math.random() * 220) + 120;
   const timestamp = new Date().toISOString();
+  const sampleOutput = def?.defaultData.defaultOutput || {};
 
-  const mockOutput = {
-    ...(def?.defaultData.defaultOutput || {}),
-    _meta: {
-      executedAt: timestamp,
-      durationMs: executionTimeMs,
-      nodeId: node.id,
-      nodeType: node.type,
-    },
+  const mockOutput: Record<string, unknown> =
+    def?.category === "integration" || def?.category === "trigger"
+      ? {
+          previewOnly: true,
+          previewMessage: "Sample result only. No external service was contacted.",
+          sampleData: sampleOutput,
+        }
+      : { ...sampleOutput };
+
+  if (node.type === "logic_if_condition") {
+    const fieldPath = String(node.parameters.fieldPath || "");
+    const actualValue = fieldPath
+      .split(".")
+      .filter(Boolean)
+      .reduce<unknown>((value, key) => {
+        if (!value || typeof value !== "object") return undefined;
+        return (value as Record<string, unknown>)[key];
+      }, inputData);
+    const operator = String(node.parameters.operator || ">=");
+    const expectedValue = node.parameters.compareValue;
+    const leftNumber = Number(actualValue);
+    const rightNumber = Number(expectedValue);
+    const canCompareNumbers =
+      actualValue !== undefined &&
+      actualValue !== null &&
+      String(actualValue).trim() !== "" &&
+      Number.isFinite(leftNumber) &&
+      Number.isFinite(rightNumber);
+    const result =
+      operator === "isEmpty"
+        ? actualValue === undefined || actualValue === null || actualValue === ""
+        : operator === ">="
+        ? canCompareNumbers && leftNumber >= rightNumber
+        : operator === "<="
+        ? canCompareNumbers && leftNumber <= rightNumber
+        : operator === "=="
+        ? canCompareNumbers
+          ? leftNumber === rightNumber
+          : String(actualValue) === String(expectedValue)
+        : operator === "!="
+        ? String(actualValue) !== String(expectedValue)
+        : false;
+
+    mockOutput.evaluatedCondition = `${fieldPath || "(empty field)"} ${operator} ${String(expectedValue)}`;
+    mockOutput.result = result;
+    mockOutput.branchSelected = result ? "true" : "false";
+  }
+
+  mockOutput._meta = {
+    executedAt: timestamp,
+    durationMs: executionTimeMs,
+    nodeId: node.id,
+    nodeType: node.type,
+    mode: "local_mock",
   };
 
   const logs: ExecutionLog[] = [
@@ -1607,7 +1762,7 @@ export function simulateNodeExecution(
       nodeName: node.name,
       timestamp,
       level: "info",
-      message: `Executing ${def?.name || node.name} with configured parameters...`,
+      message: `Previewing ${def?.name || node.name} with local sample data...`,
       durationMs: 40,
     },
     {
@@ -1616,11 +1771,11 @@ export function simulateNodeExecution(
       nodeName: node.name,
       timestamp,
       level: "success",
-      message: `Execution completed successfully in ${executionTimeMs}ms. Output schema verified.`,
+      message: `Local sample preview generated in ${executionTimeMs}ms. No integration request was sent.`,
       durationMs: executionTimeMs,
       dataSnippet: JSON.stringify(mockOutput).slice(0, 120) + "...",
     },
   ];
 
-  return { outputData: mockOutput, executionTimeMs, logs };
+  return { outputData: mockOutput as SimulatedNodeOutput, executionTimeMs, logs };
 }

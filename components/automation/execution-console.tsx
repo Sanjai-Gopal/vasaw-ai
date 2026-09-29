@@ -5,13 +5,8 @@ import {
   Terminal,
   ChevronDown,
   ChevronUp,
-  X,
   Trash2,
   CheckCircle2,
-  AlertCircle,
-  Clock,
-  Activity,
-  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ExecutionLog } from "@/lib/types/automation-flow";
@@ -58,7 +53,7 @@ export function ExecutionConsole({
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 font-bold text-slate-200">
             <Terminal className="w-4 h-4 text-blue-400" />
-            <span>Telemetry &amp; Execution Console</span>
+            <span>Local dry-run console</span>
           </div>
 
           <div className="h-4 w-px bg-slate-800" />
@@ -74,7 +69,7 @@ export function ExecutionConsole({
           ) : (
             <div className="flex items-center gap-1.5 text-emerald-400">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Execution Complete ({totalDurationMs}ms)</span>
+              <span>Simulation complete ({totalDurationMs}ms)</span>
             </div>
           )}
         </div>

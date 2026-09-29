@@ -5,17 +5,11 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize2,
-  Minimize2,
   RotateCcw,
   Sparkles,
-  MapPin,
   Trash2,
-  Scissors,
-  Layers,
   Zap,
   Mail,
-  Globe,
-  GitFork,
   Plus,
   StickyNote,
 } from "lucide-react";
@@ -23,10 +17,10 @@ import { cn } from "@/lib/utils";
 import type {
   FlowNode,
   FlowConnection,
-  NodeTypeDefinition,
   CanvasStickyNote,
 } from "@/lib/types/automation-flow";
 import { NODE_TYPE_REGISTRY } from "@/lib/data/automation-registry";
+import { topologicallyOrderNodes } from "@/lib/utils/automation-flow";
 import { FlowNodeCard } from "@/components/automation/flow-node-card";
 
 interface FlowCanvasProps {
@@ -102,7 +96,7 @@ export function FlowCanvas({
   const [selectedConnectionId, setSelectedConnectionId] = React.useState<string | null>(null);
 
   // Show minimap toggle
-  const [showMinimap, setShowMinimap] = React.useState(true);
+  const showMinimap = true;
 
   // Handle canvas background mouse down (pan)
   const handleCanvasMouseDown = (e: React.MouseEvent) => {
@@ -259,10 +253,10 @@ export function FlowCanvas({
     setTransform((prev) => ({ ...prev, scale: Math.max(prev.scale * 0.8, 0.3) }));
   const resetZoom = () => setTransform({ x: 60, y: 60, scale: 1 });
 
-  const fitView = () => {
-    if (nodes.length === 0) return;
-    const xs = nodes.map((n) => n.position.x);
-    const ys = nodes.map((n) => n.position.y);
+  const fitView = (targetNodes: FlowNode[] = nodes) => {
+    if (targetNodes.length === 0) return;
+    const xs = targetNodes.map((n) => n.position.x);
+    const ys = targetNodes.map((n) => n.position.y);
     const minX = Math.min(...xs);
     const maxX = Math.max(...xs) + NODE_WIDTH;
     const minY = Math.min(...ys);
@@ -288,12 +282,14 @@ export function FlowCanvas({
 
   // Auto-tidy layout: arrange nodes in clean topological sequence
   const tidyNodes = () => {
-    let currentX = 80;
-    nodes.forEach((node) => {
-      onUpdateNodePosition(node.id, { x: currentX, y: 220 });
-      currentX += 340;
+    const layoutNodes = topologicallyOrderNodes(nodes, connections).map((node, index) => ({
+      ...node,
+      position: { x: 80 + index * 340, y: 220 },
+    }));
+    layoutNodes.forEach((node) => {
+      onUpdateNodePosition(node.id, node.position);
     });
-    fitView();
+    fitView(layoutNodes);
   };
 
   // Calculate port absolute canvas coordinates
@@ -563,14 +559,14 @@ export function FlowCanvas({
       {/* Floating Quick Action Tray (Top Left) */}
       <div className="absolute top-4 left-4 z-30 flex items-center gap-1.5 p-1.5 rounded-2xl bg-[#191a21]/95 border border-[#2d313c] shadow-2xl backdrop-blur-md">
         <span className="text-[10px] font-mono uppercase font-bold text-slate-400 px-2 select-none">
-          n8n Studio
+          VASAW Canvas
         </span>
 
-        {/* Open Node Palette (Tab) */}
+        {/* Open Node Palette */}
         <button
           onClick={onOpenPalette}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#ff6d5a] hover:bg-[#ea4b35] text-white text-xs font-bold transition-all shadow-sm shadow-[#ff6d5a]/25 cursor-pointer active:scale-95"
-          title="Add Node to Canvas (Tab)"
+          title="Add node to canvas (Alt+N)"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Add node</span>
@@ -640,7 +636,7 @@ export function FlowCanvas({
         </button>
 
         <button
-          onClick={fitView}
+          onClick={() => fitView()}
           className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
           title="Fit View"
         >

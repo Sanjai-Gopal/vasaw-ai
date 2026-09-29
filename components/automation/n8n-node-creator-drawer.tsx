@@ -112,7 +112,7 @@ export function N8nNodeCreatorDrawer({
             <input
               ref={inputRef}
               type="text"
-              placeholder="Search triggers, AI, integrations, code... (Tab)"
+              placeholder="Search triggers, AI, integrations, and code..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-9 pl-9 pr-3 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-[#ff6d5a] transition-all"

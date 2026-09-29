@@ -461,23 +461,21 @@ export function CommandCenterView({ stats, activities, onRefresh }: CommandCente
 
   const handleTriggerPipeline = async () => {
     setIsRunningPipeline(true);
-    showToast("Starting autonomous multi-agent pipeline cycle...");
     try {
       const res = await fetch("/api/automations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "trigger_all", targetZone: "Kovai Cluster" }),
       });
-      if (res.ok) {
-        showToast("Pipeline active: 6 agents executing in sequence");
-      }
-    } catch {
-      // Fallback
+      const result = await res.json().catch(() => ({}));
+      showToast(res.ok
+        ? "Workflow saved. Open Automation Studio to run its dry run."
+        : result.error || "The all-agents pipeline is not connected to an executable workflow.");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "The pipeline request failed.");
     } finally {
-      setTimeout(() => {
-        setIsRunningPipeline(false);
-        if (onRefresh) onRefresh();
-      }, 1200);
+      setIsRunningPipeline(false);
+      if (onRefresh) onRefresh();
     }
   };
 

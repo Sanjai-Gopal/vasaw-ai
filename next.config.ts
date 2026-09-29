@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
   ],
   serverExternalPackages: ["pg", "apify-client", "@supabase/supabase-js", "@supabase/ssr"],
   turbopack: {
-    root: __dirname,
+    root: process.cwd(),
   },
 };
 
